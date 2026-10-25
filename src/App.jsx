@@ -151,7 +151,7 @@ export default function App() {
   const handleRestoreExperiment = (snapshot) => {
     if (!snapshot) return;
     if (snapshot.experimentType === "double_slit") {
-      setActiveLabTab("doubleslit");
+      setActiveLabTab("double_slit");
     } else {
       setActiveLabTab("tunneling");
     }

@@ -1000,6 +1000,13 @@ export default function Street3D({
                   <strong>{activeFact.phenomenon}</strong>
                 </div>
 
+                {activeFact.materialComposition && (
+                  <div className="street-material-card">
+                    <span className="street-material-label font-mono">MATERIAL COMPOSITION</span>
+                    <span className="street-material-val">{activeFact.materialComposition}</span>
+                  </div>
+                )}
+
                 {/* Macro vs Quantum View Mode Switcher */}
                 <div className="view-mode-tabs">
                   <button
@@ -1036,15 +1043,25 @@ export default function Street3D({
                   </div>
                 )}
 
+                {activeFact.honestScopeNotice && (
+                  <div className="honest-scope-callout">
+                    <div className="scope-icon-row">
+                      <Sparkles size={12} color="var(--color-copper, #c67248)" />
+                      <span>Scientific Scope Notice</span>
+                    </div>
+                    <p>{activeFact.honestScopeNotice}</p>
+                  </div>
+                )}
+
                 <div className="drawer-actions-row">
                   <button
                     onClick={() => {
                       onClose();
-                      onOpenLab?.();
+                      onOpenLab?.(activeFact.exploreAction?.experimentKey || "tunneling");
                     }}
-                    className="drawer-action-btn"
+                    className="drawer-action-btn explore-btn"
                   >
-                    <span>Launch Quantum Lab Solver</span>
+                    <span>{activeFact.exploreAction?.label || "Launch Quantum Lab Solver"}</span>
                     <ExternalLink size={14} />
                   </button>
                 </div>
@@ -1440,6 +1457,55 @@ export default function Street3D({
           font-size: 0.68rem;
           color: #6b7c96;
           font-style: italic;
+        }
+
+        .street-material-card {
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 6px;
+          padding: 8px 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .street-material-label {
+          font-size: 0.64rem;
+          color: #8c9bb3;
+          letter-spacing: 0.05em;
+        }
+
+        .street-material-val {
+          font-size: 0.74rem;
+          color: #ffffff;
+          line-height: 1.35;
+        }
+
+        .honest-scope-callout {
+          background: rgba(198, 114, 72, 0.1);
+          border-left: 3px solid #c67248;
+          border-radius: 0 6px 6px 0;
+          padding: 8px 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .scope-icon-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: #c67248;
+          font-size: 0.68rem;
+          font-family: monospace;
+          text-transform: uppercase;
+        }
+
+        .honest-scope-callout p {
+          font-size: 0.7rem;
+          color: #e2e8f5;
+          line-height: 1.4;
+          margin: 0;
         }
 
         .drawer-action-btn {

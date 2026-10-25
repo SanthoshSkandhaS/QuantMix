@@ -49,6 +49,7 @@ export default function QuantumLabPreview({
   const [localActiveTab, setLocalActiveTab] = useState("tunneling");
   const currentTab = extActiveLabTab ?? localActiveTab;
   const setCurrentTab = extOnSelectLabTab ?? setLocalActiveTab;
+  const isDoubleSlit = currentTab === "double_slit" || currentTab === "doubleslit";
 
   const [notebookSaveToast, setNotebookSaveToast] = useState(null);
   const [isSavingNotebook, setIsSavingNotebook] = useState(false);
@@ -272,7 +273,7 @@ export default function QuantumLabPreview({
           <button
             type="button"
             onClick={() => setCurrentTab("tunneling")}
-            className={`lab-exp-btn ${currentTab === "tunneling" ? "active" : ""}`}
+            className={`lab-exp-btn ${!isDoubleSlit ? "active" : ""}`}
           >
             <div className="exp-btn-title-row">
               <span className="exp-index">EXPERIMENT 01</span>
@@ -284,7 +285,7 @@ export default function QuantumLabPreview({
           <button
             type="button"
             onClick={() => setCurrentTab("double_slit")}
-            className={`lab-exp-btn ${currentTab === "double_slit" ? "active" : ""}`}
+            className={`lab-exp-btn ${isDoubleSlit ? "active" : ""}`}
           >
             <div className="exp-btn-title-row">
               <span className="exp-index">EXPERIMENT 02</span>
@@ -294,7 +295,7 @@ export default function QuantumLabPreview({
           </button>
         </div>
 
-        {currentTab === "double_slit" ? (
+        {isDoubleSlit ? (
           <DoubleSlitLab3D onSaveToNotebook={handleSaveToNotebook} />
         ) : (
           /* Experiment Main Container */

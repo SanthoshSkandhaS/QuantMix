@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#0B1020" />
+  <circle cx="32" cy="32" r="28" stroke="#111B2E" stroke-width="2" />
+  <!-- Wave / Orbital 1 -->
+  <ellipse cx="32" cy="32" rx="22" ry="8" stroke="#35D6D0" stroke-width="2" transform="rotate(-30 32 32)" stroke-dasharray="4 2" opacity="0.9" />
+  <!-- Wave / Orbital 2 -->
+  <ellipse cx="32" cy="32" rx="22" ry="8" stroke="#9B8CFF" stroke-width="2" transform="rotate(30 32 32)" opacity="0.9" />
+  <!-- Quantum Core -->
+  <circle cx="32" cy="32" r="5" fill="#35D6D0">
+    <animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="32" cy="32" r="9" stroke="#9B8CFF" stroke-width="1.5" opacity="0.5">
+    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <!-- Node particles -->
+  <circle cx="48" cy="23" r="2" fill="#FF8B78" />
+  <circle cx="16" cy="41" r="2" fill="#35D6D0" />
+</svg>

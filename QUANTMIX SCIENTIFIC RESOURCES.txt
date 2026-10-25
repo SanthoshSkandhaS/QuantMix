@@ -1,0 +1,26 @@
+QUANTMIX SCIENTIFIC RESOURCES
+
+1. https://openstax.org/books/university-physics-volume-3/pages/7-6-the-quantum-tunneling-of-particles-through-potential-barriers?utm_source=chatgpt.com
+
+2. https://openstax.org/books/university-physics-volume-3/pages/7-introduction?utm_source=chatgpt.com
+
+3. https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/?utm_source=chatgpt.com
+
+4. https://openstax.org/books/university-physics-volume-3/pages/8-introduction?utm_source=chatgpt.com
+
+5. https://openstax.org/books/university-physics-volume-3/pages/9-introduction?utm_source=chatgpt.com
+
+6. https://doi.org/10.1103/RevModPhys.75.715?utm_source=chatgpt.com
+
+
+QUANTMIX AI DEVELOPMENT
+
+1. https://developers.openai.com/api/docs/guides/retrieval?utm_source=chatgpt.com
+
+2. https://developers.openai.com/api/docs/guides/retrieval?utm_source=chatgpt.com
+
+3. https://numpy.org/doc/stable/?utm_source=chatgpt.com
+
+4. https://developers.openai.com/api/docs/guides/model-optimization?utm_source=chatgpt.com
+
+5. https://docs.scipy.org/doc/scipy/?utm_source=chatgpt.com

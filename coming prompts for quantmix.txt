@@ -1,0 +1,225 @@
+coming prompts for quantmix:
+
+# QuantMix — Milestone 2: Build the First Realistic 3D Environment
+
+You are continuing development of **QuantMix — Virtual Quantum Mechanics Explorer** in the existing project and GitHub repository.
+
+## Product vision
+
+QuantMix is an immersive, scientifically accurate quantum mechanics exploration website.
+
+Tagline: “What if our world behaved according to the laws of Quantum Mechanics”
+
+The experience should combine the visual quality of premium architectural visualization, the interactivity of a high-quality 3D game, and the scientific integrity of a physics learning tool.
+
+**The goal is a genuinely interactive 3D environment, not a static illustration, a collection of animations, a Roblox-like scene, or a fake working prototype.**
+
+## Phase 1 — Audit before changing code
+
+1. Inspect the entire existing project, package.json, scripts, dependencies, routing, current homepage and Git status.
+2. Identify the current rendering framework and determine whether Three.js with React Three Fiber, or Three.js directly, is the most compatible choice.
+3. If appropriate, use Rapier for rigid-body physics. Do not introduce unnecessary frameworks or replace the working project architecture without a clear reason.
+4. Preserve the existing homepage, branding, typography, colour palette, responsive layout and working features.
+5. Check for existing uncommitted changes. Do not discard, overwrite or reset them.
+6. Write a short implementation plan and then proceed with the first environment.
+
+## Phase 2 — Build the first 3D room
+
+Create one high-quality, navigable room with:
+
+- A realistic desk, laptop, glass of water, books, chair or bed, window and surrounding room details.
+- High-quality 3D assets with realistic proportions and materials.
+- Physically based rendering materials, natural daylight, soft shadows, realistic glass and metal reflections, and carefully tuned ambient lighting.
+- A convincing sense of scale, depth and spatial continuity.
+- A cinematic but restrained visual style consistent with QuantMix.
+- Smooth camera movement, appropriate collision boundaries and sensible interaction feedback.
+
+Prioritise asset quality, lighting, materials, composition and believable movement over the number of objects.
+
+Use appropriately licensed assets where possible. Record the source and licence of externally sourced assets. Do not hotlink unreliable asset URLs. If suitable assets are unavailable, create a visually coherent fallback and clearly report the limitation rather than pretending the result is photorealistic.
+
+## Phase 3 — Make the room genuinely interactive
+
+Implement and test the following in order:
+
+1. First-person camera with mouse-look and keyboard movement on desktop.
+2. A visible, intuitive way to identify and select interactive objects.
+3. Pick up, rotate, move, place and drop supported objects.
+4. Gravity, collision detection and stable object placement.
+5. A laptop that opens and displays a functioning QuantMix interface or experiment entry point.
+6. A glass that can be picked up and placed on surfaces without falling through them.
+7. Clear controls, instructions, reset functionality and an easy way to return to the main website.
+
+Use stable physics settings, sensible collision shapes and appropriate limits on object movement. Avoid objects vibrating, tunnelling through surfaces, becoming uncontrollable or disappearing outside the scene.
+
+Do not implement complex liquid simulation, glass shattering or all six environments in this milestone. Add them only after the core interactions are reliable.
+
+## Phase 4 — Prepare the scientific exploration architecture
+
+Do not yet implement the complete quantum laboratory or connect a live AI model.
+
+However, design the code so that future milestones can integrate them without rewriting the room.
+
+- Separate rendering, input handling, physical simulation, scientific calculations and interface components.
+- Use structured state for the currently selected object, environment, experiment and parameter values.
+- Provide a clear interface through which future scientific models can receive inputs and return calculated results.
+- Keep scientific equations and calculations independent of visual animation.
+- Label any schematic or illustrative quantum visualisation clearly.
+- Never represent a decorative animation as a scientifically calculated quantum state.
+
+The future QuAntI integration must be able to receive the actual experiment configuration and calculated results. Do not fabricate an AI response or invent numerical output.
+
+## Phase 5 — Performance and reliability
+
+The experience must be designed for an ordinary student laptop and a modern desktop browser.
+
+- Optimise 3D asset sizes, textures, draw calls, shadows and rendering quality.
+- Avoid loading enormous assets unnecessarily.
+- Dispose of unused GPU resources and clean up event listeners appropriately.
+- Handle loading failures and unsupported WebGL gracefully.
+- Provide a loading screen and useful error messages.
+- Include reduced-motion considerations where relevant.
+- Ensure the existing homepage still works on mobile, even if the complete 3D experience requires desktop controls.
+- Avoid console errors, unhandled promises, broken imports and missing assets.
+
+Do not claim the experience is bug-free without testing it.
+
+## Phase 6 — Test the actual experience
+
+Run the existing project using its documented development command.
+
+Verify:
+
+- The homepage still loads.
+- The room loads without missing assets or fatal errors.
+- Camera movement and object selection work.
+- Objects can be picked up, moved, dropped and reset.
+- Collision and gravity behave sensibly.
+- The laptop interaction works.
+- Repeated interactions do not cause state corruption or memory leaks.
+- Reloading the page restores a usable state.
+- The project builds successfully for production.
+
+Fix errors discovered during testing. Clearly distinguish tests actually performed from tests that remain unverified.
+
+## Phase 7 — GitHub workflow
+
+Use the existing repository: https://github.com/SanthoshSkandhaS/QuantMix
+
+- Inspect the existing branch, remote and working tree before committing.
+- Preserve all unrelated work.
+- Do not overwrite the repository, force-push, expose secrets or commit API keys.
+- After implementation and tests pass, create a descriptive commit for this milestone and push it to the existing repository if authentication and permissions are available.
+- If the push fails, report the exact reason and provide the next safe step.
+- Report the commit hash, files changed, test results and how to launch the room.
+
+## Scope discipline
+
+Build one excellent room before expanding the project.
+
+Do not implement the other five environments, a complete quantum laboratory, AI model integration, authentication or unrelated features in this milestone.
+
+**Definition of success:** A user can open QuantMix, enter a visually convincing 3D room, move around, interact reliably with selected objects, and return to the existing homepage. The project remains maintainable, testable and ready for future scientifically validated experiments and QuAntI integration.
+
+Begin by auditing the existing project. Then implement, run, test, fix and report.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# QuantMix — Supplementary Requirements: User Controls and Future Experiment Architecture
+
+Apply these requirements to the 3D-room milestone you are currently building. Treat them as an extension of the existing specification, not a separate project.
+
+## 1. Camera and navigation
+
+- Support immersive first-person exploration with keyboard movement and mouse-look.
+- Provide an optional orbit/inspection camera for examining the room and objects.
+- Include clear controls for switching camera modes, resetting the camera and returning to the main homepage.
+- Prevent the camera from passing through walls or becoming trapped inside objects.
+- Keep the controls discoverable through a compact help panel.
+- Make the interaction design adaptable to touch controls in a later mobile optimisation pass.
+
+## 2. Room interaction controls
+
+Provide reliable interactions for supported objects:
+
+- Select and highlight an object.
+- Pick up, rotate, move, place and drop objects.
+- Use sensible movement limits, gravity and collisions.
+- Reset an object's position when requested.
+- Open and interact with the laptop interface.
+- Control supported room lighting and window states.
+
+Do not expose controls for objects or behaviours that have not actually been implemented.
+
+## 3. Environment settings
+
+Create a compact settings panel for implemented features only.
+
+Where supported, allow users to change:
+- Time-of-day lighting presets.
+- Indoor light state.
+- Camera sensitivity and movement speed.
+- Graphics quality presets.
+- Visual effects and reduced-motion preferences.
+
+Settings must update the actual scene, not just change a displayed number. Use sensible defaults and provide a reset-to-defaults option.
+
+## 4. Separate real-world physics from the future sandbox
+
+For this milestone, use realistic defaults for gravity, collisions and object motion.
+
+Design the architecture so a later classical physics sandbox can expose parameters such as mass, friction, bounce and initial force. Do not add misleading physics sliders before their underlying behaviour is implemented.
+
+Keep visual effects separate from physical parameters. Increasing a glow effect must not change a scientific calculation.
+
+## 5. Prepare for the future Quantum Lab
+
+Do not build the full Quantum Lab in this milestone.
+
+However, keep the architecture modular so a later one-dimensional quantum tunnelling experiment can accept particle energy, barrier height, barrier width and particle mass, then return calculated transmission and reflection probabilities.
+
+Scientific calculations must be independent of the rendering engine and visual animation. Preserve the model assumptions, units, input parameters and calculation results in a structured form suitable for later use by QuAntI.
+
+Do not generate fake results or claim a model is validated without testing it.
+
+## 6. Prepare for QuAntI AI integration
+
+Do not connect a live AI model yet.
+
+Provide clear module boundaries for future integration with:
+- A scientific knowledge retrieval system.
+- The current scene and selected object.
+- The active experiment and its parameters.
+- Actual calculated outputs.
+- Source references, assumptions and uncertainty.
+
+Future AI suggestions must be reviewable before they change experiment parameters. The AI must not bypass scientific calculations or invent results.
+
+Keep API keys and other secrets out of browser code and GitHub.
+
+## 7. Reliability and acceptance criteria
+
+Test the controls in the running website. Confirm that camera switching, object interaction, reset functions and settings behave correctly and that the existing homepage remains intact.
+
+Run the project's available checks and production build. Fix discovered errors before reporting completion. Clearly list any features that remain incomplete.
+
+Commit and push the verified milestone to the existing QuantMix GitHub repository only after checking the current Git status, preserving unrelated changes and avoiding destructive Git operations.
+
+Prioritise reliable functionality, realistic presentation and clean architecture over the number of features. Do not expand into all six environments, the complete quantum simulator or AI integration during this milestone.

@@ -13,7 +13,8 @@ import {
   HelpCircle,
   ExternalLink,
   Sliders,
-  Scale
+  Scale,
+  Info
 } from "lucide-react";
 import { BEDROOM_QUANTUM_FACTS } from "../data/bedroomData";
 
@@ -219,7 +220,6 @@ export default function Bedroom3D({
   const [selectedObject, setSelectedObject] = useState(null);
   const [hoveredObjectName, setHoveredObjectName] = useState(null);
   const [showHelp, setShowHelp] = useState(true);
-  const [viewMode, setViewMode] = useState("macro"); // "macro" | "quantum"
 
   // 2D Screen coordinates for contextual anchor
   const [screenCoords, setScreenCoords] = useState(null);
@@ -257,7 +257,6 @@ export default function Bedroom3D({
   // Focus Camera onto Selected Object
   const focusOnObject = useCallback((objKey) => {
     setSelectedObject(objKey);
-    setViewMode("macro");
     const camera = cameraRef.current;
     const controls = controlsRef.current;
     if (!camera || !controls) return;
@@ -265,6 +264,7 @@ export default function Bedroom3D({
     const targets = {
       laptop: { pos: [-0.65, 1.15, -0.6], target: [-0.65, 0.88, -1.05] },
       water: { pos: [-0.2, 1.05, -0.7], target: [-0.2, 0.88, -1.0] },
+      lamp: { pos: [-0.02, 1.15, -0.85], target: [-0.02, 0.95, -1.22] },
       chair: { pos: [-0.65, 1.2, 0.6], target: [-0.65, 0.6, -0.2] },
       desk: { pos: [-0.65, 1.6, 0.8], target: [-0.65, 0.75, -1.0] },
       window: { pos: [-0.5, 1.8, 1.2], target: [-3.18, 1.8, -0.8] },
@@ -628,10 +628,10 @@ export default function Bedroom3D({
     const glassMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       transmission: 0.96,
-      roughness: 0.03,
+      roughness: 0.02,
       transparent: true,
-      opacity: 0.85,
-      ior: 1.52,
+      opacity: 0.88,
+      ior: 1.473, // Exact borosilicate glass refractive index
       thickness: 0.06
     });
     const glassOuter = new THREE.Mesh(glassOuterGeo, glassMat);
@@ -643,11 +643,11 @@ export default function Bedroom3D({
     const waterGeo = new THREE.CylinderGeometry(0.042, 0.036, 0.09, 24);
     const waterMat = new THREE.MeshPhysicalMaterial({
       color: 0x35d6d0,
-      transmission: 0.88,
-      roughness: 0.08,
+      transmission: 0.92,
+      roughness: 0.04,
       transparent: true,
-      opacity: 0.7,
-      ior: 1.33
+      opacity: 0.75,
+      ior: 1.333 // Refractive index of pure water at 20°C
     });
     const waterMesh = new THREE.Mesh(waterGeo, waterMat);
     waterMesh.position.y = 0.048;
@@ -666,6 +666,82 @@ export default function Bedroom3D({
 
     worldPosMap.water = new THREE.Vector3(-0.2, 0.88, -1.0);
     roomGroup.add(glassGroup);
+
+    // 9.5 Interactive Architectural Desk Lamp
+    const lampGroup = new THREE.Group();
+    lampGroup.position.set(0.02, 0.775, -1.22);
+
+    const lampMetalMat = new THREE.MeshStandardMaterial({
+      color: 0x181e28,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+    const lampBrassMat = new THREE.MeshStandardMaterial({
+      color: 0xd4a359,
+      metalness: 0.9,
+      roughness: 0.2
+    });
+
+    // Circular weighted base
+    const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.015, 24), lampMetalMat);
+    lampBase.position.y = 0.008;
+    lampBase.castShadow = true;
+    lampGroup.add(lampBase);
+
+    // Lower articulated arm
+    const arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.25, 12), lampMetalMat);
+    arm1.position.set(-0.03, 0.12, 0.03);
+    arm1.rotation.z = 0.25;
+    arm1.castShadow = true;
+    lampGroup.add(arm1);
+
+    // Brass joint knuckle
+    const joint = new THREE.Mesh(new THREE.SphereGeometry(0.014, 16, 16), lampBrassMat);
+    joint.position.set(-0.06, 0.23, 0.04);
+    lampGroup.add(joint);
+
+    // Upper articulated arm reaching towards glass
+    const arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.22, 12), lampMetalMat);
+    arm2.position.set(-0.13, 0.27, 0.08);
+    arm2.rotation.z = 1.1;
+    arm2.castShadow = true;
+    lampGroup.add(arm2);
+
+    // Conical spun-metal lampshade
+    const shadeGeo = new THREE.ConeGeometry(0.075, 0.12, 24, 1, true);
+    const shade = new THREE.Mesh(shadeGeo, lampMetalMat);
+    shade.position.set(-0.21, 0.25, 0.12);
+    shade.rotation.z = -0.55;
+    shade.rotation.y = 0.2;
+    shade.castShadow = true;
+    lampGroup.add(shade);
+
+    // Warm LED bulb inside shade (3000 K)
+    const bulbMat = new THREE.MeshBasicMaterial({ color: 0xfff0dd });
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.02, 16, 16), bulbMat);
+    bulb.position.set(-0.21, 0.24, 0.12);
+    lampGroup.add(bulb);
+
+    // Realistic task spotlight illuminating desk and glass
+    const deskSpot = new THREE.SpotLight(0xffeedd, 2.6, 2.8, Math.PI / 4, 0.5, 1.2);
+    deskSpot.position.set(-0.21, 0.24, 0.12);
+    deskSpot.target.position.set(-0.25, 0, 0.2);
+    lampGroup.add(deskSpot.target);
+    lampGroup.add(deskSpot);
+    deskLampLightRef.current = deskSpot;
+
+    // Generous high-priority hit cylinder for lamp
+    const lampHit = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.14, 0.35, 16),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    lampHit.position.set(-0.1, 0.16, 0.06);
+    lampHit.userData = { key: "lamp", priority: 95 };
+    interactables.push(lampHit);
+    lampGroup.add(lampHit);
+
+    worldPosMap.lamp = new THREE.Vector3(0.02, 1.05, -1.22);
+    roomGroup.add(lampGroup);
 
     // 10. Stack of Physics Textbooks
     const bookGroup = new THREE.Group();
@@ -1077,7 +1153,7 @@ export default function Bedroom3D({
               </div>
             )}
 
-            {/* Interactive Object Quantum Briefing Drawer */}
+            {/* Scientifically Grounded Object Inspection Drawer */}
             {activeFact && (
               <div className="object-quantum-drawer">
                 <div className="drawer-header">
@@ -1094,73 +1170,93 @@ export default function Bedroom3D({
                   </button>
                 </div>
 
+                {/* Material Composition Banner */}
+                <div className="drawer-material-tag">
+                  <span className="material-label">Material Composition:</span>
+                  <p className="material-val">{activeFact.material}</p>
+                </div>
+
+                {/* Quantum Mechanism Tag */}
                 <div className="drawer-phenomenon-badge">
-                  <span>Quantum Mechanism:</span>
-                  <strong>{activeFact.phenomenon}</strong>
-                </div>
-
-                {/* Macro vs Quantum View Mode Switcher */}
-                <div className="view-mode-tabs">
-                  <button
-                    onClick={() => setViewMode("macro")}
-                    className={`mode-tab ${viewMode === "macro" ? "active" : ""}`}
-                  >
-                    <span>Macroscopic Physical View</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode("quantum")}
-                    className={`mode-tab ${viewMode === "quantum" ? "active" : ""}`}
-                  >
-                    <span>Microscopic Quantum View</span>
-                  </button>
-                </div>
-
-                {viewMode === "macro" ? (
-                  <div className="view-mode-content">
-                    <p className="drawer-summary">{activeFact.macroscopicSummary}</p>
-                    <div className="scale-indicator">
-                      <Scale size={13} color="var(--color-copper, #c67248)" />
-                      <span>{activeFact.scale}</span>
-                    </div>
+                  <div className="phenom-row">
+                    <span>Governing Phenomenon:</span>
+                    <strong>{activeFact.phenomenon}</strong>
                   </div>
-                ) : (
-                  <div className="view-mode-content">
-                    <p className="drawer-summary">{activeFact.quantumSummary}</p>
-                    <div className="equation-box">
-                      <code>{activeFact.equation}</code>
+                  <div className="scale-indicator">
+                    <Scale size={12} color="var(--color-copper, #c67248)" />
+                    <span>Scale: {activeFact.scale}</span>
+                  </div>
+                </div>
+
+                {/* Observable Macroscopic Physical Properties */}
+                <div className="drawer-section">
+                  <h5 className="section-subtitle">Observable Physical Properties</h5>
+                  <div className="props-table">
+                    {activeFact.physicalProperties?.map((prop, idx) => (
+                      <div key={idx} className="prop-row">
+                        <span className="prop-name">{prop.label}:</span>
+                        <span className="prop-val font-mono">{prop.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Dedicated Optical Physics & Refraction (for glass & optical objects) */}
+                {activeFact.opticalPhysics && (
+                  <div className="drawer-section optical-section">
+                    <div className="optical-header">
+                      <Sparkles size={14} color="#35d6d0" />
+                      <h5 className="section-subtitle text-teal">Optical Properties &amp; Transparency</h5>
                     </div>
-                    <div className="citation-note">
-                      <span>Source: {activeFact.citation}</span>
+                    <div className="optical-block">
+                      <strong className="block-title">Refraction &amp; Phase Velocity:</strong>
+                      <p className="block-text">{activeFact.opticalPhysics.refractionMechanism}</p>
+                    </div>
+                    <div className="optical-block">
+                      <strong className="block-title">Microscopic Origin of Transparency:</strong>
+                      <p className="block-text">{activeFact.opticalPhysics.transparencyOrigin}</p>
                     </div>
                   </div>
                 )}
 
-                <div className="drawer-actions-row">
-                  {selectedObject === "laptop" && (
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onOpenLab?.();
-                      }}
-                      className="drawer-action-btn"
-                    >
-                      <span>Launch Quantum Lab Simulation</span>
-                      <ExternalLink size={14} />
-                    </button>
-                  )}
-                  {selectedObject === "water" && (
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onOpenLab?.();
-                      }}
-                      className="drawer-action-btn"
-                    >
-                      <span>Simulate Atomic Barrier Tunneling</span>
-                      <ExternalLink size={14} />
-                    </button>
-                  )}
+                {/* Relationship to Quantum Mechanics */}
+                <div className="drawer-section">
+                  <h5 className="section-subtitle">Relationship to Quantum Mechanics</h5>
+                  <p className="drawer-summary">{activeFact.quantumRelationship}</p>
+                  <div className="equation-box">
+                    <code>{activeFact.equation}</code>
+                  </div>
+                  <div className="citation-note">
+                    <span>Source: {activeFact.citation}</span>
+                  </div>
                 </div>
+
+                {/* Honest Physical Scope Notice */}
+                <div className="honest-scope-callout">
+                  <div className="scope-icon-row">
+                    <Info size={14} color="#c67248" />
+                    <strong>Physical Scope Notice</strong>
+                  </div>
+                  <p>{activeFact.honestScopeNotice}</p>
+                </div>
+
+                {/* Dedicated "Explore Quantum Physics" Action Button */}
+                {activeFact.exploreAction && (
+                  <div className="drawer-actions-row">
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenLab?.(activeFact.exploreAction.experimentKey);
+                      }}
+                      className="drawer-action-btn explore-btn"
+                    >
+                      <Atom size={16} />
+                      <span>{activeFact.exploreAction.label}</span>
+                      <ExternalLink size={14} />
+                    </button>
+                    <span className="action-hint-note">{activeFact.exploreAction.reason}</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1184,11 +1280,13 @@ export default function Bedroom3D({
                 <div className="interactive-tags">
                   <span className="tag-label">Inspectable:</span>
                   <button onClick={() => focusOnObject("water")} className="quick-obj-tag">Glass of Water</button>
+                  <button onClick={() => focusOnObject("lamp")} className="quick-obj-tag">Desk Lamp</button>
                   <button onClick={() => focusOnObject("laptop")} className="quick-obj-tag">Laptop</button>
-                  <button onClick={() => focusOnObject("chair")} className="quick-obj-tag">Chair</button>
                   <button onClick={() => focusOnObject("desk")} className="quick-obj-tag">Desk</button>
-                  <button onClick={() => focusOnObject("bed")} className="quick-obj-tag">Bed</button>
+                  <button onClick={() => focusOnObject("chair")} className="quick-obj-tag">Chair</button>
                   <button onClick={() => focusOnObject("books")} className="quick-obj-tag">Books</button>
+                  <button onClick={() => focusOnObject("window")} className="quick-obj-tag">Window</button>
+                  <button onClick={() => focusOnObject("bed")} className="quick-obj-tag">Bed</button>
                 </div>
               </div>
             )}
@@ -1433,25 +1531,31 @@ export default function Bedroom3D({
           position: absolute;
           top: 75px;
           right: 20px;
-          width: 380px;
+          width: 410px;
           max-width: calc(100vw - 30px);
-          background: rgba(18, 21, 29, 0.95);
-          backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          max-height: calc(100vh - 95px);
+          overflow-y: auto;
+          background: rgba(14, 18, 26, 0.96);
+          backdrop-filter: blur(18px);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           border-left: 3px solid #35d6d0;
           border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+          padding: 18px 20px;
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
           z-index: 25;
           animation: slideInRight 0.22s ease-out;
           color: #f4f7ff;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
         }
 
         .drawer-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 10px;
+          padding-bottom: 4px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .drawer-title-row {
@@ -1471,69 +1575,155 @@ export default function Bedroom3D({
           border: none;
           color: #a9b6cf;
           cursor: pointer;
+          display: flex;
+          padding: 4px;
         }
 
-        .drawer-phenomenon-badge {
-          background: rgba(53, 214, 208, 0.12);
-          border: 1px solid rgba(53, 214, 208, 0.25);
+        .drawer-close-btn:hover {
+          color: #ffffff;
+        }
+
+        .drawer-material-tag {
+          background: rgba(0, 0, 0, 0.35);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           border-radius: 6px;
-          padding: 6px 10px;
-          font-size: 0.72rem;
-          margin-bottom: 14px;
+          padding: 8px 10px;
           display: flex;
           flex-direction: column;
           gap: 2px;
         }
 
-        .drawer-phenomenon-badge span {
+        .material-label {
+          font-size: 0.68rem;
+          color: #8c9bb3;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .material-val {
+          font-size: 0.75rem;
+          color: #d1d9ea;
+          margin: 0;
+          line-height: 1.4;
+        }
+
+        .drawer-phenomenon-badge {
+          background: rgba(53, 214, 208, 0.1);
+          border: 1px solid rgba(53, 214, 208, 0.25);
+          border-radius: 6px;
+          padding: 8px 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .phenom-row {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          font-size: 0.72rem;
+        }
+
+        .phenom-row span {
           color: #8c9bb3;
         }
 
-        .drawer-phenomenon-badge strong {
+        .phenom-row strong {
+          color: #35d6d0;
+          font-family: monospace;
+          font-size: 0.76rem;
+        }
+
+        .drawer-section {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .section-subtitle {
+          font-size: 0.74rem;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: #8c9bb3;
+          margin: 0;
+          font-weight: 700;
+        }
+
+        .props-table {
+          background: rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 6px;
+          overflow: hidden;
+        }
+
+        .prop-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 5px 10px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          font-size: 0.72rem;
+        }
+
+        .prop-row:last-child {
+          border-bottom: none;
+        }
+
+        .prop-name {
+          color: #8c9bb3;
+        }
+
+        .prop-val {
+          color: #ffffff;
+          text-align: right;
+        }
+
+        .optical-section {
+          background: rgba(53, 214, 208, 0.06);
+          border: 1px solid rgba(53, 214, 208, 0.2);
+          border-radius: 8px;
+          padding: 10px 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .optical-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .optical-block {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .block-title {
+          font-size: 0.72rem;
           color: #35d6d0;
           font-family: monospace;
         }
 
-        .view-mode-tabs {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 6px;
-          margin-bottom: 12px;
-        }
-
-        .mode-tab {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #8c9bb3;
-          border-radius: 6px;
-          padding: 6px;
+        .block-text {
           font-size: 0.72rem;
-          cursor: pointer;
-        }
-
-        .mode-tab.active {
-          background: rgba(53, 214, 208, 0.18);
-          border-color: #35d6d0;
-          color: #ffffff;
-          font-weight: 600;
-        }
-
-        .view-mode-content {
-          margin-bottom: 14px;
+          color: #d1d9ea;
+          line-height: 1.45;
+          margin: 0;
         }
 
         .drawer-summary {
-          font-size: 0.8rem;
+          font-size: 0.76rem;
           line-height: 1.5;
           color: #d1d9ea;
-          margin: 0 0 10px 0;
+          margin: 0;
         }
 
         .scale-indicator {
           display: flex;
           align-items: center;
           gap: 6px;
-          font-size: 0.72rem;
+          font-size: 0.7rem;
           color: #c67248;
           font-family: monospace;
         }
@@ -1542,17 +1732,50 @@ export default function Bedroom3D({
           background: rgba(0, 0, 0, 0.4);
           border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 6px;
-          padding: 8px 12px;
+          padding: 6px 10px;
           font-family: monospace;
           color: #35d6d0;
-          font-size: 0.82rem;
-          margin-bottom: 8px;
+          font-size: 0.78rem;
         }
 
         .citation-note {
-          font-size: 0.68rem;
+          font-size: 0.66rem;
           color: #6b7c96;
           font-style: italic;
+        }
+
+        .honest-scope-callout {
+          background: rgba(198, 114, 72, 0.1);
+          border-left: 3px solid #c67248;
+          border-radius: 0 6px 6px 0;
+          padding: 8px 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .scope-icon-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: #c67248;
+          font-size: 0.7rem;
+          font-family: monospace;
+          text-transform: uppercase;
+        }
+
+        .honest-scope-callout p {
+          font-size: 0.7rem;
+          color: #e2e8f5;
+          line-height: 1.4;
+          margin: 0;
+        }
+
+        .drawer-actions-row {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          margin-top: 4px;
         }
 
         .drawer-action-btn {
@@ -1564,16 +1787,23 @@ export default function Bedroom3D({
           background: #c67248;
           color: #ffffff;
           border: none;
-          padding: 9px 14px;
+          padding: 10px 14px;
           border-radius: 6px;
           font-weight: 700;
-          font-size: 0.8rem;
+          font-size: 0.78rem;
           cursor: pointer;
           transition: background 0.15s ease;
         }
 
         .drawer-action-btn:hover {
           background: #d88358;
+        }
+
+        .action-hint-note {
+          font-size: 0.66rem;
+          color: #8c9bb3;
+          text-align: center;
+          font-style: italic;
         }
 
         /* Help panel */

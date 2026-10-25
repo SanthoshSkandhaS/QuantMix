@@ -199,6 +199,73 @@ export async function createExperimentFromCurrentSimulation(simState, customTitl
 }
 
 /**
+ * Creates and stores a double-slit experiment record in the notebook
+ *
+ * @param {object} slitState
+ * @param {string} [customTitle]
+ * @param {string} [hypothesis]
+ * @param {Array<string>} [tags]
+ * @returns {Promise<object>} Created experiment record
+ */
+export async function createDoubleSlitExperiment(slitState, customTitle, hypothesis = "", tags = []) {
+  if (!slitState) throw new Error("Double-slit state required to record experiment.");
+
+  const slitMode = slitState.slitMode || "both";
+  const slitSeparationUm = Number(slitState.slitSeparationUm) || 100;
+  const slitWidthUm = Number(slitState.slitWidthUm) || 20;
+  const screenDistanceM = Number(slitState.screenDistanceM) || 0.60;
+  const beamName = slitState.beamName || "532 nm Green Laser";
+  const detectedCount = Number(slitState.detectedCount) || 0;
+  const fringeSpacingMm = slitState.fringeSpacingMm || "3.19";
+
+  const modeLabel = slitMode === "both" ? "Two Slits Open" : slitMode === "left" ? "Left Slit Only" : "Right Slit Only";
+  const defaultTitle = `Double-Slit: ${beamName} (${modeLabel})`;
+
+  const record = {
+    id: `exp_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    title: (customTitle || defaultTitle).trim(),
+    timestamp: new Date().toISOString(),
+    experimentType: "double_slit",
+    modelName: "Wave-Particle Duality & Fraunhofer Double-Slit Diffraction",
+    hypothesis: hypothesis.trim() || `Observe buildup of ${slitMode === "both" ? "two-slit interference fringes" : "single-slit diffraction envelope"} from individual Poisson particle impacts.`,
+    parameters: {
+      slitMode,
+      slitSeparationUm,
+      slitWidthUm,
+      screenDistanceM,
+      beamName,
+      particleKey: slitState.particleKey || "photon_green",
+      units: { separation: "µm", width: "µm", distance: "m" }
+    },
+    results: {
+      detectedCount,
+      fringeSpacingMm: `${fringeSpacingMm} mm`,
+      formula: slitMode === "both" ? "I(x) = I₀ [sin(β)/β]² cos²(α)" : "I(x) = (I₀/2) [sin(β)/β]²",
+      fringeSpacingFormula: "Δy = λ D / d"
+    },
+    graphData: [],
+    observations: `Recorded ${detectedCount} individual particle arrivals on the phosphorescent detection screen. ${slitMode === "both" ? `Interference fringe maxima spaced at Δy = ${fringeSpacingMm} mm.` : "Diffraction central envelope observed without interference fringe splitting."}`,
+    conclusion: slitMode === "both"
+      ? "Individual quantum particles exhibit spatial probability interference when both slit paths are open."
+      : "Single-slit aperture eliminates phase interference fringes, matching classical single-slit Fraunhofer diffraction.",
+    tags: tags.length ? tags : ["double-slit", "interference", slitMode === "both" ? "two-slits" : "single-slit"],
+    configSnapshot: {
+      experimentType: "double_slit",
+      slitMode,
+      slitSeparationUm,
+      slitWidthUm,
+      screenDistanceM,
+      particleKey: slitState.particleKey || "photon_green"
+    },
+    isSummary: false
+  };
+
+  const saved = await saveExperiment(record);
+  notifySubscribers({ type: "create", experiment: saved });
+  return saved;
+}
+
+/**
  * Updates an existing experiment record
  */
 export async function updateExperiment(id, updates = {}) {

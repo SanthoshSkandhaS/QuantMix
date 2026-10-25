@@ -16,14 +16,20 @@ import {
 } from "lucide-react";
 import MathView from "./MathView";
 import QuantumLab3D from "./QuantumLab3D";
+import DoubleSlitLab3D from "./DoubleSlitLab3D";
 import {
   calculateRectangularBarrierTunneling,
   evaluateStationaryWavefunction,
   PARTICLE_TYPES
 } from "../utils/quantumPhysics";
-import { createExperimentFromCurrentSimulation } from "../utils/notebookService";
+import {
+  createExperimentFromCurrentSimulation,
+  createDoubleSlitExperiment
+} from "../utils/notebookService";
 
 export default function QuantumLabPreview({
+  activeLabTab: extActiveLabTab,
+  onSelectLabTab: extOnSelectLabTab,
   energyEv: extEnergyEv,
   setEnergyEv: extSetEnergyEv,
   barrierHeightEv: extBarrierHeightEv,
@@ -40,6 +46,10 @@ export default function QuantumLabPreview({
   onOpenComparison,
   onOpenNotebook
 }) {
+  const [localActiveTab, setLocalActiveTab] = useState("tunneling");
+  const currentTab = extActiveLabTab ?? localActiveTab;
+  const setCurrentTab = extOnSelectLabTab ?? setLocalActiveTab;
+
   const [notebookSaveToast, setNotebookSaveToast] = useState(null);
   const [isSavingNotebook, setIsSavingNotebook] = useState(false);
   // Local fallback states if not controlled externally
@@ -110,16 +120,21 @@ export default function QuantumLabPreview({
     }
   };
 
-  const handleSaveToNotebook = async () => {
+  const handleSaveToNotebook = async (customConfig) => {
     try {
       setIsSavingNotebook(true);
-      const saved = await createExperimentFromCurrentSimulation({
-        energyEv: particleEnergy,
-        barrierHeightEv: barrierHeight,
-        barrierWidthNm: barrierWidth,
-        particleKey,
-        physicsData
-      });
+      let saved;
+      if (customConfig && customConfig.experimentType === "double_slit") {
+        saved = await createDoubleSlitExperiment(customConfig);
+      } else {
+        saved = await createExperimentFromCurrentSimulation({
+          energyEv: particleEnergy,
+          barrierHeightEv: barrierHeight,
+          barrierWidthNm: barrierWidth,
+          particleKey,
+          physicsData
+        });
+      }
       setNotebookSaveToast(`Saved to Notebook: "${saved.title}"`);
       setTimeout(() => setNotebookSaveToast(null), 3500);
     } catch (err) {
@@ -252,8 +267,38 @@ export default function QuantumLabPreview({
           </p>
         </div>
 
-        {/* Experiment Main Container */}
-        <div className="editorial-card lab-main-card">
+        {/* Master Experiment Navigation Tabs */}
+        <div className="lab-experiment-switcher-bar">
+          <button
+            type="button"
+            onClick={() => setCurrentTab("tunneling")}
+            className={`lab-exp-btn ${currentTab === "tunneling" ? "active" : ""}`}
+          >
+            <div className="exp-btn-title-row">
+              <span className="exp-index">EXPERIMENT 01</span>
+              <strong className="exp-name">Quantum Tunnelling (1D Barrier)</strong>
+            </div>
+            <span className="exp-subtitle font-mono">1D Schrödinger Stationary State Solver</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCurrentTab("double_slit")}
+            className={`lab-exp-btn ${currentTab === "double_slit" ? "active" : ""}`}
+          >
+            <div className="exp-btn-title-row">
+              <span className="exp-index">EXPERIMENT 02</span>
+              <strong className="exp-name">Double-Slit Wave-Particle Duality</strong>
+            </div>
+            <span className="exp-subtitle font-mono">Poisson Impact Accumulator &amp; Slit Shutters</span>
+          </button>
+        </div>
+
+        {currentTab === "double_slit" ? (
+          <DoubleSlitLab3D onSaveToNotebook={handleSaveToNotebook} />
+        ) : (
+          /* Experiment Main Container */
+          <div className="editorial-card lab-main-card">
           {/* Top Status & Workbench Actions Header */}
           <div className="lab-status-header">
             <div className="lab-title-group">
@@ -803,9 +848,73 @@ export default function QuantumLabPreview({
             )}
           </div>
         </div>
+        )}
       </div>
 
       <style>{`
+        .lab-experiment-switcher-bar {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+          .lab-experiment-switcher-bar {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .lab-exp-btn {
+          background: rgba(18, 22, 32, 0.85);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 16px 20px;
+          text-align: left;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .lab-exp-btn:hover {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .lab-exp-btn.active {
+          background: rgba(32, 196, 180, 0.12);
+          border-color: var(--color-teal);
+          box-shadow: 0 0 24px rgba(32, 196, 180, 0.18);
+        }
+
+        .exp-btn-title-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .exp-index {
+          font-family: monospace;
+          font-size: 0.72rem;
+          color: var(--color-teal);
+          letter-spacing: 0.08em;
+          background: rgba(32, 196, 180, 0.15);
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+
+        .exp-name {
+          color: #ffffff;
+          font-size: 1.05rem;
+        }
+
+        .exp-subtitle {
+          font-size: 0.76rem;
+          color: var(--color-text-muted);
+        }
+
         .lab-main-card {
           padding: 32px;
           background: var(--color-bg-card);

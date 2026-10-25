@@ -103,6 +103,7 @@ export default function QuAntIPreview({
         parameterAction: response.parameterAction,
         source: response.source,
         mode: response.mode,
+        scopeNotice: response.scopeNotice,
         notebookAction: response.notebookAction
       };
 
@@ -129,14 +130,14 @@ export default function QuAntIPreview({
   };
 
   const samplePromptChips = [
-    { label: "Save to Notebook", prompt: "Save this experiment to my notebook as Electron Tunnelling Trial" },
-    { label: "Show Experiments", prompt: "Show me my last five experiments" },
-    { label: "AI Research Summary", prompt: "Create a research summary of my saved experiments" },
-    { label: "Compare Trials", prompt: "Compare my last two tunnelling experiments" },
+    { label: "Double-Slit Duality", prompt: "Explain double-slit wave-particle duality and Poisson impacts" },
+    { label: "Why is glass transparent?", prompt: "Why is ordinary glass transparent in quantum physics?" },
+    { label: "Why don't objects tunnel?", prompt: "Why don't everyday macroscopic objects tunnel through walls?" },
     { label: "Why is T changing?", prompt: "Why is the transmission probability changing?" },
     { label: "Barrier width effect", prompt: "What happens when I increase the barrier width?" },
-    { label: "Classical vs Quantum", prompt: "Why does the classical prediction differ from the quantum prediction?" },
-    { label: "Which equation?", prompt: "Which equation is being solved in this simulation?" }
+    { label: "Save to Notebook", prompt: "Save this experiment to my notebook as Electron Tunnelling Trial" },
+    { label: "Show Experiments", prompt: "Show me my last five experiments" },
+    { label: "AI Research Summary", prompt: "Create a research summary of my saved experiments" }
   ];
 
   return (
@@ -337,11 +338,27 @@ export default function QuAntIPreview({
                       </div>
                     )}
 
-                    {/* Grounded Textbook Citation */}
+                    {/* Grounded Textbook Citation & Scope Notice */}
                     {msg.source && (
                       <div className="citation-row">
                         <span className="citation-label">Authoritative Source:</span>
                         <span className="citation-text">{msg.source}</span>
+                      </div>
+                    )}
+                    {msg.scopeNotice && (
+                      <div
+                        className="scope-notice-row"
+                        style={{
+                          marginTop: "6px",
+                          fontSize: "0.78rem",
+                          color: "var(--color-text-muted)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px"
+                        }}
+                      >
+                        <span style={{ color: "var(--color-teal)", fontWeight: 600 }}>Physical Scope:</span>
+                        <span>{msg.scopeNotice}</span>
                       </div>
                     )}
                   </div>

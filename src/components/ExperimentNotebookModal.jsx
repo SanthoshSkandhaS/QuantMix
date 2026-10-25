@@ -238,6 +238,7 @@ export default function ExperimentNotebookModal({
   const handleReopenInLab = () => {
     if (!selectedExperiment) return;
     const snapshot = selectedExperiment.configSnapshot || {
+      experimentType: selectedExperiment.experimentType || "tunneling",
       energyEv: selectedExperiment.parameters?.energyEv ?? 3.8,
       barrierHeightEv: selectedExperiment.parameters?.barrierHeightEv ?? 4.5,
       barrierWidthNm: selectedExperiment.parameters?.barrierWidthNm ?? 0.35,
@@ -724,72 +725,146 @@ export default function ExperimentNotebookModal({
                         <h5 className="section-card-title">Configuration Parameters</h5>
                         <div className="conservation-pill">
                           <ShieldCheck size={13} color="var(--color-teal)" />
-                          <span>R + T = 1.000000</span>
-                        </div>
-                      </div>
-
-                      <div className="params-table-grid">
-                        <div className="param-cell">
-                          <span className="param-label">Incident Particle</span>
-                          <span className="param-value">
-                            {selectedExperiment.parameters?.particleName || selectedExperiment.parameters?.particleKey || "Electron"}
-                          </span>
-                        </div>
-                        <div className="param-cell">
-                          <span className="param-label">Particle Energy (E)</span>
-                          <span className="param-value font-mono">
-                            {selectedExperiment.parameters?.energyEv?.toFixed(2)} eV
-                          </span>
-                        </div>
-                        <div className="param-cell">
-                          <span className="param-label">Barrier Height (V₀)</span>
-                          <span className="param-value font-mono">
-                            {selectedExperiment.parameters?.barrierHeightEv?.toFixed(2)} eV
-                          </span>
-                        </div>
-                        <div className="param-cell">
-                          <span className="param-label">Barrier Width (L)</span>
-                          <span className="param-value font-mono">
-                            {selectedExperiment.parameters?.barrierWidthNm?.toFixed(3)} nm
-                          </span>
-                        </div>
-                        <div className="param-cell">
-                          <span className="param-label">Decay Constant (κ)</span>
-                          <span className="param-value font-mono">
-                            {selectedExperiment.results?.kappaNm ? `${selectedExperiment.results.kappaNm} nm⁻¹` : "—"}
-                          </span>
-                        </div>
-                        <div className="param-cell">
-                          <span className="param-label">de Broglie Wavelength (λ)</span>
-                          <span className="param-value font-mono">
-                            {selectedExperiment.results?.deBroglieWavelengthNm
-                              ? `${selectedExperiment.results.deBroglieWavelengthNm.toFixed(3)} nm`
-                              : "—"}
+                          <span>
+                            {selectedExperiment.experimentType === "double_slit"
+                              ? "Wave-Particle Duality"
+                              : "R + T = 1.000000"}
                           </span>
                         </div>
                       </div>
 
-                      {/* Calculated Quantities Banner */}
-                      <div className="results-summary-row">
-                        <div className="result-metric-box">
-                          <span className="res-title">Quantum Transmission (T)</span>
-                          <span className="res-val-big text-teal font-mono">
-                            {selectedExperiment.results?.formattedTransmission || "0.0%"}
-                          </span>
-                          <span className="res-coeff font-mono">
-                            T = {Number(selectedExperiment.results?.transmissionCoefficient || 0).toFixed(6)}
-                          </span>
-                        </div>
-                        <div className="result-metric-box">
-                          <span className="res-title">Quantum Reflection (R)</span>
-                          <span className="res-val-big text-copper font-mono">
-                            {selectedExperiment.results?.formattedReflection || "100.0%"}
-                          </span>
-                          <span className="res-coeff font-mono">
-                            R = {Number(selectedExperiment.results?.reflectionCoefficient || 0).toFixed(6)}
-                          </span>
-                        </div>
-                      </div>
+                      {selectedExperiment.experimentType === "double_slit" ? (
+                        <>
+                          <div className="params-table-grid">
+                            <div className="param-cell">
+                              <span className="param-label">Incident Beam</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.parameters?.beamName || "532 nm Green Laser"}
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Aperture Configuration</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.parameters?.slitMode === "both"
+                                  ? "Two Slits Open (Interference)"
+                                  : selectedExperiment.parameters?.slitMode === "left"
+                                  ? "Left Slit Only (Diffraction)"
+                                  : "Right Slit Only (Diffraction)"}
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Slit Separation (d)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.parameters?.slitSeparationUm ?? 100} µm
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Slit Width (a)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.parameters?.slitWidthUm ?? 20} µm
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Screen Distance (D)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.parameters?.screenDistanceM ?? 0.60} m
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Fringe Spacing (Δy)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.results?.fringeSpacingMm || "3.19 mm"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="results-summary-row">
+                            <div className="result-metric-box">
+                              <span className="res-title">Detected Impacts (N)</span>
+                              <span className="res-val-big text-teal font-mono">
+                                {selectedExperiment.results?.detectedCount ?? 0}
+                              </span>
+                              <span className="res-coeff font-mono">
+                                Poisson arrival events registered
+                              </span>
+                            </div>
+                            <div className="result-metric-box">
+                              <span className="res-title">Analytical Distribution</span>
+                              <span className="res-val-big text-copper font-mono" style={{ fontSize: "1rem" }}>
+                                {selectedExperiment.results?.formula || "I(x) = I₀ [sin(β)/β]² cos²(α)"}
+                              </span>
+                              <span className="res-coeff font-mono">
+                                {selectedExperiment.results?.fringeSpacingFormula || "Δy = λ D / d"}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="params-table-grid">
+                            <div className="param-cell">
+                              <span className="param-label">Incident Particle</span>
+                              <span className="param-value">
+                                {selectedExperiment.parameters?.particleName || selectedExperiment.parameters?.particleKey || "Electron"}
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Particle Energy (E)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.parameters?.energyEv?.toFixed(2)} eV
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Barrier Height (V₀)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.parameters?.barrierHeightEv?.toFixed(2)} eV
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Barrier Width (L)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.parameters?.barrierWidthNm?.toFixed(3)} nm
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">Decay Constant (κ)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.results?.kappaNm ? `${selectedExperiment.results.kappaNm} nm⁻¹` : "—"}
+                              </span>
+                            </div>
+                            <div className="param-cell">
+                              <span className="param-label">de Broglie Wavelength (λ)</span>
+                              <span className="param-value font-mono">
+                                {selectedExperiment.results?.deBroglieWavelengthNm
+                                  ? `${selectedExperiment.results.deBroglieWavelengthNm.toFixed(3)} nm`
+                                  : "—"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Calculated Quantities Banner */}
+                          <div className="results-summary-row">
+                            <div className="result-metric-box">
+                              <span className="res-title">Quantum Transmission (T)</span>
+                              <span className="res-val-big text-teal font-mono">
+                                {selectedExperiment.results?.formattedTransmission || "0.0%"}
+                              </span>
+                              <span className="res-coeff font-mono">
+                                T = {Number(selectedExperiment.results?.transmissionCoefficient || 0).toFixed(6)}
+                              </span>
+                            </div>
+                            <div className="result-metric-box">
+                              <span className="res-title">Quantum Reflection (R)</span>
+                              <span className="res-val-big text-copper font-mono">
+                                {selectedExperiment.results?.formattedReflection || "100.0%"}
+                              </span>
+                              <span className="res-coeff font-mono">
+                                R = {Number(selectedExperiment.results?.reflectionCoefficient || 0).toFixed(6)}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
 

@@ -59,6 +59,7 @@ export default function App() {
   // Persistent Experiment Notebook Modal & Badge Count
   const [showNotebookModal, setShowNotebookModal] = useState(false);
   const [notebookCount, setNotebookCount] = useState(0);
+  const [activeLabTab, setActiveLabTab] = useState("tunneling"); // "tunneling" | "double_slit"
 
   // Shared Physical Simulation State
   const [energyEv, setEnergyEv] = useState(3.8); // eV
@@ -149,6 +150,11 @@ export default function App() {
   // Restores saved parameters and recalculates live
   const handleRestoreExperiment = (snapshot) => {
     if (!snapshot) return;
+    if (snapshot.experimentType === "double_slit") {
+      setActiveLabTab("doubleslit");
+    } else {
+      setActiveLabTab("tunneling");
+    }
     if (typeof snapshot.energyEv === "number") setEnergyEv(snapshot.energyEv);
     if (typeof snapshot.barrierHeightEv === "number") setBarrierHeightEv(snapshot.barrierHeightEv);
     if (typeof snapshot.barrierWidthNm === "number") setBarrierWidthNm(snapshot.barrierWidthNm);
@@ -210,6 +216,8 @@ export default function App() {
         />
 
         <QuantumLabPreview
+          activeLabTab={activeLabTab}
+          onSelectLabTab={setActiveLabTab}
           energyEv={energyEv}
           setEnergyEv={setEnergyEv}
           barrierHeightEv={barrierHeightEv}
@@ -247,8 +255,9 @@ export default function App() {
       {showBedroom3D && (
         <Bedroom3D
           onClose={() => setShowBedroom3D(false)}
-          onOpenLab={() => {
+          onOpenLab={(experimentKey) => {
             setShowBedroom3D(false);
+            if (experimentKey) setActiveLabTab(experimentKey);
             scrollToLab();
           }}
           onSwitchToStreet={() => {
@@ -262,8 +271,9 @@ export default function App() {
       {showStreet3D && (
         <Street3D
           onClose={() => setShowStreet3D(false)}
-          onOpenLab={() => {
+          onOpenLab={(experimentKey) => {
             setShowStreet3D(false);
+            if (experimentKey) setActiveLabTab(experimentKey);
             scrollToLab();
           }}
           onSwitchToBedroom={() => {

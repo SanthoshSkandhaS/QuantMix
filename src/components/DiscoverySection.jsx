@@ -328,8 +328,8 @@ export default function DiscoverySection() {
               </span>
               <p className="sim-mode-desc">
                 {simMode === "double-slit"
-                  ? "Wave interference fringes created by phase superpositions passing through dual apertures. (Illustrative 2D Model)"
-                  : "Continuous 2D cross-section depicting where bound electrons are statistically predicted to localize."}
+                  ? "Wave interference fringes created by phase superpositions passing through dual apertures. (Conceptual Model — explore the Quantum Lab below for discrete particle-by-particle impact accumulation)."
+                  : "Continuous 2D cross-section depicting where bound electrons are statistically predicted to localize. (Conceptual Illustration)"}
               </p>
             </div>
           </div>

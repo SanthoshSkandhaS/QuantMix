@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Atom, Menu, X, PlayCircle } from "lucide-react";
+import { Atom, Menu, X, PlayCircle, BookOpen } from "lucide-react";
 
 /**
  * Navbar
@@ -9,9 +9,10 @@ import { Atom, Menu, X, PlayCircle } from "lucide-react";
  * - Scroll progress indicator along top edge
  * - Sticky blurred header with deep ink elevation
  * - "Replay Intro" trigger
+ * - Persistent "Experiment Notebook" modal trigger with count badge
  * - Mobile responsive drawer
  */
-export default function Navbar({ onReplayIntro }) {
+export default function Navbar({ onReplayIntro, onOpenNotebook, notebookCount = 0 }) {
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -165,7 +166,47 @@ export default function Navbar({ onReplayIntro }) {
           </nav>
 
           {/* Right Action CTA */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            {onOpenNotebook && (
+              <button
+                onClick={onOpenNotebook}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "6px 14px",
+                  borderRadius: "var(--radius-full)",
+                  background: "rgba(198, 114, 72, 0.12)",
+                  border: "1px solid rgba(198, 114, 72, 0.35)",
+                  color: "var(--color-copper)",
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                  fontFamily: "var(--font-sans)",
+                  cursor: "pointer",
+                  boxShadow: "var(--shadow-sm)"
+                }}
+                className="navbar-notebook-btn"
+                title="Open persistent personal experiment notebook (Keyboard shortcut: N)"
+              >
+                <BookOpen size={14} />
+                <span>Notebook</span>
+                {typeof notebookCount === "number" && notebookCount > 0 && (
+                  <span
+                    style={{
+                      background: "var(--color-copper)",
+                      color: "#fff",
+                      borderRadius: "10px",
+                      padding: "1px 6px",
+                      fontSize: "0.72rem",
+                      fontWeight: 700
+                    }}
+                  >
+                    {notebookCount}
+                  </span>
+                )}
+              </button>
+            )}
+
             <button
               onClick={onReplayIntro}
               style={{
@@ -241,6 +282,31 @@ export default function Navbar({ onReplayIntro }) {
                 {link.label}
               </a>
             ))}
+
+            {onOpenNotebook && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenNotebook();
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 14px",
+                  background: "rgba(198, 114, 72, 0.15)",
+                  border: "1px solid rgba(198, 114, 72, 0.4)",
+                  borderRadius: "6px",
+                  color: "var(--color-copper)",
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                  cursor: "pointer"
+                }}
+              >
+                <BookOpen size={16} />
+                <span>Experiment Notebook {notebookCount > 0 ? `(${notebookCount})` : ""}</span>
+              </button>
+            )}
           </div>
         )}
       </header>

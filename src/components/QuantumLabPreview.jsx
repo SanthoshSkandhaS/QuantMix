@@ -21,22 +21,8 @@ import {
   evaluateStationaryWavefunction,
   PARTICLE_TYPES
 } from "../utils/quantumPhysics";
+import { createExperimentFromCurrentSimulation } from "../utils/notebookService";
 
-/**
- * QuantumLabPreview
- * Interactive 3D Quantum Mechanics Laboratory.
- *
- * Core Features:
- * - Premium 3D WebGL scientific viewport (QuantumLab3D) displaying the 3D complex phase helix and dynamic wavepacket collision
- * - True 1D rectangular barrier tunneling analytical solver with exact complex boundary matching (R + T = 1.000000)
- * - Variable Particle Species (Electron, Muon, Proton, Alpha) demonstrating mass-dependent quantum suppression
- * - Classical vs. Quantum Side-by-Side Comparison panel with calculated numerical values
- * - Direct "Tweak Simulation [T]" and "Compare Configs A vs B" workbench controls
- * - Precision parameter controls (E, V0, L) with physical benchmark presets
- * - Live 2D Probability Density profile cross-section (x vs. |psi|^2 vs. V(x))
- * - Real-time physical telemetry: de Broglie wavelength, decay constant kappa, particle velocity
- * - Collapsible scientific derivation and real-world technology application guide (STM, NAND flash, Gamow alpha decay)
- */
 export default function QuantumLabPreview({
   energyEv: extEnergyEv,
   setEnergyEv: extSetEnergyEv,
@@ -51,8 +37,11 @@ export default function QuantumLabPreview({
   showClassicalComparison: extShowClassical,
   setShowClassicalComparison: extSetShowClassical,
   onOpenTweak,
-  onOpenComparison
+  onOpenComparison,
+  onOpenNotebook
 }) {
+  const [notebookSaveToast, setNotebookSaveToast] = useState(null);
+  const [isSavingNotebook, setIsSavingNotebook] = useState(false);
   // Local fallback states if not controlled externally
   const [localCase, setLocalCase] = useState("stm");
   const [localSimMode, setLocalSimMode] = useState("helix");
@@ -118,6 +107,27 @@ export default function QuantumLabPreview({
       setBarrierHeight(6.0);
       setParticleEnergy(4.5);
       setParticleKey("alpha");
+    }
+  };
+
+  const handleSaveToNotebook = async () => {
+    try {
+      setIsSavingNotebook(true);
+      const saved = await createExperimentFromCurrentSimulation({
+        energyEv: particleEnergy,
+        barrierHeightEv: barrierHeight,
+        barrierWidthNm: barrierWidth,
+        particleKey,
+        physicsData
+      });
+      setNotebookSaveToast(`Saved to Notebook: "${saved.title}"`);
+      setTimeout(() => setNotebookSaveToast(null), 3500);
+    } catch (err) {
+      console.error("Save to notebook failed:", err);
+      setNotebookSaveToast("Failed to save experiment to notebook.");
+      setTimeout(() => setNotebookSaveToast(null), 3000);
+    } finally {
+      setIsSavingNotebook(false);
     }
   };
 
@@ -259,6 +269,34 @@ export default function QuantumLabPreview({
                 <span>Conservation: <strong className="teal-text">R + T = 1.000000</strong></span>
               </div>
 
+              <button
+                type="button"
+                onClick={handleSaveToNotebook}
+                disabled={isSavingNotebook}
+                className="workbench-action-btn"
+                style={{
+                  background: "rgba(198, 114, 72, 0.15)",
+                  borderColor: "rgba(198, 114, 72, 0.4)",
+                  color: "var(--color-copper)"
+                }}
+                title="Save current experiment configuration and analytical results to your personal notebook"
+              >
+                <BookOpen size={14} />
+                <span>{isSavingNotebook ? "Saving…" : "Save to Notebook"}</span>
+              </button>
+
+              {onOpenNotebook && (
+                <button
+                  type="button"
+                  onClick={onOpenNotebook}
+                  className="workbench-action-btn"
+                  title="Open persistent personal experiment notebook (Shortcut: N)"
+                >
+                  <BookOpen size={14} />
+                  <span>Notebook [N]</span>
+                </button>
+              )}
+
               {onOpenTweak && (
                 <button
                   type="button"
@@ -284,6 +322,44 @@ export default function QuantumLabPreview({
               )}
             </div>
           </div>
+
+          {/* Quick Notebook Save Toast */}
+          {notebookSaveToast && (
+            <div
+              style={{
+                margin: "0 24px 16px",
+                padding: "10px 16px",
+                background: "rgba(32, 196, 180, 0.12)",
+                border: "1px solid rgba(32, 196, 180, 0.35)",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                color: "var(--color-teal)",
+                fontSize: "0.88rem"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <CheckCircle2 size={16} />
+                <span>{notebookSaveToast}</span>
+              </div>
+              {onOpenNotebook && (
+                <button
+                  onClick={onOpenNotebook}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "var(--color-text-main)",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    fontSize: "0.84rem"
+                  }}
+                >
+                  View in Notebook &rarr;
+                </button>
+              )}
+            </div>
+          )}
 
           {/* 3D WebGL Simulation Viewport (QuantumLab3D) */}
           <div className="lab-viewport-container">

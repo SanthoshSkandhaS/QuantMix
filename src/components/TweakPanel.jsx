@@ -9,7 +9,8 @@ import {
   Layers,
   ArrowRight,
   Split,
-  Atom
+  Atom,
+  BookOpen
 } from "lucide-react";
 import { PARTICLE_TYPES } from "../utils/quantumPhysics";
 
@@ -47,7 +48,9 @@ export default function TweakPanel({
   onSaveConfigA,
   onSaveConfigB,
   onClearComparison,
-  onApplyPreset
+  onApplyPreset,
+  onSaveToNotebook,
+  onOpenNotebook
 }) {
   if (!isOpen) return null;
 
@@ -68,6 +71,30 @@ export default function TweakPanel({
           </div>
         </div>
         <div className="tweak-header-actions">
+          {onSaveToNotebook && (
+            <button
+              onClick={onSaveToNotebook}
+              className="tweak-icon-btn"
+              style={{ color: "var(--color-copper)" }}
+              title="Save current parameters to Experiment Notebook"
+              aria-label="Save to Notebook"
+            >
+              <BookOpen size={15} />
+            </button>
+          )}
+          {onOpenNotebook && (
+            <button
+              onClick={() => {
+                onClose();
+                onOpenNotebook();
+              }}
+              className="tweak-icon-btn"
+              title="Open Experiment Notebook [N]"
+              aria-label="Open Experiment Notebook"
+            >
+              <BookOpen size={15} />
+            </button>
+          )}
           <button
             onClick={onResetDefaults}
             className="tweak-icon-btn"

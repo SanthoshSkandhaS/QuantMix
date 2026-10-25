@@ -26,7 +26,9 @@ import { queryQuAntI } from "../utils/quantiEngine";
  */
 export default function QuAntIPreview({
   simulationState = {},
-  onOpenTweak
+  onOpenTweak,
+  onOpenNotebook,
+  onRestoreSimulation
 }) {
   const [inputValue, setInputValue] = useState("");
   const [isThinking, setIsThinking] = useState(false);
@@ -49,7 +51,7 @@ export default function QuAntIPreview({
       id: "init-0",
       role: "assistant",
       question: "System Initialization",
-      answer: `Greetings. I am QuAntI, your scientific quantum intelligence guide. I am actively tracking your 1D Schrödinger simulation. Currently, an incident **${particleKey}** (E = ${E.toFixed(2)} eV) is scattering against a rectangular potential barrier (V₀ = ${V0.toFixed(2)} eV, L = ${L.toFixed(2)} nm). Quantum wave tunneling yields a transmission probability of **T = ${T_pct}** (decay constant κ = ${kappa} nm⁻¹). How can I assist your physical exploration?`,
+      answer: `Greetings. I am QuAntI, your scientific quantum intelligence guide. I am actively tracking your 1D Schrödinger simulation. Currently, an incident **${particleKey}** (E = ${E.toFixed(2)} eV) is scattering against a rectangular potential barrier (V₀ = ${V0.toFixed(2)} eV, L = ${L.toFixed(2)} nm). Quantum wave tunneling yields a transmission probability of **T = ${T_pct}** (decay constant κ = ${kappa} nm⁻¹). I can answer physics questions or manage your personal **Experiment Notebook** (save trials, compare, annotate, synthesize research summaries). How can I assist you?`,
       mathematicalBasis: "\\hat{H}\\psi(x) = E\\psi(x), \\quad R + T = 1.000000",
       source: "OpenStax University Physics Vol 3 & MIT 8.04 Quantum Physics I",
       mode: "Grounded Analytical Reasoning Engine (Live Simulation Telemetry)",
@@ -100,8 +102,13 @@ export default function QuAntIPreview({
         mathematicalBasis: response.mathematicalBasis,
         parameterAction: response.parameterAction,
         source: response.source,
-        mode: response.mode
+        mode: response.mode,
+        notebookAction: response.notebookAction
       };
+
+      if (response.parameterAction?.type === "restoreConfig" && onRestoreSimulation) {
+        onRestoreSimulation(response.parameterAction.config);
+      }
 
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
@@ -122,13 +129,14 @@ export default function QuAntIPreview({
   };
 
   const samplePromptChips = [
+    { label: "Save to Notebook", prompt: "Save this experiment to my notebook as Electron Tunnelling Trial" },
+    { label: "Show Experiments", prompt: "Show me my last five experiments" },
+    { label: "AI Research Summary", prompt: "Create a research summary of my saved experiments" },
+    { label: "Compare Trials", prompt: "Compare my last two tunnelling experiments" },
     { label: "Why is T changing?", prompt: "Why is the transmission probability changing?" },
     { label: "Barrier width effect", prompt: "What happens when I increase the barrier width?" },
     { label: "Classical vs Quantum", prompt: "Why does the classical prediction differ from the quantum prediction?" },
-    { label: "Graph explanation", prompt: "What does this 3D wavefunction graph show?" },
-    { label: "Why is glass solid?", prompt: "Why does the glass of water still behave like a solid?" },
-    { label: "Which equation?", prompt: "Which equation is being solved in this simulation?" },
-    { label: "Model assumptions", prompt: "What assumptions does this 1D barrier model make?" }
+    { label: "Which equation?", prompt: "Which equation is being solved in this simulation?" }
   ];
 
   return (
@@ -278,6 +286,54 @@ export default function QuAntIPreview({
                             <span>Open Tweak Panel [T]</span>
                           </button>
                         )}
+                      </div>
+                    )}
+
+                    {/* Notebook Action Synchronization Box */}
+                    {msg.notebookAction && onOpenNotebook && (
+                      <div
+                        className="notebook-action-box"
+                        style={{
+                          marginTop: "12px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          background: "rgba(198, 114, 72, 0.1)",
+                          border: "1px solid rgba(198, 114, 72, 0.3)",
+                          borderRadius: "6px",
+                          padding: "8px 12px"
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            fontSize: "0.85rem",
+                            color: "var(--color-copper)"
+                          }}
+                        >
+                          <BookOpen size={14} />
+                          <span>Notebook Record Synchronized</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={onOpenNotebook}
+                          style={{
+                            background: "rgba(24, 28, 38, 0.9)",
+                            border: "1px solid var(--border-stone)",
+                            color: "var(--color-text-main)",
+                            borderRadius: "4px",
+                            padding: "4px 10px",
+                            fontSize: "0.8rem",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px"
+                          }}
+                        >
+                          <span>Open Notebook [N]</span>
+                        </button>
                       </div>
                     )}
 

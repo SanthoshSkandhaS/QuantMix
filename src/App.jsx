@@ -12,7 +12,13 @@ import Bedroom3D from "./components/Bedroom3D";
 import Street3D from "./components/Street3D";
 import TweakPanel from "./components/TweakPanel";
 import ConfigComparisonModal from "./components/ConfigComparisonModal";
+import ExperimentNotebookModal from "./components/ExperimentNotebookModal";
 import { calculateRectangularBarrierTunneling } from "./utils/quantumPhysics";
+import {
+  listExperiments,
+  subscribeToNotebook,
+  createExperimentFromCurrentSimulation
+} from "./utils/notebookService";
 
 /**
  * QuantMix Homepage
@@ -26,7 +32,8 @@ import { calculateRectangularBarrierTunneling } from "./utils/quantumPhysics";
  * - Precision 1D Schrödinger Scattering Analytical Quantum Lab (R + T = 1.000000)
  * - Classical vs. Quantum Side-by-Side Comparison Engine
  * - Floating Tweak Panel [T] with Live Preset Benchmarks & Snapshot A/B Comparator
- * - QuAntI Scientific AI Intelligence Console with Live Simulation Telemetry
+ * - Persistent Personal Experiment Notebook [N] (Browser-Local IndexedDB with QuAntI AI Control)
+ * - QuAntI Scientific AI Intelligence Console with Live Simulation Telemetry & Notebook Operations
  * - Ambient Canvas Wave & Coherence Particle System
  */
 export default function App() {
@@ -48,6 +55,10 @@ export default function App() {
   // Tweak Panel & Config Comparison Modals
   const [showTweakPanel, setShowTweakPanel] = useState(false);
   const [showCompModal, setShowCompModal] = useState(false);
+
+  // Persistent Experiment Notebook Modal & Badge Count
+  const [showNotebookModal, setShowNotebookModal] = useState(false);
+  const [notebookCount, setNotebookCount] = useState(0);
 
   // Shared Physical Simulation State
   const [energyEv, setEnergyEv] = useState(3.8); // eV
@@ -86,13 +97,34 @@ export default function App() {
     );
   }, [energyEv, barrierHeightEv, barrierWidthNm, particleKey]);
 
-  // Global Keyboard Shortcut: 'T' toggles Tweak Panel without stealing typing focus
+  // Keep notebookCount updated in sync with storage
+  useEffect(() => {
+    const updateCount = async () => {
+      try {
+        const list = await listExperiments();
+        setNotebookCount(list.length);
+      } catch (err) {
+        console.error("Failed to fetch notebook count:", err);
+      }
+    };
+
+    updateCount();
+    const unsubscribe = subscribeToNotebook(() => {
+      updateCount();
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Global Keyboard Shortcuts: 'T' toggles Tweak Panel, 'N' toggles Notebook
   useEffect(() => {
     const handleKeyDown = (e) => {
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      if (activeTag === "input" || activeTag === "textarea") return;
+
       if (e.key === "t" || e.key === "T") {
-        const activeTag = document.activeElement?.tagName?.toLowerCase();
-        if (activeTag === "input" || activeTag === "textarea") return;
         setShowTweakPanel((prev) => !prev);
+      } else if (e.key === "n" || e.key === "N") {
+        setShowNotebookModal((prev) => !prev);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -114,6 +146,31 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Restores saved parameters and recalculates live
+  const handleRestoreExperiment = (snapshot) => {
+    if (!snapshot) return;
+    if (typeof snapshot.energyEv === "number") setEnergyEv(snapshot.energyEv);
+    if (typeof snapshot.barrierHeightEv === "number") setBarrierHeightEv(snapshot.barrierHeightEv);
+    if (typeof snapshot.barrierWidthNm === "number") setBarrierWidthNm(snapshot.barrierWidthNm);
+    if (snapshot.particleKey) setParticleKey(snapshot.particleKey);
+    scrollToLab();
+  };
+
+  const handleSaveToNotebookDirect = async () => {
+    try {
+      await createExperimentFromCurrentSimulation({
+        energyEv,
+        barrierHeightEv,
+        barrierWidthNm,
+        particleKey,
+        physicsData
+      });
+      setShowNotebookModal(true);
+    } catch (err) {
+      console.error("Direct save failed:", err);
+    }
+  };
+
   return (
     <div className="quantmix-app-root">
       {/* 4-Second Atomic Intro Overlay */}
@@ -128,7 +185,11 @@ export default function App() {
       <ParticleBackground />
 
       {/* Global Navigation Bar */}
-      <Navbar onReplayIntro={handleReplayIntro} />
+      <Navbar
+        onReplayIntro={handleReplayIntro}
+        onOpenNotebook={() => setShowNotebookModal(true)}
+        notebookCount={notebookCount}
+      />
 
       {/* Main Content Sections */}
       <main id="main-content" tabIndex={-1}>
@@ -163,6 +224,7 @@ export default function App() {
           setShowClassicalComparison={setShowClassicalComparison}
           onOpenTweak={() => setShowTweakPanel(true)}
           onOpenComparison={() => setShowCompModal(true)}
+          onOpenNotebook={() => setShowNotebookModal(true)}
         />
 
         <QuAntIPreview
@@ -176,6 +238,8 @@ export default function App() {
             selectedObject: "water"
           }}
           onOpenTweak={() => setShowTweakPanel(true)}
+          onOpenNotebook={() => setShowNotebookModal(true)}
+          onRestoreSimulation={handleRestoreExperiment}
         />
       </main>
 
@@ -212,6 +276,7 @@ export default function App() {
       {/* Floating Tweak Panel [T] */}
       {showTweakPanel && (
         <TweakPanel
+          isOpen={showTweakPanel}
           energyEv={energyEv}
           setEnergyEv={setEnergyEv}
           barrierHeightEv={barrierHeightEv}
@@ -230,6 +295,14 @@ export default function App() {
           onSaveConfigA={setConfigA}
           onSaveConfigB={setConfigB}
           onOpenComparison={() => setShowCompModal(true)}
+          onSaveToNotebook={handleSaveToNotebookDirect}
+          onOpenNotebook={() => setShowNotebookModal(true)}
+          onResetDefaults={() => {
+            setEnergyEv(3.8);
+            setBarrierHeightEv(4.5);
+            setBarrierWidthNm(0.35);
+            setParticleKey("electron");
+          }}
         />
       )}
 
@@ -241,6 +314,20 @@ export default function App() {
           onClose={() => setShowCompModal(false)}
         />
       )}
+
+      {/* Persistent Experiment Notebook Modal [N] */}
+      <ExperimentNotebookModal
+        isOpen={showNotebookModal}
+        onClose={() => setShowNotebookModal(false)}
+        currentSimState={{
+          energyEv,
+          barrierHeightEv,
+          barrierWidthNm,
+          particleKey,
+          physicsData
+        }}
+        onRestoreExperiment={handleRestoreExperiment}
+      />
 
       {/* Finished Professional Footer */}
       <Footer onReplayIntro={handleReplayIntro} />

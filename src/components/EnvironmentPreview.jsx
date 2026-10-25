@@ -51,7 +51,7 @@ const windowAtmosphere = {
  * - Architectural windows into different worlds, each with distinctive depth.
  * - Honest roadmap notice clarifying Milestone 2 Three.js 3D implementation.
  */
-export default function EnvironmentPreview({ onOpenBedroom }) {
+export default function EnvironmentPreview({ onOpenBedroom, onOpenStreet }) {
   const [selectedEnv, setSelectedEnv] = useState(null);
 
   return (
@@ -65,7 +65,7 @@ export default function EnvironmentPreview({ onOpenBedroom }) {
           </div>
           <h2 className="section-title">Your everyday world, seen differently.</h2>
           <p className="section-desc">
-            Windows into six physical spaces. In Milestone 2, we launch a genuine, navigable 3D Bedroom using Three.js and React Three Fiber with realistic physics, lighting, and quantum interactions.
+            Windows into six physical spaces. Explore our verified 3D Bedroom and 3D Street environments with realistic lighting, classical rigid-body collisions, and microscopic quantum experiments.
           </p>
         </div>
 
@@ -75,7 +75,7 @@ export default function EnvironmentPreview({ onOpenBedroom }) {
             <Info size={18} color="var(--color-copper)" />
           </div>
           <div className="roadmap-notice-text">
-            <strong>Simulation Roadmap Notice:</strong> The interactive windows below showcase planned scientific research and architectural blueprints. Full 3D navigation and interactive physics are in active preparation for Milestone 2 (commencing with the interactive 3D Bedroom).
+            <strong>Active 3D Simulations:</strong> Both the <strong>3D Bedroom</strong> and <strong>3D Street</strong> environments are live and navigable in full WebGL with physical collisions, raycast inspection, and real-time quantum tunneling solvers.
           </div>
         </div>
 
@@ -84,12 +84,13 @@ export default function EnvironmentPreview({ onOpenBedroom }) {
           {ENVIRONMENTS.map((env) => {
             const IconComponent = iconMap[env.icon] || Home;
             const isFirst = env.isFirstFocus;
+            const isStreet = env.id === "the-street";
             const windowBg = windowAtmosphere[env.id] || "rgba(18, 21, 29, 0.95)";
 
             return (
               <div
                 key={env.id}
-                className={`editorial-card env-card ${isFirst ? "env-card-featured" : ""}`}
+                className={`editorial-card env-card ${isFirst || isStreet ? "env-card-featured" : ""}`}
                 style={{ background: windowBg }}
                 onClick={() => setSelectedEnv(env)}
                 role="button"
@@ -104,11 +105,11 @@ export default function EnvironmentPreview({ onOpenBedroom }) {
               >
                 {/* Top Badge: Status */}
                 <div className="env-card-header">
-                  <div className={`env-icon-wrapper ${isFirst ? "icon-copper" : "icon-teal"}`}>
+                  <div className={`env-icon-wrapper ${isFirst || isStreet ? "icon-copper" : "icon-teal"}`}>
                     <IconComponent size={20} />
                   </div>
-                  <span className={`env-status-badge ${isFirst ? "badge-primary" : "badge-upcoming"}`}>
-                    {isFirst ? "Milestone 2: Navigable 3D Focus" : env.statusBadge}
+                  <span className={`env-status-badge ${isFirst || isStreet ? "badge-primary" : "badge-upcoming"}`}>
+                    {isFirst ? "Live 3D Bedroom" : isStreet ? "Live 3D Street" : env.statusBadge}
                   </span>
                 </div>
 
@@ -164,6 +165,37 @@ export default function EnvironmentPreview({ onOpenBedroom }) {
                       >
                         <Sparkles size={13} />
                         <span>Enter 3D Room</span>
+                      </button>
+                      <span className="preview-action-text" style={{ fontSize: "0.76rem" }}>
+                        Blueprint Details
+                      </span>
+                    </div>
+                  ) : isStreet ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", gap: "8px" }}>
+                      <button
+                        type="button"
+                        className="card-enter-3d-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onOpenStreet) onOpenStreet();
+                        }}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          background: "var(--color-teal)",
+                          color: "#0D1017",
+                          border: "none",
+                          borderRadius: "4px",
+                          padding: "6px 12px",
+                          fontSize: "0.78rem",
+                          fontWeight: "600",
+                          cursor: "pointer"
+                        }}
+                        aria-label="Enter Walkable 3D Street Simulation"
+                      >
+                        <Navigation size={13} />
+                        <span>Enter 3D Street</span>
                       </button>
                       <span className="preview-action-text" style={{ fontSize: "0.76rem" }}>
                         Blueprint Details
@@ -281,6 +313,32 @@ export default function EnvironmentPreview({ onOpenBedroom }) {
                   >
                     <Sparkles size={16} />
                     <span>Launch Walkable 3D Bedroom</span>
+                  </button>
+                )}
+                {selectedEnv.id === "the-street" && (
+                  <button
+                    type="button"
+                    className="modal-enter-3d-btn"
+                    onClick={() => {
+                      setSelectedEnv(null);
+                      if (onOpenStreet) onOpenStreet();
+                    }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      background: "var(--color-teal)",
+                      color: "#0D1017",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "10px 18px",
+                      fontSize: "0.88rem",
+                      fontWeight: "600",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <Navigation size={16} />
+                    <span>Launch Walkable 3D Street</span>
                   </button>
                 )}
                 <button

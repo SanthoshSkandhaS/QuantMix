@@ -1,61 +1,135 @@
-import React, { useState } from "react";
-import { Sparkles, Bot, MessageSquare, CornerDownRight, Sliders } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Bot,
+  MessageSquare,
+  Sliders,
+  Send,
+  Atom,
+  BookOpen,
+  CheckCircle2,
+  RefreshCw
+} from "lucide-react";
 import { MathText } from "./MathView";
+import { queryQuAntI } from "../utils/quantiEngine";
 
 /**
  * QuAntIPreview
- * Section introducing future AI Companion:
- * - Scientific Dialogue Console (distinct identity, NOT a generic chatbot)
- * - Exact Name: QuAntI
+ * Interactive Scientific AI Assistant & Dialogue Console:
+ * - Direct Name: QuAntI
  * - Heading: "Meet QuAntI."
  * - Description: "Ask anything. Understand the strange. Discover what to change next."
- * - KaTeX mathematical typesetting for explanations
- * - Scientifically consistent numerical claims matching the 1D barrier solver
- * - Deep obsidian and stone styling with restrained copper & teal accents
+ * - Live real-time simulation parameter telemetry badge (E, V0, L, Particle species, Transmission T, Reflection R)
+ * - Grounded deterministic retrieval engine anchored in OpenStax Vol 1 & 3, MIT 8.04, RevModPhys
+ * - Active text input with prompt chips and dynamic conversation history
+ * - KaTeX mathematical typesetting for equations and boundary conditions
+ * - Deep obsidian, stone, copper, and teal styling matching QuantMix aesthetics
  */
-export default function QuAntIPreview() {
-  const [selectedChipIndex, setSelectedChipIndex] = useState(0);
+export default function QuAntIPreview({
+  simulationState = {},
+  onOpenTweak
+}) {
+  const [inputValue, setInputValue] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
+  const chatBottomRef = useRef(null);
+  const msgCounterRef = useRef(1);
 
-  const sampleConversations = [
+  // Unpack live parameters with defaults
+  const E = simulationState.energyEv ?? 3.8;
+  const V0 = simulationState.barrierHeightEv ?? 4.5;
+  const L = simulationState.barrierWidthNm ?? 0.35;
+  const particleKey = simulationState.particleKey || "electron";
+  const physicsData = simulationState.physicsData;
+  const T_pct = physicsData?.formattedTransmission || "7.8%";
+  const R_pct = physicsData?.formattedReflection || "92.2%";
+  const kappa = physicsData?.kappaNm || "4.28";
+
+  // Initial greeting message
+  const [messages, setMessages] = useState(() => [
     {
-      chip: "Why is this quantum?",
-      question: "Why is my bedroom chair solid if atoms are 99.999% empty space?",
-      answer:
-        "Your chair feels solid because electrons are fermions that obey the Pauli exclusion principle. When atoms are pressed together, their electron wavefunctions cannot occupy identical quantum states, producing a powerful quantum degeneracy pressure that supports your weight.",
-      followUp: "In future milestones, QuAntI will allow you to dial down the Pauli exclusion resistance to observe how everyday matter compresses.",
-      parameterTip: null
-    },
-    {
-      chip: "Explain it simply.",
-      question: "What actually happens during quantum tunneling?",
-      answer:
-        "Imagine throwing a tennis ball at a concrete wall. In classical physics, it reflects every time. But when an electron behaves like a wave, its probability amplitude does not abruptly end at the surface; a finite evanescent tail penetrates through the barrier, giving the particle a non-zero chance of appearing on the far side.",
-      followUp: "This wave property enables NAND flash memory cells in smartphones to trap charge without mechanical wear.",
-      parameterTip: null
-    },
-    {
-      chip: "What should I change?",
-      question: "I want to increase the tunneling transmission rate in the lab. What should I change?",
-      answer:
-        "Reduce the barrier width \\(w\\) or decrease the barrier potential \\(V_0\\). Because quantum transmission decays exponentially as \\(T \\approx e^{-2\\kappa w}\\), decreasing width from 2.2 nm to 0.8 nm increases transmission by over a thousand-fold.",
-      followUp: null,
-      parameterTip: {
-        param: "Barrier Width (w)",
-        suggestion: "Reduce from 2.2 nm → 0.8 nm",
-        expectedOutcome: "Transmission jumps from 0.04% to ~42%"
-      }
-    },
-    {
-      chip: "Show me the deeper physics.",
-      question: "Where does the exponential decay inside a potential barrier come from mathematically?",
-      answer:
-        "Inside a rectangular barrier where \\(V_0 > E\\), the stationary Schrödinger equation is \\(\\frac{d^2\\psi}{dx^2} = \\kappa^2\\psi\\), where \\(\\kappa = \\frac{\\sqrt{2m(V_0 - E)}}{\\hbar}\\). Because kinetic energy is classically negative, the wavenumber becomes imaginary (\\(k = i\\kappa\\)), converting oscillating phase exponentials \\(e^{ikx}\\) into real decaying exponentials \\(e^{-\\kappa x}\\).",
-      followUp: "When matching boundary wavefunctions at \\(x=0\\) and \\(x=w\\), the transmitted probability current retains an amplitude proportional to \\(e^{-2\\kappa w}\\).",
-      parameterTip: null
+      id: "init-0",
+      role: "assistant",
+      question: "System Initialization",
+      answer: `Greetings. I am QuAntI, your scientific quantum intelligence guide. I am actively tracking your 1D Schrödinger simulation. Currently, an incident **${particleKey}** (E = ${E.toFixed(2)} eV) is scattering against a rectangular potential barrier (V₀ = ${V0.toFixed(2)} eV, L = ${L.toFixed(2)} nm). Quantum wave tunneling yields a transmission probability of **T = ${T_pct}** (decay constant κ = ${kappa} nm⁻¹). How can I assist your physical exploration?`,
+      mathematicalBasis: "\\hat{H}\\psi(x) = E\\psi(x), \\quad R + T = 1.000000",
+      source: "OpenStax University Physics Vol 3 & MIT 8.04 Quantum Physics I",
+      mode: "Grounded Analytical Reasoning Engine (Live Simulation Telemetry)",
+      parameterAction: null
     }
-  ];
+  ]);
 
-  const currentSample = sampleConversations[selectedChipIndex];
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    if (chatBottomRef.current) {
+      chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isThinking]);
+
+  // Handle user question submission
+  const handleSend = async (questionText) => {
+    const q = (questionText || inputValue).trim();
+    if (!q || isThinking) return;
+
+    setInputValue("");
+    setIsThinking(true);
+
+    // Append user message immediately
+    const userMsgId = `user-${msgCounterRef.current++}`;
+    const newUserMsg = {
+      id: userMsgId,
+      role: "user",
+      text: q
+    };
+    setMessages((prev) => [...prev, newUserMsg]);
+
+    try {
+      const response = await queryQuAntI(q, {
+        energyEv: E,
+        barrierHeightEv: V0,
+        barrierWidthNm: L,
+        particleKey,
+        physicsData,
+        activeEnvironment: simulationState.activeEnvironment || "bedroom",
+        selectedObject: simulationState.selectedObject || "water"
+      });
+
+      const aiMsg = {
+        id: `ai-${msgCounterRef.current++}`,
+        role: "assistant",
+        question: q,
+        answer: response.answer,
+        mathematicalBasis: response.mathematicalBasis,
+        parameterAction: response.parameterAction,
+        source: response.source,
+        mode: response.mode
+      };
+
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch (err) {
+      console.error("Error querying QuAntI:", err);
+      const errorMsg = {
+        id: `err-${msgCounterRef.current++}`,
+        role: "assistant",
+        question: q,
+        answer: "An error occurred while evaluating the quantum scattering context. Please verify your parameter inputs in the Tweak panel.",
+        mathematicalBasis: null,
+        source: "System Error Handler",
+        mode: "Offline Diagnostic Mode"
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  const samplePromptChips = [
+    { label: "Why is T changing?", prompt: "Why is the transmission probability changing?" },
+    { label: "Barrier width effect", prompt: "What happens when I increase the barrier width?" },
+    { label: "Classical vs Quantum", prompt: "Why does the classical prediction differ from the quantum prediction?" },
+    { label: "Graph explanation", prompt: "What does this 3D wavefunction graph show?" },
+    { label: "Why is glass solid?", prompt: "Why does the glass of water still behave like a solid?" },
+    { label: "Which equation?", prompt: "Which equation is being solved in this simulation?" },
+    { label: "Model assumptions", prompt: "What assumptions does this 1D barrier model make?" }
+  ];
 
   return (
     <section id="quanti" className="section-wrapper quanti-section">
@@ -64,7 +138,7 @@ export default function QuAntIPreview() {
         <div className="section-header">
           <div className="section-tag">
             <Bot size={14} />
-            <span>AI Companion Architecture</span>
+            <span>Interactive Scientific Intelligence</span>
           </div>
           <h2 className="section-title">Meet QuAntI.</h2>
           <p className="section-desc">
@@ -72,7 +146,7 @@ export default function QuAntIPreview() {
           </p>
         </div>
 
-        {/* QuAntI Interactive Scientific Console */}
+        {/* QuAntI Main Console Card */}
         <div className="editorial-card quanti-card">
           {/* Top Assistant Status Strip */}
           <div className="quanti-status-bar">
@@ -86,96 +160,178 @@ export default function QuAntIPreview() {
               <div className="quanti-info">
                 <div className="quanti-name-row">
                   <span className="quanti-name font-serif">QuAntI</span>
-                  <span className="quanti-badge">Scientific Guide Console</span>
+                  <span className="quanti-badge">Active Scientific Guide</span>
                 </div>
-                <span className="quanti-subtext">Quantum Intuition & Scientific Dialogue Engine</span>
+                <span className="quanti-subtext">
+                  Quantum Intuition &amp; Analytical Scattering Engine
+                </span>
               </div>
             </div>
 
-            <div className="quanti-planned-tag">
-              <Sparkles size={13} color="var(--color-copper)" />
-              <span>Future AI Integration Preview</span>
+            {/* Live Simulation Telemetry Pill */}
+            <div className="quanti-telemetry-pill">
+              <div className="telemetry-pill-row">
+                <span className="pill-dot active" />
+                <span className="pill-title">Live Lab Telemetry:</span>
+              </div>
+              <div className="telemetry-pill-values">
+                <span className="pill-val">
+                  <strong>{particleKey.toUpperCase()}</strong>
+                </span>
+                <span className="pill-sep">|</span>
+                <span className="pill-val">E = {E.toFixed(2)} eV</span>
+                <span className="pill-sep">|</span>
+                <span className="pill-val">V₀ = {V0.toFixed(2)} eV</span>
+                <span className="pill-sep">|</span>
+                <span className="pill-val">L = {L.toFixed(2)} nm</span>
+                <span className="pill-sep">|</span>
+                <span className="pill-val teal">T = {T_pct}</span>
+                <span className="pill-sep">|</span>
+                <span className="pill-val copper">R = {R_pct}</span>
+              </div>
             </div>
           </div>
 
-          {/* Sample Prompts Chips */}
+          {/* Quick Scientific Question Chips */}
           <div className="quanti-chips-wrapper">
-            <span className="chips-label">Inquire by Scientific Topic:</span>
+            <span className="chips-label">Inquire by Scientific Question:</span>
             <div className="chips-row">
-              {sampleConversations.map((item, idx) => (
+              {samplePromptChips.map((chip, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setSelectedChipIndex(idx)}
-                  className={`quanti-chip-btn ${selectedChipIndex === idx ? "active" : ""}`}
-                  aria-label={`Show dialogue for ${item.chip}`}
+                  onClick={() => handleSend(chip.prompt)}
+                  disabled={isThinking}
+                  className="quanti-chip-btn"
+                  aria-label={`Ask QuAntI: ${chip.label}`}
                 >
                   <MessageSquare size={13} />
-                  <span>“{item.chip}”</span>
+                  <span>“{chip.label}”</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Dialogue Display Box */}
-          <div className="quanti-dialogue-panel">
-            {/* User Inquiry Box */}
-            <div className="dialogue-block user-block">
-              <span className="block-label">Your Question</span>
-              <p className="block-text">{currentSample.question}</p>
-            </div>
-
-            {/* QuAntI Response Box */}
-            <div className="dialogue-block ai-block">
-              <div className="ai-block-header">
-                <span className="block-label ai-label">QuAntI Scientific Analysis</span>
-                <span className="verified-pill">Physics Grounded</span>
-              </div>
-              <div className="block-text">
-                <MathText text={currentSample.answer} />
-              </div>
-
-              {/* Follow-up Note */}
-              {currentSample.followUp && (
-                <div className="dialogue-followup">
-                  <CornerDownRight size={14} className="followup-icon" />
-                  <span><MathText text={currentSample.followUp} /></span>
-                </div>
-              )}
-
-              {/* Recommended Model Parameter Action Tip */}
-              {currentSample.parameterTip && (
-                <div className="parameter-recommendation-box">
-                  <div className="param-header">
-                    <Sliders size={14} color="var(--color-copper)" />
-                    <span className="param-title">Lab Parameter Recommendation:</span>
+          {/* Dialogue Message Thread */}
+          <div className="quanti-thread-container" role="log" aria-live="polite">
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`quanti-msg-wrapper ${msg.role === "user" ? "user-msg" : "assistant-msg"}`}
+              >
+                {msg.role === "user" ? (
+                  <div className="dialogue-block user-block">
+                    <span className="block-label">Your Question</span>
+                    <p className="block-text">{msg.text}</p>
                   </div>
-                  <div className="param-content">
-                    <div className="param-detail">
-                      <span className="param-key">{currentSample.parameterTip.param}:</span>
-                      <span className="param-action">{currentSample.parameterTip.suggestion}</span>
+                ) : (
+                  <div className="dialogue-block ai-block">
+                    <div className="ai-block-header">
+                      <div className="ai-label-group">
+                        <Atom size={14} color="var(--color-copper)" />
+                        <span className="block-label ai-label">QuAntI Scientific Analysis</span>
+                      </div>
+                      <div className="ai-meta-pills">
+                        <span className="verified-pill">
+                          <CheckCircle2 size={11} />
+                          <span>Strict Boundary Matching</span>
+                        </span>
+                        {msg.mode && (
+                          <span className="mode-pill">{msg.mode}</span>
+                        )}
+                      </div>
                     </div>
-                    <span className="param-outcome">
-                      Expected Result: {currentSample.parameterTip.expectedOutcome}
-                    </span>
+
+                    <div className="block-text">
+                      <MathText text={msg.answer} />
+                    </div>
+
+                    {/* Mathematical Basis Formula */}
+                    {msg.mathematicalBasis && (
+                      <div className="formula-box">
+                        <div className="formula-label">
+                          <BookOpen size={13} color="var(--color-teal)" />
+                          <span>Analytical Formulation:</span>
+                        </div>
+                        <div className="formula-content">
+                          <MathText text={`\\(${msg.mathematicalBasis}\\)`} />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Parameter Action Recommendation Tip */}
+                    {msg.parameterAction && (
+                      <div className="parameter-recommendation-box">
+                        <div className="param-header">
+                          <Sliders size={14} color="var(--color-copper)" />
+                          <span className="param-title">Lab Action Recommendation:</span>
+                        </div>
+                        <div className="param-content">
+                          <span className="param-key">{msg.parameterAction.param}:</span>
+                          <span className="param-action">{msg.parameterAction.tip}</span>
+                        </div>
+                        {onOpenTweak && (
+                          <button
+                            type="button"
+                            onClick={onOpenTweak}
+                            className="open-tweak-action-btn"
+                          >
+                            <span>Open Tweak Panel [T]</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Grounded Textbook Citation */}
+                    {msg.source && (
+                      <div className="citation-row">
+                        <span className="citation-label">Authoritative Source:</span>
+                        <span className="citation-text">{msg.source}</span>
+                      </div>
+                    )}
                   </div>
+                )}
+              </div>
+            ))}
+
+            {isThinking && (
+              <div className="dialogue-block ai-block thinking-block">
+                <div className="thinking-row">
+                  <RefreshCw size={14} className="spinning-icon" color="var(--color-copper)" />
+                  <span>QuAntI is evaluating Schrödinger boundary equations...</span>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            <div ref={chatBottomRef} />
           </div>
 
-          {/* Bottom Interactive Mock Input Bar */}
-          <div className="quanti-input-mock">
+          {/* Active Free-Form Question Input Bar */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend(inputValue);
+            }}
+            className="quanti-input-bar"
+          >
             <input
               type="text"
-              readOnly
-              value="QuAntI conversational interface is scheduled for release in Milestone 4."
-              className="mock-input-field"
-              aria-label="Planned QuAntI AI input field"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Ask QuAntI about tunneling, parameters, classical differences, or everyday solids..."
+              className="active-input-field"
+              aria-label="Ask QuAntI a scientific question"
+              disabled={isThinking}
             />
-            <button className="mock-send-btn" disabled aria-label="Send query">
-              <span>Ask</span>
+            <button
+              type="submit"
+              className="active-send-btn"
+              disabled={isThinking || !inputValue.trim()}
+              aria-label="Send scientific question to QuAntI"
+            >
+              <Send size={15} />
+              <span>Ask QuAntI</span>
             </button>
-          </div>
+          </form>
         </div>
       </div>
 
@@ -189,10 +345,10 @@ export default function QuAntIPreview() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding-bottom: 22px;
+          padding-bottom: 20px;
           border-bottom: 1px solid var(--border-subtle);
           flex-wrap: wrap;
-          gap: 14px;
+          gap: 16px;
         }
 
         .quanti-identity {
@@ -259,28 +415,75 @@ export default function QuAntIPreview() {
           color: var(--color-text-muted);
         }
 
-        .quanti-planned-tag {
+        .quanti-telemetry-pill {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding: 8px 14px;
+          border-radius: var(--radius-sm);
+          background: rgba(18, 21, 29, 0.9);
+          border: 1px solid var(--border-stone);
+        }
+
+        .telemetry-pill-row {
           display: flex;
           align-items: center;
           gap: 6px;
+        }
+
+        .pill-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+        }
+
+        .pill-dot.active {
+          background: #20C4B4;
+          box-shadow: 0 0 6px rgba(32, 196, 180, 0.6);
+        }
+
+        .pill-title {
           font-family: var(--font-mono);
-          font-size: 0.76rem;
+          font-size: 0.72rem;
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+        }
+
+        .telemetry-pill-values {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-mono);
+          font-size: 0.78rem;
+          color: var(--color-text-secondary);
+        }
+
+        .pill-val strong {
           color: var(--color-copper);
+        }
+
+        .pill-val.teal {
+          color: var(--color-teal);
           font-weight: 600;
         }
 
+        .pill-sep {
+          color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Chips */
         .quanti-chips-wrapper {
-          margin-top: 22px;
-          margin-bottom: 24px;
+          margin-top: 20px;
+          margin-bottom: 20px;
         }
 
         .chips-label {
           display: block;
-          font-size: 0.75rem;
+          font-size: 0.74rem;
           font-family: var(--font-mono);
           color: var(--color-text-muted);
           text-transform: uppercase;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .chips-row {
@@ -293,35 +496,51 @@ export default function QuAntIPreview() {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 8px 14px;
+          padding: 7px 13px;
           border-radius: var(--radius-full);
-          background: rgba(24, 28, 38, 0.9);
+          background: rgba(24, 28, 38, 0.85);
           border: 1px solid var(--border-stone);
           color: var(--color-text-secondary);
-          font-size: 0.84rem;
+          font-size: 0.8rem;
           font-family: var(--font-sans);
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
-        .quanti-chip-btn:hover {
-          background: rgba(32, 38, 52, 0.9);
+        .quanti-chip-btn:hover:not(:disabled) {
+          background: rgba(32, 38, 52, 0.95);
           color: var(--color-text-main);
-        }
-
-        .quanti-chip-btn.active {
-          background: rgba(24, 28, 38, 0.95);
           border-color: var(--color-copper);
-          color: var(--color-copper);
-          font-weight: 600;
-          box-shadow: 0 1px 6px rgba(198, 114, 72, 0.2);
         }
 
-        .quanti-dialogue-panel {
+        .quanti-chip-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        /* Dialogue Thread Container */
+        .quanti-thread-container {
           display: flex;
           flex-direction: column;
           gap: 16px;
           margin-bottom: 24px;
+          max-height: 480px;
+          overflow-y: auto;
+          padding-right: 6px;
+        }
+
+        .quanti-thread-container::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .quanti-thread-container::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.12);
+          border-radius: 4px;
+        }
+
+        .quanti-msg-wrapper {
+          display: flex;
+          flex-direction: column;
         }
 
         .dialogue-block {
@@ -330,8 +549,11 @@ export default function QuAntIPreview() {
         }
 
         .user-block {
-          background: rgba(18, 21, 29, 0.85);
+          background: rgba(18, 21, 29, 0.9);
           border: 1px solid var(--border-subtle);
+          border-right: 3px solid var(--color-teal);
+          align-self: flex-end;
+          max-width: 85%;
         }
 
         .ai-block {
@@ -341,6 +563,28 @@ export default function QuAntIPreview() {
           box-shadow: var(--shadow-sm);
         }
 
+        .thinking-block {
+          background: rgba(24, 28, 38, 0.7);
+        }
+
+        .thinking-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-family: var(--font-mono);
+          font-size: 0.84rem;
+          color: var(--color-text-secondary);
+        }
+
+        .spinning-icon {
+          animation: spin 1.2s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
         .block-label {
           display: block;
           font-family: var(--font-mono);
@@ -348,59 +592,100 @@ export default function QuAntIPreview() {
           font-weight: 600;
           text-transform: uppercase;
           color: var(--color-text-muted);
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
 
         .ai-label {
           color: var(--color-copper);
+          margin-bottom: 0;
+        }
+
+        .ai-label-group {
+          display: flex;
+          align-items: center;
+          gap: 7px;
         }
 
         .ai-block-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .ai-meta-pills {
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .verified-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
           font-family: var(--font-mono);
           font-size: 0.68rem;
           color: var(--color-teal);
           background: var(--color-teal-dim);
-          padding: 1px 6px;
+          padding: 2px 7px;
           border-radius: var(--radius-full);
           border: 1px solid var(--color-teal-border);
         }
 
+        .mode-pill {
+          font-family: var(--font-mono);
+          font-size: 0.68rem;
+          color: var(--color-text-muted);
+          background: rgba(255, 255, 255, 0.04);
+          padding: 2px 7px;
+          border-radius: var(--radius-full);
+          border: 1px solid var(--border-subtle);
+        }
+
         .block-text {
-          font-size: 0.96rem;
+          font-size: 0.94rem;
           color: var(--color-text-main);
-          line-height: 1.6;
+          line-height: 1.62;
         }
 
-        .dialogue-followup {
+        /* Formula Box */
+        .formula-box {
           margin-top: 14px;
-          padding-top: 10px;
-          border-top: 1px solid var(--border-subtle);
+          padding: 10px 14px;
+          background: rgba(14, 17, 23, 0.85);
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-sm);
+        }
+
+        .formula-label {
           display: flex;
-          align-items: flex-start;
-          gap: 8px;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          color: var(--color-teal);
+          text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+
+        .formula-content {
           font-size: 0.88rem;
-          color: var(--color-text-secondary);
+          color: var(--color-text-main);
+          overflow-x: auto;
         }
 
-        .followup-icon {
-          flex-shrink: 0;
-          margin-top: 3px;
-          color: var(--color-copper);
-        }
-
+        /* Parameter Recommendation Box */
         .parameter-recommendation-box {
           margin-top: 14px;
           padding: 12px 16px;
           background: rgba(18, 21, 29, 0.8);
           border-radius: var(--radius-sm);
-          border: 1px solid var(--border-subtle);
+          border: 1px solid var(--border-stone);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
 
         .param-header {
@@ -412,60 +697,133 @@ export default function QuAntIPreview() {
           color: var(--color-copper);
           font-weight: 600;
           text-transform: uppercase;
-          margin-bottom: 6px;
         }
 
         .param-content {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
           font-size: 0.86rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
         }
 
         .param-key {
           font-weight: 600;
           color: var(--color-text-main);
-          margin-right: 6px;
         }
 
         .param-action {
           color: var(--color-teal);
-          font-family: var(--font-mono);
+          font-family: var(--font-sans);
         }
 
-        .param-outcome {
-          font-size: 0.82rem;
+        .open-tweak-action-btn {
+          align-self: flex-start;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 5px 12px;
+          background: rgba(198, 114, 72, 0.15);
+          border: 1px solid var(--color-copper);
+          color: var(--color-copper);
+          border-radius: var(--radius-sm);
+          font-family: var(--font-mono);
+          font-size: 0.74rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.2s ease;
+        }
+
+        .open-tweak-action-btn:hover {
+          background: var(--color-copper);
+          color: #FFFFFF;
+        }
+
+        /* Citation Row */
+        .citation-row {
+          margin-top: 12px;
+          padding-top: 8px;
+          border-top: 1px solid var(--border-subtle);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.74rem;
+          font-family: var(--font-mono);
           color: var(--color-text-muted);
         }
 
-        .quanti-input-mock {
-          display: flex;
-          gap: 10px;
-          background: rgba(18, 21, 29, 0.85);
-          padding: 8px 12px;
-          border-radius: var(--radius-full);
-          border: 1px solid var(--border-stone);
+        .citation-label {
+          color: var(--color-text-secondary);
         }
 
-        .mock-input-field {
+        .citation-text {
+          color: var(--color-text-muted);
+          font-style: italic;
+        }
+
+        /* Active Input Bar */
+        .quanti-input-bar {
+          display: flex;
+          gap: 10px;
+          background: rgba(18, 21, 29, 0.95);
+          padding: 8px 10px 8px 16px;
+          border-radius: var(--radius-full);
+          border: 1px solid var(--border-stone);
+          transition: border-color 0.2s ease;
+        }
+
+        .quanti-input-bar:focus-within {
+          border-color: var(--color-copper);
+          box-shadow: 0 0 10px rgba(198, 114, 72, 0.2);
+        }
+
+        .active-input-field {
           flex: 1;
           background: transparent;
           border: none;
           outline: none;
-          color: var(--color-text-muted);
-          font-size: 0.88rem;
+          color: var(--color-text-main);
+          font-size: 0.9rem;
           font-family: var(--font-sans);
-          padding-left: 10px;
         }
 
-        .mock-send-btn {
-          padding: 8px 20px;
-          border-radius: var(--radius-full);
-          background: rgba(255, 255, 255, 0.08);
+        .active-input-field::placeholder {
           color: var(--color-text-muted);
+          font-size: 0.86rem;
+        }
+
+        .active-send-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 20px;
+          border-radius: var(--radius-full);
+          background: var(--color-copper);
+          color: #FFFFFF;
+          border: none;
           font-size: 0.84rem;
           font-weight: 600;
+          cursor: pointer;
+          transition: opacity 0.2s ease, transform 0.1s ease;
+        }
+
+        .active-send-btn:hover:not(:disabled) {
+          opacity: 0.92;
+          transform: translateY(-1px);
+        }
+
+        .active-send-btn:disabled {
+          opacity: 0.45;
           cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+          .quanti-status-bar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .user-block {
+            max-width: 95%;
+          }
         }
       `}</style>
     </section>

@@ -9,13 +9,17 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
-  Sparkles
+  Sparkles,
+  GitCompare,
+  Atom,
+  HelpCircle
 } from "lucide-react";
 import MathView from "./MathView";
 import QuantumLab3D from "./QuantumLab3D";
 import {
   calculateRectangularBarrierTunneling,
-  evaluateStationaryWavefunction
+  evaluateStationaryWavefunction,
+  PARTICLE_TYPES
 } from "../utils/quantumPhysics";
 
 /**
@@ -24,53 +28,96 @@ import {
  *
  * Core Features:
  * - Premium 3D WebGL scientific viewport (QuantumLab3D) displaying the 3D complex phase helix and dynamic wavepacket collision
- * - True 1D rectangular barrier tunneling analytical solver with exact complex boundary matching
- * - Strict verification of probability current conservation (R + T = 1.000000 across all parameters)
+ * - True 1D rectangular barrier tunneling analytical solver with exact complex boundary matching (R + T = 1.000000)
+ * - Variable Particle Species (Electron, Muon, Proton, Alpha) demonstrating mass-dependent quantum suppression
+ * - Classical vs. Quantum Side-by-Side Comparison panel with calculated numerical values
+ * - Direct "Tweak Simulation [T]" and "Compare Configs A vs B" workbench controls
  * - Precision parameter controls (E, V0, L) with physical benchmark presets
  * - Live 2D Probability Density profile cross-section (x vs. |psi|^2 vs. V(x))
- * - Real-time physical telemetry: de Broglie wavelength, decay constant kappa, electron velocity
- * - Collapsible scientific derivation and real-world technology application guide (STM, NAND flash)
+ * - Real-time physical telemetry: de Broglie wavelength, decay constant kappa, particle velocity
+ * - Collapsible scientific derivation and real-world technology application guide (STM, NAND flash, Gamow alpha decay)
  */
-export default function QuantumLabPreview() {
-  const [selectedCase, setSelectedCase] = useState("stm"); // "stm" | "resonant" | "macro" | "threshold" | "custom"
-  const [simMode, setSimMode] = useState("helix"); // "helix" | "wavepacket"
+export default function QuantumLabPreview({
+  energyEv: extEnergyEv,
+  setEnergyEv: extSetEnergyEv,
+  barrierHeightEv: extBarrierHeightEv,
+  setBarrierHeightEv: extSetBarrierHeightEv,
+  barrierWidthNm: extBarrierWidthNm,
+  setBarrierWidthNm: extSetBarrierWidthNm,
+  particleKey: extParticleKey,
+  setParticleKey: extSetParticleKey,
+  simMode: extSimMode,
+  setSimMode: extSetSimMode,
+  showClassicalComparison: extShowClassical,
+  setShowClassicalComparison: extSetShowClassical,
+  onOpenTweak,
+  onOpenComparison
+}) {
+  // Local fallback states if not controlled externally
+  const [localCase, setLocalCase] = useState("stm");
+  const [localSimMode, setLocalSimMode] = useState("helix");
+  const [localParticleKey, setLocalParticleKey] = useState("electron");
+  const [localBarrierWidth, setLocalBarrierWidth] = useState(0.35);
+  const [localBarrierHeight, setLocalBarrierHeight] = useState(4.5);
+  const [localParticleEnergy, setLocalParticleEnergy] = useState(3.8);
+  const [localShowClassical, setLocalShowClassical] = useState(true);
   const [isTheoryOpen, setIsTheoryOpen] = useState(false);
 
-  // Parameter states in physical units (eV and nm)
-  const [barrierWidth, setBarrierWidth] = useState(0.35); // nm (3.5 Angstroms - typical STM barrier)
-  const [barrierHeight, setBarrierHeight] = useState(4.5); // eV (work function of gold/platinum)
-  const [particleEnergy, setParticleEnergy] = useState(3.8); // eV (incident electron energy)
+  // Active values (controlled or uncontrolled)
+  const particleEnergy = extEnergyEv ?? localParticleEnergy;
+  const setParticleEnergy = extSetEnergyEv ?? setLocalParticleEnergy;
+
+  const barrierHeight = extBarrierHeightEv ?? localBarrierHeight;
+  const setBarrierHeight = extSetBarrierHeightEv ?? setLocalBarrierHeight;
+
+  const barrierWidth = extBarrierWidthNm ?? localBarrierWidth;
+  const setBarrierWidth = extSetBarrierWidthNm ?? setLocalBarrierWidth;
+
+  const particleKey = extParticleKey ?? localParticleKey;
+  const setParticleKey = extSetParticleKey ?? setLocalParticleKey;
+
+  const simMode = extSimMode ?? localSimMode;
+  const setSimMode = extSetSimMode ?? setLocalSimMode;
+
+  const showClassical = extShowClassical ?? localShowClassical;
+  const setShowClassical = extSetShowClassical ?? setLocalShowClassical;
 
   const profileCanvasRef = useRef(null);
 
   // Pure scientific calculation isolated via quantum physics utility
   const physicsData = useMemo(() => {
-    return calculateRectangularBarrierTunneling(particleEnergy, barrierHeight, barrierWidth);
-  }, [particleEnergy, barrierHeight, barrierWidth]);
+    return calculateRectangularBarrierTunneling(particleEnergy, barrierHeight, barrierWidth, particleKey);
+  }, [particleEnergy, barrierHeight, barrierWidth, particleKey]);
 
   // Preset Benchmark Scenarios
   const handleCaseSelect = (caseType) => {
-    setSelectedCase(caseType);
+    setLocalCase(caseType);
     if (caseType === "stm") {
-      // Scanning Tunneling Microscopy regime (sub-nanometer vacuum gap)
       setBarrierWidth(0.35);
       setBarrierHeight(4.5);
       setParticleEnergy(3.8);
+      setParticleKey("electron");
     } else if (caseType === "resonant") {
-      // Over-barrier resonance (Ramsauer-Townsend constructive interference)
       setBarrierWidth(1.1);
       setBarrierHeight(3.5);
       setParticleEnergy(5.4);
+      setParticleKey("electron");
     } else if (caseType === "macro") {
-      // Macroscopic classical wall (negligible quantum penetration)
       setBarrierWidth(2.4);
       setBarrierHeight(5.0);
       setParticleEnergy(3.0);
+      setParticleKey("electron");
     } else if (caseType === "threshold") {
-      // Critical threshold (E == V0)
       setBarrierWidth(0.8);
       setBarrierHeight(4.0);
       setParticleEnergy(4.0);
+      setParticleKey("electron");
+    } else if (caseType === "alpha") {
+      // Gamow alpha decay tunneling
+      setBarrierWidth(0.25);
+      setBarrierHeight(6.0);
+      setParticleEnergy(4.5);
+      setParticleKey("alpha");
     }
   };
 
@@ -173,7 +220,6 @@ export default function QuantumLabPreview() {
       }
     };
     window.addEventListener("resize", handleResize);
-
     renderProfile();
 
     return () => {
@@ -192,13 +238,13 @@ export default function QuantumLabPreview() {
           </div>
           <h2 className="section-title">The Quantum Lab</h2>
           <p className="section-desc">
-            An authentic physical laboratory. Explore one-dimensional quantum scattering, observe the 3D rotating complex wavefunction helix, and verify exponential barrier tunneling in real time.
+            An authentic physical laboratory. Explore one-dimensional quantum scattering, observe the 3D rotating complex wavefunction helix, tweak physical parameters in real time, and compare classical mechanics against quantum predictions.
           </p>
         </div>
 
         {/* Experiment Main Container */}
         <div className="editorial-card lab-main-card">
-          {/* Top Status Header */}
+          {/* Top Status & Workbench Actions Header */}
           <div className="lab-status-header">
             <div className="lab-title-group">
               <span className="lab-badge">Verified 1D Quantum Scattering</span>
@@ -206,9 +252,36 @@ export default function QuantumLabPreview() {
                 Quantum Tunnelling Through a Finite Rectangular Barrier
               </h3>
             </div>
-            <div className="lab-conservation-badge">
-              <ShieldCheck size={16} color="var(--color-teal)" />
-              <span>Conservation Verified: <strong className="teal-text">R + T = 1.000000</strong></span>
+            
+            <div className="lab-header-actions">
+              <div className="lab-conservation-badge">
+                <ShieldCheck size={16} color="var(--color-teal)" />
+                <span>Conservation: <strong className="teal-text">R + T = 1.000000</strong></span>
+              </div>
+
+              {onOpenTweak && (
+                <button
+                  type="button"
+                  onClick={onOpenTweak}
+                  className="workbench-action-btn tweak-btn"
+                  title="Open live parameter tweak panel (Keyboard shortcut: T)"
+                >
+                  <Sliders size={14} />
+                  <span>Tweak Panel [T]</span>
+                </button>
+              )}
+
+              {onOpenComparison && (
+                <button
+                  type="button"
+                  onClick={onOpenComparison}
+                  className="workbench-action-btn compare-btn"
+                  title="Compare two experiment parameter configurations side by side"
+                >
+                  <GitCompare size={14} />
+                  <span>Compare A / B</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -228,18 +301,118 @@ export default function QuantumLabPreview() {
                 <Waves size={14} color="var(--color-teal)" />
                 <span>Analytical Probability Density Cross-Section: <MathView math="|\psi(x)|^2" inline /></span>
               </div>
-              <span className="profile-regime-tag">
-                {physicsData.regime === "tunneling" ? "Evanescent Exponential Decay" : "Phase Interference Modulation"}
-              </span>
+              <div className="profile-meta-tags">
+                <span className="profile-species-tag">
+                  {physicsData.particle.name} ({physicsData.particle.massRelative})
+                </span>
+                <span className="profile-regime-tag">
+                  {physicsData.regime === "tunneling" ? "Evanescent Exponential Decay" : "Phase Interference Modulation"}
+                </span>
+              </div>
             </div>
             <div className="profile-canvas-wrapper">
               <canvas ref={profileCanvasRef} className="profile-canvas" />
             </div>
           </div>
 
+          {/* Classical vs. Quantum Comparison Section */}
+          <div className="classical-quantum-comparison-card">
+            <div className="cq-header">
+              <div className="cq-title-group">
+                <GitCompare size={16} color="var(--color-copper)" />
+                <h4 className="cq-title">Classical vs. Quantum Prediction Comparison</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowClassical(!showClassical)}
+                className="cq-toggle-btn"
+              >
+                <span>{showClassical ? "Collapse Comparison" : "Expand Comparison"}</span>
+                {showClassical ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+            </div>
+
+            {showClassical && (
+              <div className="cq-content-grid">
+                {/* Classical Prediction Column */}
+                <div className="cq-column classical-col">
+                  <div className="cq-col-header">
+                    <span className="cq-badge classical-badge">Classical Mechanics</span>
+                    <span className="cq-law-label">Newtonian Determinism</span>
+                  </div>
+                  <div className="cq-metrics">
+                    <div className="cq-metric">
+                      <span className="metric-label">Predicted Transmission:</span>
+                      <strong className="metric-value classical-val">
+                        {physicsData.classical.transmissionPercent}
+                      </strong>
+                    </div>
+                    <div className="cq-metric">
+                      <span className="metric-label">Predicted Reflection:</span>
+                      <strong className="metric-value">
+                        {physicsData.classical.reflectionPercent}
+                      </strong>
+                    </div>
+                    <div className="cq-metric">
+                      <span className="metric-label">Kinetic Energy in Barrier:</span>
+                      <span className="metric-detail font-mono">
+                        K₂ = (E - V₀) = {physicsData.classical.kineticEnergyRegion2Ev.toFixed(2)} eV
+                      </span>
+                    </div>
+                  </div>
+                  <p className="cq-explanation">
+                    {physicsData.classical.prediction}
+                  </p>
+                </div>
+
+                {/* Quantum Prediction Column */}
+                <div className="cq-column quantum-col">
+                  <div className="cq-col-header">
+                    <span className="cq-badge quantum-badge">Quantum Mechanics</span>
+                    <span className="cq-law-label">Schrödinger Wave Equation</span>
+                  </div>
+                  <div className="cq-metrics">
+                    <div className="cq-metric">
+                      <span className="metric-label">Calculated Transmission:</span>
+                      <strong className="metric-value teal">
+                        {physicsData.formattedTransmission}
+                      </strong>
+                    </div>
+                    <div className="cq-metric">
+                      <span className="metric-label">Calculated Reflection:</span>
+                      <strong className="metric-value copper">
+                        {physicsData.formattedReflection}
+                      </strong>
+                    </div>
+                    <div className="cq-metric">
+                      <span className="metric-label">Evanescent Decay Constant:</span>
+                      <span className="metric-detail font-mono">
+                        κ = {physicsData.kappaNm} nm⁻¹
+                      </span>
+                    </div>
+                  </div>
+                  <p className="cq-explanation">
+                    {physicsData.quantumClassicalDelta.keyTakeaway}
+                  </p>
+                </div>
+
+                {/* Delta / Physical Rationale Box */}
+                <div className="cq-delta-card">
+                  <div className="delta-header">
+                    <HelpCircle size={14} color="var(--color-teal)" />
+                    <span>Why Do The Models Differ?</span>
+                  </div>
+                  <p className="delta-body">
+                    {physicsData.quantumClassicalDelta.mechanism}. In classical mechanics, kinetic energy <MathView math="K = E - V(x) < 0" inline /> would require an unphysical imaginary velocity. In quantum mechanics, particles are represented by wavefunctions whose spatial derivatives must remain continuous across interfaces, leaving a finite evanescent amplitude at the exit boundary.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Controls & Telemetry Workbench */}
           <div className="lab-workbench-grid">
-            {/* Left Column: Parameter Controls & Benchmark Scenarios */}
+            {/* Left Column: Parameter Controls & Particle Species */}
             <div className="workbench-panel controls-panel">
               <div className="panel-header">
                 <div className="panel-title-row">
@@ -252,44 +425,68 @@ export default function QuantumLabPreview() {
                 </span>
               </div>
 
+              {/* Particle Species Selector */}
+              <div className="particle-selector-group">
+                <span className="presets-label">
+                  <Atom size={13} color="var(--color-teal)" style={{ display: "inline", marginRight: "4px" }} />
+                  Particle Species (Mass):
+                </span>
+                <div className="particle-btn-row">
+                  {Object.entries(PARTICLE_TYPES).map(([k, p]) => (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => {
+                        setParticleKey(k);
+                        setLocalCase("custom");
+                      }}
+                      className={`particle-species-btn ${particleKey === k ? "active" : ""}`}
+                    >
+                      <span className="particle-name">{p.name}</span>
+                      <span className="particle-mass">{p.massRelative}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Physical Benchmark Presets */}
               <div className="benchmark-presets">
                 <span className="presets-label">Physical Benchmark Scenarios:</span>
                 <div className="presets-grid">
                   <button
                     onClick={() => handleCaseSelect("stm")}
-                    className={`preset-btn ${selectedCase === "stm" ? "active" : ""}`}
+                    className={`preset-btn ${localCase === "stm" ? "active" : ""}`}
                     aria-label="Scanning Tunneling Microscopy preset"
                   >
                     <span className="preset-name">STM Vacuum Gap</span>
-                    <span className="preset-detail">L = 0.35 nm, E &lt; V₀ (T ≈ 7.8%)</span>
+                    <span className="preset-detail">L = 0.35 nm, e⁻ (T ≈ 7.8%)</span>
                   </button>
 
                   <button
                     onClick={() => handleCaseSelect("resonant")}
-                    className={`preset-btn ${selectedCase === "resonant" ? "active" : ""}`}
+                    className={`preset-btn ${localCase === "resonant" ? "active" : ""}`}
                     aria-label="Ramsauer-Townsend resonance preset"
                   >
                     <span className="preset-name">Transmission Resonance</span>
-                    <span className="preset-detail">L = 1.1 nm, E &gt; V₀ (T ≈ 98.4%)</span>
+                    <span className="preset-detail">L = 1.1 nm, e⁻ (T ≈ 98.4%)</span>
                   </button>
 
                   <button
                     onClick={() => handleCaseSelect("macro")}
-                    className={`preset-btn ${selectedCase === "macro" ? "active" : ""}`}
+                    className={`preset-btn ${localCase === "macro" ? "active" : ""}`}
                     aria-label="Macroscopic barrier preset"
                   >
-                    <span className="preset-name">Macroscopic Door</span>
-                    <span className="preset-detail">L = 2.4 nm, E &lt; V₀ (T &lt; 10⁻¹²)</span>
+                    <span className="preset-name">Macroscopic Wall</span>
+                    <span className="preset-detail">L = 2.4 nm, e⁻ (T &lt; 10⁻¹²)</span>
                   </button>
 
                   <button
-                    onClick={() => handleCaseSelect("threshold")}
-                    className={`preset-btn ${selectedCase === "threshold" ? "active" : ""}`}
-                    aria-label="Critical threshold preset"
+                    onClick={() => handleCaseSelect("alpha")}
+                    className={`preset-btn ${localCase === "alpha" ? "active" : ""}`}
+                    aria-label="Nuclear alpha decay tunneling preset"
                   >
-                    <span className="preset-name">Threshold State</span>
-                    <span className="preset-detail">L = 0.8 nm, E = V₀ (Critical Limit)</span>
+                    <span className="preset-name">Nuclear Alpha Decay</span>
+                    <span className="preset-detail">α-particle (m ≈ 7294 m_e)</span>
                   </button>
                 </div>
               </div>
@@ -310,7 +507,7 @@ export default function QuantumLabPreview() {
                     value={barrierWidth}
                     onChange={(e) => {
                       setBarrierWidth(parseFloat(e.target.value));
-                      setSelectedCase("custom");
+                      setLocalCase("custom");
                     }}
                     className="editorial-slider copper-slider"
                     aria-label="Barrier Width slider"
@@ -335,7 +532,7 @@ export default function QuantumLabPreview() {
                     value={barrierHeight}
                     onChange={(e) => {
                       setBarrierHeight(parseFloat(e.target.value));
-                      setSelectedCase("custom");
+                      setLocalCase("custom");
                     }}
                     className="editorial-slider copper-slider"
                     aria-label="Barrier Height slider"
@@ -360,7 +557,7 @@ export default function QuantumLabPreview() {
                     value={particleEnergy}
                     onChange={(e) => {
                       setParticleEnergy(parseFloat(e.target.value));
-                      setSelectedCase("custom");
+                      setLocalCase("custom");
                     }}
                     className="editorial-slider teal-slider"
                     aria-label="Particle Energy slider"
@@ -392,7 +589,7 @@ export default function QuantumLabPreview() {
                   <span className="card-label">Transmission Probability (T)</span>
                   <span className="card-value teal">{physicsData.formattedTransmission}</span>
                   <span className="card-subtext">
-                    Fraction of wave amplitude successfully penetrating through <MathView math={`${barrierWidth.toFixed(2)}\\text{ nm}`} inline />
+                    Probability fraction penetrating barrier of width <MathView math={`${barrierWidth.toFixed(2)}\\text{ nm}`} inline />
                   </span>
                 </div>
 
@@ -400,7 +597,7 @@ export default function QuantumLabPreview() {
                   <span className="card-label">Reflection Probability (R)</span>
                   <span className="card-value copper">{physicsData.formattedReflection}</span>
                   <span className="card-subtext">
-                    Fraction of wave reflected backward due to potential step mismatch
+                    Probability fraction reflected backward into Region I
                   </span>
                 </div>
 
@@ -408,7 +605,7 @@ export default function QuantumLabPreview() {
                   <span className="card-label">Decay Constant (<MathView math="\kappa" inline />)</span>
                   <span className="card-value">{physicsData.kappaNm} nm⁻¹</span>
                   <span className="card-subtext">
-                    Exponential decay inside barrier: <MathView math="e^{-\kappa x}" inline />
+                    Evanescent wave decay: <MathView math="e^{-\kappa x}" inline />
                   </span>
                 </div>
 
@@ -416,15 +613,15 @@ export default function QuantumLabPreview() {
                   <span className="card-label">De Broglie Wavelength (<MathView math="\lambda" inline />)</span>
                   <span className="card-value">{physicsData.deBroglieWavelengthNm.toFixed(3)} nm</span>
                   <span className="card-subtext">
-                    Matter wavelength in free space: <MathView math="\lambda = \frac{h}{p}" inline />
+                    Free-space matter wavelength: <MathView math="\lambda = \frac{h}{p}" inline />
                   </span>
                 </div>
 
                 <div className="telemetry-card">
-                  <span className="card-label">Electron Velocity (v)</span>
+                  <span className="card-label">Particle Velocity (v)</span>
                   <span className="card-value">{(physicsData.velocityMs / 1000).toFixed(0)} km/s</span>
                   <span className="card-subtext">
-                    Group velocity: <MathView math={`${physicsData.velocityCPercent.toFixed(2)}\\%\\text{ of } c`} inline />
+                    Kinematic speed: <MathView math={`${physicsData.velocityCPercent.toFixed(2)}\\%\\text{ of } c`} inline />
                   </span>
                 </div>
 
@@ -446,7 +643,7 @@ export default function QuantumLabPreview() {
                 <p className="interp-body">
                   {particleEnergy < barrierHeight ? (
                     <span>
-                      Because the electron energy (<MathView math={`${particleEnergy.toFixed(1)}\\text{ eV}`} inline />) is less than the barrier potential (<MathView math={`${barrierHeight.toFixed(1)}\\text{ eV}`} inline />), classical mechanics predicts complete reflection (<MathView math="T = 0" inline />). Quantum mechanically, the complex wavefunction forms an evanescent exponential tail inside the barrier (<MathView math={`\\kappa = ${physicsData.kappaNm}\\text{ nm}^{-1}`} inline />), yielding a calculated transmission of <strong>{physicsData.formattedTransmission}</strong>.
+                      Because the {physicsData.particle.name} energy (<MathView math={`${particleEnergy.toFixed(1)}\\text{ eV}`} inline />) is less than the barrier potential (<MathView math={`${barrierHeight.toFixed(1)}\\text{ eV}`} inline />), classical mechanics forbids penetration (<MathView math="T = 0" inline />). Quantum mechanically, the complex wavefunction forms an evanescent exponential tail inside the barrier (<MathView math={`\\kappa = ${physicsData.kappaNm}\\text{ nm}^{-1}`} inline />), yielding a calculated transmission of <strong>{physicsData.formattedTransmission}</strong>.
                     </span>
                   ) : (
                     <span>
@@ -507,7 +704,7 @@ export default function QuantumLabPreview() {
                     </p>
                     <MathView math="J_{\text{incident}} = J_{\text{reflected}} + J_{\text{transmitted}} \implies R + T = 1.000000" display />
                     <p className="theory-sub">
-                      Our live numerical engine continuously verifies this identity to within machine precision tolerance (<MathView math="\Delta < 10^{-12}" inline />).
+                      Our live analytical engine continuously verifies this identity to within machine precision tolerance (<MathView math="\Delta < 10^{-12}" inline />).
                     </p>
                   </div>
 
@@ -546,7 +743,7 @@ export default function QuantumLabPreview() {
           padding-bottom: 18px;
           border-bottom: 1px solid var(--border-subtle);
           flex-wrap: wrap;
-          gap: 14px;
+          gap: 16px;
         }
 
         .lab-title-group {
@@ -570,6 +767,13 @@ export default function QuantumLabPreview() {
           font-weight: 600;
         }
 
+        .lab-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
         .lab-conservation-badge {
           display: inline-flex;
           align-items: center;
@@ -587,6 +791,42 @@ export default function QuantumLabPreview() {
           color: var(--color-teal);
         }
 
+        .workbench-action-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 7px 14px;
+          border-radius: var(--radius-sm);
+          font-family: var(--font-mono);
+          font-size: 0.78rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: 1px solid var(--border-stone);
+        }
+
+        .tweak-btn {
+          background: rgba(198, 114, 72, 0.15);
+          color: var(--color-copper);
+          border-color: var(--color-copper);
+        }
+
+        .tweak-btn:hover {
+          background: var(--color-copper);
+          color: #FFFFFF;
+        }
+
+        .compare-btn {
+          background: rgba(32, 196, 180, 0.15);
+          color: var(--color-teal);
+          border-color: var(--color-teal);
+        }
+
+        .compare-btn:hover {
+          background: var(--color-teal);
+          color: #0D1017;
+        }
+
         /* 3D Viewport Wrapper */
         .lab-viewport-container {
           margin-bottom: 24px;
@@ -598,7 +838,7 @@ export default function QuantumLabPreview() {
           border: 1px solid var(--border-stone);
           border-radius: var(--radius-md);
           padding: 14px 18px;
-          margin-bottom: 28px;
+          margin-bottom: 24px;
         }
 
         .profile-header {
@@ -618,6 +858,22 @@ export default function QuantumLabPreview() {
           font-size: 0.82rem;
           font-weight: 600;
           color: var(--color-text-main);
+        }
+
+        .profile-meta-tags {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .profile-species-tag {
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          color: var(--color-teal);
+          background: var(--color-teal-dim);
+          border: 1px solid var(--color-teal-border);
+          padding: 2px 8px;
+          border-radius: var(--radius-full);
         }
 
         .profile-regime-tag {
@@ -642,6 +898,169 @@ export default function QuantumLabPreview() {
           display: block;
           width: 100%;
           height: 140px;
+        }
+
+        /* Classical vs. Quantum Card */
+        .classical-quantum-comparison-card {
+          background: rgba(18, 21, 29, 0.9);
+          border: 1px solid var(--border-stone);
+          border-radius: var(--radius-md);
+          padding: 18px 22px;
+          margin-bottom: 28px;
+        }
+
+        .cq-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .cq-title-group {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .cq-title {
+          font-size: 0.92rem;
+          font-family: var(--font-mono);
+          text-transform: uppercase;
+          color: var(--color-text-main);
+          letter-spacing: 0.04em;
+        }
+
+        .cq-toggle-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: transparent;
+          border: none;
+          color: var(--color-text-muted);
+          font-size: 0.76rem;
+          font-family: var(--font-mono);
+          cursor: pointer;
+        }
+
+        .cq-toggle-btn:hover {
+          color: var(--color-text-main);
+        }
+
+        .cq-content-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-top: 16px;
+        }
+
+        .cq-column {
+          padding: 16px;
+          border-radius: var(--radius-sm);
+          background: rgba(24, 28, 38, 0.9);
+          border: 1px solid var(--border-subtle);
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .classical-col {
+          border-left: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .quantum-col {
+          border-left: 3px solid var(--color-teal);
+        }
+
+        .cq-col-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .cq-badge {
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          padding: 2px 7px;
+          border-radius: var(--radius-full);
+          font-weight: 600;
+        }
+
+        .classical-badge {
+          background: rgba(255, 255, 255, 0.08);
+          color: var(--color-text-secondary);
+        }
+
+        .quantum-badge {
+          background: var(--color-teal-dim);
+          color: var(--color-teal);
+          border: 1px solid var(--color-teal-border);
+        }
+
+        .cq-law-label {
+          font-size: 0.72rem;
+          font-family: var(--font-mono);
+          color: var(--color-text-muted);
+        }
+
+        .cq-metrics {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .cq-metric {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.82rem;
+        }
+
+        .metric-label {
+          color: var(--color-text-secondary);
+        }
+
+        .metric-value {
+          font-family: var(--font-mono);
+          font-size: 0.92rem;
+        }
+
+        .metric-value.classical-val {
+          color: #A3ACB9;
+        }
+
+        .metric-detail {
+          font-size: 0.74rem;
+          color: var(--color-text-muted);
+        }
+
+        .cq-explanation {
+          font-size: 0.82rem;
+          color: var(--color-text-secondary);
+          line-height: 1.45;
+          margin-top: 4px;
+        }
+
+        .cq-delta-card {
+          grid-column: 1 / -1;
+          padding: 12px 16px;
+          background: rgba(14, 17, 23, 0.85);
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border-stone);
+        }
+
+        .delta-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--font-mono);
+          font-size: 0.76rem;
+          color: var(--color-teal);
+          text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+
+        .delta-body {
+          font-size: 0.84rem;
+          color: var(--color-text-secondary);
+          line-height: 1.5;
         }
 
         /* Workbench Grid */
@@ -703,6 +1122,55 @@ export default function QuantumLabPreview() {
           border: 1px solid var(--color-teal-border);
         }
 
+        /* Particle Species Selector */
+        .particle-selector-group {
+          margin-bottom: 20px;
+        }
+
+        .particle-btn-row {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 6px;
+          margin-top: 6px;
+        }
+
+        .particle-species-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 6px 4px;
+          border-radius: var(--radius-sm);
+          background: rgba(18, 21, 29, 0.85);
+          border: 1px solid var(--border-stone);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .particle-species-btn:hover {
+          border-color: var(--color-teal);
+        }
+
+        .particle-species-btn.active {
+          background: rgba(32, 196, 180, 0.15);
+          border-color: var(--color-teal);
+        }
+
+        .particle-name {
+          font-size: 0.76rem;
+          font-weight: 600;
+          color: var(--color-text-main);
+        }
+
+        .particle-mass {
+          font-size: 0.64rem;
+          font-family: var(--font-mono);
+          color: var(--color-text-muted);
+        }
+
+        .particle-species-btn.active .particle-name {
+          color: var(--color-teal);
+        }
+
         /* Benchmark Presets */
         .benchmark-presets {
           margin-bottom: 24px;
@@ -714,7 +1182,7 @@ export default function QuantumLabPreview() {
           font-family: var(--font-mono);
           color: var(--color-text-muted);
           text-transform: uppercase;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .presets-grid {
@@ -727,7 +1195,7 @@ export default function QuantumLabPreview() {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          padding: 9px 12px;
+          padding: 8px 12px;
           border-radius: var(--radius-sm);
           background: rgba(18, 21, 29, 0.85);
           border: 1px solid var(--border-stone);
@@ -748,14 +1216,14 @@ export default function QuantumLabPreview() {
         }
 
         .preset-name {
-          font-size: 0.82rem;
+          font-size: 0.8rem;
           font-weight: 600;
           color: var(--color-text-main);
           margin-bottom: 2px;
         }
 
         .preset-detail {
-          font-size: 0.7rem;
+          font-size: 0.68rem;
           font-family: var(--font-mono);
           color: var(--color-text-secondary);
         }
@@ -768,7 +1236,7 @@ export default function QuantumLabPreview() {
         .parameter-sliders {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 18px;
         }
 
         .slider-control {
@@ -992,6 +1460,9 @@ export default function QuantumLabPreview() {
           .lab-workbench-grid {
             grid-template-columns: 1fr;
           }
+          .cq-content-grid {
+            grid-template-columns: 1fr;
+          }
           .theory-grid {
             grid-template-columns: 1fr;
           }
@@ -1000,6 +1471,9 @@ export default function QuantumLabPreview() {
         @media (max-width: 600px) {
           .presets-grid {
             grid-template-columns: 1fr;
+          }
+          .particle-btn-row {
+            grid-template-columns: repeat(2, 1fr);
           }
           .telemetry-readout-grid {
             grid-template-columns: 1fr;

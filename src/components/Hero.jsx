@@ -1,7 +1,7 @@
 import React from "react";
 import FlowingWaveButton from "./FlowingWaveButton";
 import MathView from "./MathView";
-import { ChevronDown, Orbit, Layers, Binary, Compass } from "lucide-react";
+import { ChevronDown, Orbit, Layers, Binary, Compass, Navigation } from "lucide-react";
 
 /**
  * Hero
@@ -14,7 +14,7 @@ import { ChevronDown, Orbit, Layers, Binary, Compass } from "lucide-react";
  * - Quantum constant telemetry with KaTeX mathematical typesetting
  * - Cinematic atmospheric depth
  */
-export default function Hero({ onExplore, onOpenBedroom }) {
+export default function Hero({ onExplore, onOpenBedroom, onOpenStreet }) {
   const handleScrollToDiscovery = () => {
     const nextSection = document.getElementById("discovery");
     if (nextSection) {
@@ -75,7 +75,21 @@ export default function Hero({ onExplore, onOpenBedroom }) {
             aria-label="Enter Walkable 3D Bedroom Simulation"
           >
             <Compass size={17} color="var(--color-teal)" />
-            <span>Enter 3D Bedroom</span>
+            <span>3D Bedroom</span>
+          </button>
+          <button
+            onClick={() => {
+              if (onOpenStreet) {
+                onOpenStreet();
+              } else {
+                handleScrollToEnvironments();
+              }
+            }}
+            className="hero-secondary-btn street-btn"
+            aria-label="Enter Walkable 3D Street Simulation"
+          >
+            <Navigation size={17} color="var(--color-copper)" />
+            <span>3D Street</span>
           </button>
         </div>
 

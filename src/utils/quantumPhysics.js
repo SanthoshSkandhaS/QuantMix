@@ -20,14 +20,60 @@ export const ELEMENTARY_CHARGE = 1.602176634e-19;
 export const SPEED_OF_LIGHT = 299792458;
 
 /**
+ * Standard particle types with accurate physical masses
+ */
+export const PARTICLE_TYPES = {
+  electron: {
+    id: "electron",
+    name: "Electron",
+    massKg: 9.1093837015e-31,
+    massRelative: "1.0 m_e",
+    symbol: "e⁻",
+    charge: "-1 e",
+    description: "Fundamental lepton; governs scanning tunneling microscopy (STM) and solid-state bandgaps."
+  },
+  muon: {
+    id: "muon",
+    name: "Muon",
+    massKg: 1.883531627e-28,
+    massRelative: "206.8 m_e",
+    symbol: "μ⁻",
+    charge: "-1 e",
+    description: "Second-generation lepton; ~207× heavier, drastically suppressing tunneling probability."
+  },
+  proton: {
+    id: "proton",
+    name: "Proton",
+    massKg: 1.67262192369e-27,
+    massRelative: "1,836.2 m_e",
+    symbol: "p⁺",
+    charge: "+1 e",
+    description: "Baryon nucleon; ~1836× heavier than an electron; key in enzymatic hydrogen tunneling."
+  },
+  alpha: {
+    id: "alpha",
+    name: "Alpha Particle",
+    massKg: 6.6446573357e-27,
+    massRelative: "7,294.3 m_e",
+    symbol: "α (⁴He²⁺)",
+    charge: "+2 e",
+    description: "Helium-4 nucleus; Gamow model of alpha radioactive decay via Coulomb barrier tunneling."
+  }
+};
+
+/**
  * Calculates complete quantum scattering and transmission through a 1D rectangular potential barrier.
  *
  * @param {number} energyEv - Particle energy E in electron-volts (eV)
  * @param {number} barrierHeightEv - Potential barrier height V₀ in electron-volts (eV)
  * @param {number} barrierWidthNm - Barrier width L in nanometers (nm)
+ * @param {string} particleKey - Selected particle type key ('electron', 'muon', 'proton', 'alpha')
  * @returns {object} Complete calculated physical quantities, complex amplitudes, and parameters
  */
-export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, barrierWidthNm) {
+export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, barrierWidthNm, particleKey = "electron") {
+  const particle = PARTICLE_TYPES[particleKey] || PARTICLE_TYPES.electron;
+  const particleMassKg = particle.massKg;
+
   const E = Math.max(0.01, Number(energyEv));
   const V0 = Math.max(0.01, Number(barrierHeightEv));
   const L_nm = Math.max(0.05, Number(barrierWidthNm));
@@ -40,14 +86,14 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
   const V0J = V0 * ELEMENTARY_CHARGE;
 
   // Incident wavenumber in Region I and III: k1 = sqrt(2*m*E) / hbar
-  const k1 = Math.sqrt(2 * ELECTRON_MASS_KG * EJ) / HBAR_JS; // in m^-1
+  const k1 = Math.sqrt(2 * particleMassKg * EJ) / HBAR_JS; // in m^-1
   const k1_nm = k1 * 1e-9; // in nm^-1
 
   // De Broglie wavelength lambda = 2*pi / k1
   const deBroglieWavelengthNm = (2 * Math.PI) / k1_nm;
 
   // Particle group velocity v = hbar * k1 / m
-  const velocityMs = (HBAR_JS * k1) / ELECTRON_MASS_KG;
+  const velocityMs = (HBAR_JS * k1) / particleMassKg;
   const velocityCPercent = (velocityMs / SPEED_OF_LIGHT) * 100;
 
   let T = 0;
@@ -72,9 +118,8 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
   if (E < V0) {
     // -------------------------------------------------------------
     // REGIME 1: Quantum Tunneling (E < V0)
-    // -------------------------------------------------------------
-    const deltaV = V0J - EJ;
-    kappa = Math.sqrt(2 * ELECTRON_MASS_KG * deltaV) / HBAR_JS;
+    // -------------------------------------------    const deltaV = V0J - EJ;
+    kappa = Math.sqrt(2 * particleMassKg * deltaV) / HBAR_JS;
     const kappaL = kappa * L;
 
     if (kappaL > 35) {
@@ -115,11 +160,8 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
       rIm = (rNumIm * denomRe) / denomMag2;
 
       // Internal coefficients A and B from matching at x = L:
-      // A = ((kappa - i*k1)/(2*kappa)) * exp(kappa*L) * exp(i*k1*L) * t
-      // B = ((kappa + i*k1)/(2*kappa)) * exp(-kappa*L) * exp(i*k1*L) * t
       const expK1L_Re = cosK1L;
       const expK1L_Im = sinK1L;
-      // exp(i*k1*L) * t:
       const tExpRe = tRe * expK1L_Re - tIm * expK1L_Im;
       const tExpIm = tRe * expK1L_Im + tIm * expK1L_Re;
 
@@ -138,7 +180,7 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
     // REGIME 2: Over-Barrier Scattering & Quantum Reflection (E > V0)
     // -------------------------------------------------------------
     const excess = EJ - V0J;
-    k2 = Math.sqrt(2 * ELECTRON_MASS_KG * excess) / HBAR_JS;
+    k2 = Math.sqrt(2 * particleMassKg * excess) / HBAR_JS;
     const k2L = k2 * L;
 
     const cosK2L = Math.cos(k2L);
@@ -186,7 +228,7 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
     // -------------------------------------------------------------
     // REGIME 3: Threshold Critical Limit (E == V0)
     // -------------------------------------------------------------
-    const denom = 1 + (ELECTRON_MASS_KG * V0J * Math.pow(L, 2)) / (2 * Math.pow(HBAR_JS, 2));
+    const denom = 1 + (particleMassKg * V0J * Math.pow(L, 2)) / (2 * Math.pow(HBAR_JS, 2));
     T = 1 / denom;
     R = 1 - T;
     tRe = Math.sqrt(T);
@@ -208,6 +250,30 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
   const kappaNm = kappa * 1e-9;
   const k2_nm = k2 * 1e-9;
 
+  // Classical Mechanics Comparison Calculation
+  const isClassicallyAllowed = E > V0;
+  const classical = {
+    transmissionCoefficient: isClassicallyAllowed ? 1.0 : 0.0,
+    reflectionCoefficient: isClassicallyAllowed ? 0.0 : 1.0,
+    transmissionPct: isClassicallyAllowed ? "100.0%" : "0.00%",
+    reflectionPct: isClassicallyAllowed ? "0.00%" : "100.0%",
+    behavior: isClassicallyAllowed ? "Unobstructed Transmission (T = 100%)" : "Total Specular Reflection (R = 100%)",
+    explanation:
+      E < V0
+        ? `Classically, a particle with energy E = ${E.toFixed(2)} eV encountering a barrier V₀ = ${V0.toFixed(2)} eV lacks the required kinetic energy (K = E - V₀ < 0). It experiences a restoring force and reflects with 100% certainty (T_class = 0%).`
+        : `Classically, a particle with energy E = ${E.toFixed(2)} eV exceeding V₀ = ${V0.toFixed(2)} eV slows down over the barrier to kinetic energy K = ${(E - V0).toFixed(2)} eV and exits with 100% certainty (T_class = 100%). No classical reflection can occur.`
+  };
+
+  const quantumClassicalDelta = {
+    transmissionDeltaPct: (T * 100 - classical.transmissionCoefficient * 100).toFixed(2),
+    isTunnellingForbiddenClassically: E < V0 && T > 0.000001,
+    isOverBarrierReflectionQuantum: E > V0 && R > 0.0001,
+    scientificKeyTakeaway:
+      E < V0
+        ? `Quantum mechanics predicts non-zero transmission T = ${formatPercentage(T * 100)} through a ${L_nm.toFixed(2)} nm barrier where classical mechanics predicts exactly 0%. The wavepacket's evanescent tail decays exponentially through the barrier.`
+        : `Even with E > V₀, quantum wave reflection occurs at the abrupt potential steps (R = ${formatPercentage(R * 100)}), forming transmission resonance peaks where k₂·L = n·π.`
+  };
+
   return {
     transmissionCoefficient: T,
     reflectionCoefficient: R,
@@ -224,6 +290,10 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
     velocityMs,
     velocityCPercent,
     regime,
+    particle,
+    particleKey,
+    classical,
+    quantumClassicalDelta,
     amplitudes: {
       rRe,
       rIm,
@@ -237,6 +307,41 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
     barrierWidthNm: L_nm,
     barrierHeightEv: V0,
     particleEnergyEv: E
+  };
+}
+
+/**
+ * Compares two physical configurations (A and B) side by side with true numerical solving.
+ *
+ * @param {object} configA - { energyEv, barrierHeightEv, barrierWidthNm, particleKey }
+ * @param {object} configB - { energyEv, barrierHeightEv, barrierWidthNm, particleKey }
+ * @returns {object} { dataA, dataB, ratioT, deltaT, ratioKappa, comparisonSummary }
+ */
+export function compareConfigurations(configA, configB) {
+  const dataA = calculateRectangularBarrierTunneling(
+    configA.energyEv,
+    configA.barrierHeightEv,
+    configA.barrierWidthNm,
+    configA.particleKey || "electron"
+  );
+  const dataB = calculateRectangularBarrierTunneling(
+    configB.energyEv,
+    configB.barrierHeightEv,
+    configB.barrierWidthNm,
+    configB.particleKey || "electron"
+  );
+
+  const deltaT = (dataB.transmissionPercent - dataA.transmissionPercent).toFixed(2);
+  const ratioT = dataA.transmissionCoefficient > 1e-15
+    ? (dataB.transmissionCoefficient / dataA.transmissionCoefficient).toExponential(2)
+    : "∞";
+
+  return {
+    dataA,
+    dataB,
+    deltaT,
+    ratioT,
+    summary: `Config B has ${dataB.formattedTransmission} transmission vs Config A's ${dataA.formattedTransmission} (Δ = ${deltaT}%).`
   };
 }
 

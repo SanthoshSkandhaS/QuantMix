@@ -11,8 +11,11 @@ import {
   Atom,
   Sparkles,
   HelpCircle,
-  ExternalLink
+  ExternalLink,
+  Sliders,
+  Scale
 } from "lucide-react";
+import { BEDROOM_QUANTUM_FACTS } from "../data/bedroomData";
 
 // Check WebGL hardware support
 function checkWebGLSupport() {
@@ -26,22 +29,20 @@ function checkWebGLSupport() {
 }
 
 /**
- * Generates an oak parquet wood plank procedural texture canvas.
+ * Generates an authentic procedural oak parquet floor texture.
  */
-function createWoodTexture() {
+function createOakParquetTexture() {
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 1024;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
-  // Base background
-  ctx.fillStyle = "#2c1d13";
+  ctx.fillStyle = "#2e1c12";
   ctx.fillRect(0, 0, 1024, 1024);
 
   const plankHeight = 64;
   const plankWidth = 256;
-
   const woodTones = ["#3e281b", "#473021", "#362215", "#4b3425", "#392418", "#503828"];
 
   for (let y = 0; y < 1024; y += plankHeight) {
@@ -118,7 +119,7 @@ function createLaptopScreenTexture() {
   ctx.strokeStyle = "#C67248";
   ctx.strokeRect(220, 70, 70, 146);
 
-  // Animated wave
+  // Wave curve
   ctx.beginPath();
   ctx.strokeStyle = "#20C4B4";
   ctx.lineWidth = 2.5;
@@ -148,64 +149,68 @@ function createLaptopScreenTexture() {
   return texture;
 }
 
-// Interactive object physical quantum facts
-const OBJECT_QUANTUM_FACTS = {
-  laptop: {
-    title: "Quantum Computer Terminal (Laptop)",
-    phenomenon: "Bandgap Semiconductors & Tunneling Memory",
-    summary:
-      "Inside this laptop, billions of nanoscale MOSFET transistors operate by quantum bandgap tuning. Furthermore, NAND flash storage traps charge carriers through quantum mechanical tunneling across a 1.2 nm dielectric oxide barrier without mechanical wear.",
-    actionPrompt: "Inspect Quantum Lab Console"
-  },
-  water: {
-    title: "Glass of Water",
-    phenomenon: "Pauli Exclusion & Zero-Point Energy",
-    summary:
-      "Why does water stay liquid and refuse to collapse into an infinitely dense singularity? Because electrons are fermions obeying Pauli's Exclusion Principle. Quantum degeneracy pressure holds the atomic electron clouds apart, while zero-point energy prevents molecular motion from freezing at absolute zero.",
-    actionPrompt: "Observe Degeneracy Pressure"
-  },
-  chair: {
-    title: "Ergonomic Desk Chair",
-    phenomenon: "Electron Degeneracy & Electrostatic Repulsion",
-    summary:
-      "Even though atoms are 99.999% empty space, you never fall through this chair. When you sit, the electron wavefunctions of your body overlap with the chair's fabric, causing overlapping fermion states to push back with macroscopic force.",
-    actionPrompt: "Examine Solid State Physics"
-  },
-  desk: {
-    title: "Solid Walnut Desk",
-    phenomenon: "Covalent Bonding & Crystal Lattices",
-    summary:
-      "The rigidity of this wooden desk arises from shared quantum electron pairs forming covalent sp³ molecular orbitals in cellulose polymers. Quantum mechanics alone explains why solid matter holds its shape.",
-    actionPrompt: "Study Molecular Orbitals"
-  },
-  window: {
-    title: "Architectural Window",
-    phenomenon: "Photon Absorption & Bandgap Transparency",
-    summary:
-      "Why is silicate glass transparent to visible light while wood is opaque? Glass has an electronic energy bandgap (> 3.5 eV) larger than visible photon energies (~1.8–3.1 eV). Visible photons cannot excite electrons across the gap and pass through unabsorbed.",
-    actionPrompt: "Analyze Optical Bandgap"
-  },
-  books: {
-    title: "Quantum Physics Textbooks",
-    phenomenon: "Wavefunction Formalism & Mathematical Rigor",
-    summary:
-      "A curated collection of theoretical physics literature: 'Griffiths Quantum Mechanics', 'The Feynman Lectures on Physics', and 'Dirac's Principles of Quantum Mechanics'.",
-    actionPrompt: "Browse Literature"
-  },
-  bed: {
-    title: "Platform Bed & Bedding",
-    phenomenon: "Thermal Phonons & Blackbody Radiation",
-    summary:
-      "The warmth of the bedding radiates electromagnetic blackbody spectrum photons directly obeying Max Planck's 1900 quantization law E = hν, the historical birth of quantum physics.",
-    actionPrompt: "Inspect Thermal Physics"
+/**
+ * Creates double-slit interference wall artwork texture
+ */
+function createWallArtTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  ctx.fillStyle = "#0d131f";
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Subtle grid
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+  for (let i = 0; i < 512; i += 32) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, 512);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(512, i);
+    ctx.stroke();
   }
-};
+
+  // Wave interference pattern bands
+  for (let x = 0; x < 512; x++) {
+    const intensity = Math.pow(Math.cos((x - 256) * 0.045) * Math.sin((x - 256) * 0.015 + 0.001) / ((x - 256) * 0.015 + 0.001), 2);
+    ctx.fillStyle = `rgba(53, 214, 208, ${Math.min(1, intensity * 0.85)})`;
+    ctx.fillRect(x, 140, 1, 230);
+  }
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 20px 'JetBrains Mono', monospace";
+  ctx.fillText("YOUNG'S DOUBLE-SLIT INTERFERENCE", 40, 80);
+
+  ctx.fillStyle = "#c67248";
+  ctx.font = "14px 'JetBrains Mono', monospace";
+  ctx.fillText("I(θ) = I₀ cos²(β) [sin(α)/α]²", 40, 110);
+
+  return new THREE.CanvasTexture(canvas);
+}
 
 /**
  * Bedroom3D
  * Milestone 2 Navigable 3D Bedroom Environment.
+ * Features:
+ * - High-priority hit cylinder for glass of water (no table stealing focus).
+ * - Selection Lock so selection remains stable until explicit deselect.
+ * - Screen-space projected 2D contextual floating toolbar pinned directly to the object.
+ * - Macroscopic Physical View vs. Microscopic Quantum View toggle in drawer.
+ * - Keyboard shortcuts: E (inspect), F (focus), T (tweak), Q (lab), R (reset), H (help), Esc (close).
+ * - Time-of-Day lighting presets (Day / Twilight / Night).
+ * - Seamless environment switcher to 3D Street.
  */
-export default function Bedroom3D({ onClose, onOpenLab }) {
+export default function Bedroom3D({
+  onClose,
+  onOpenLab,
+  onSwitchToStreet,
+  onToggleTweak
+}) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -214,6 +219,10 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
   const [selectedObject, setSelectedObject] = useState(null);
   const [hoveredObjectName, setHoveredObjectName] = useState(null);
   const [showHelp, setShowHelp] = useState(true);
+  const [viewMode, setViewMode] = useState("macro"); // "macro" | "quantum"
+
+  // 2D Screen coordinates for contextual anchor
+  const [screenCoords, setScreenCoords] = useState(null);
 
   // Three.js internal references
   const sceneRef = useRef(null);
@@ -222,8 +231,9 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
   const controlsRef = useRef(null);
   const interactiveMeshesRef = useRef([]);
   const animFrameIdRef = useRef(null);
+  const objectWorldPositionsRef = useRef({});
 
-  // Lighting references for Time of Day switching
+  // Lighting references
   const sunLightRef = useRef(null);
   const ambientLightRef = useRef(null);
   const deskLampLightRef = useRef(null);
@@ -232,25 +242,89 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
   // First-person keyboard movement state
   const keysPressedRef = useRef({});
 
+  // Reset Camera View
+  const handleResetCamera = useCallback(() => {
+    setSelectedObject(null);
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
+
+    camera.position.set(0, 2.2, 4.4);
+    controls.target.set(0, 1.1, 0);
+    controls.update();
+  }, []);
+
+  // Focus Camera onto Selected Object
+  const focusOnObject = useCallback((objKey) => {
+    setSelectedObject(objKey);
+    setViewMode("macro");
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
+
+    const targets = {
+      laptop: { pos: [-0.65, 1.15, -0.6], target: [-0.65, 0.88, -1.05] },
+      water: { pos: [-0.2, 1.05, -0.7], target: [-0.2, 0.88, -1.0] },
+      chair: { pos: [-0.65, 1.2, 0.6], target: [-0.65, 0.6, -0.2] },
+      desk: { pos: [-0.65, 1.6, 0.8], target: [-0.65, 0.75, -1.0] },
+      window: { pos: [-0.5, 1.8, 1.2], target: [-3.18, 1.8, -0.8] },
+      books: { pos: [-1.15, 1.15, -0.7], target: [-1.15, 0.85, -1.05] },
+      bed: { pos: [1.8, 1.6, 1.5], target: [1.8, 0.6, -0.6] }
+    };
+
+    const targetConfig = targets[objKey];
+    if (targetConfig) {
+      camera.position.set(...targetConfig.pos);
+      controls.target.set(...targetConfig.target);
+      controls.update();
+    }
+  }, []);
+
   // Handle keyboard inputs
   useEffect(() => {
     const handleKeyDown = (e) => {
-      keysPressedRef.current[e.key.toLowerCase()] = true;
+      // Don't intercept shortcuts when typing in inputs/textareas
+      if (["input", "textarea", "select"].includes(e.target.tagName.toLowerCase())) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+      keysPressedRef.current[key] = true;
+
       if (e.key === "Escape") {
         if (selectedObject) setSelectedObject(null);
         else onClose();
+      } else if (key === "e") {
+        if (hoveredObjectName && !selectedObject) {
+          setSelectedObject(hoveredObjectName);
+        }
+      } else if (key === "f") {
+        if (selectedObject) {
+          focusOnObject(selectedObject);
+        }
+      } else if (key === "t") {
+        onToggleTweak?.();
+      } else if (key === "q") {
+        onClose();
+        onOpenLab?.();
+      } else if (key === "h") {
+        setShowHelp((prev) => !prev);
+      } else if (key === "r") {
+        handleResetCamera();
       }
     };
+
     const handleKeyUp = (e) => {
       keysPressedRef.current[e.key.toLowerCase()] = false;
     };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [selectedObject, onClose]);
+  }, [selectedObject, hoveredObjectName, onClose, onOpenLab, onToggleTweak, focusOnObject, handleResetCamera]);
 
   // Update Time of Day Lighting
   const applyTimeOfDay = useCallback((tod) => {
@@ -294,43 +368,6 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
     }
   }, []);
 
-  // Reset Camera View
-  const handleResetCamera = useCallback(() => {
-    setSelectedObject(null);
-    const camera = cameraRef.current;
-    const controls = controlsRef.current;
-    if (!camera || !controls) return;
-
-    camera.position.set(0, 2.2, 4.4);
-    controls.target.set(0, 1.1, 0);
-    controls.update();
-  }, []);
-
-  // Focus Camera onto Selected Object
-  const focusOnObject = useCallback((objKey) => {
-    setSelectedObject(objKey);
-    const camera = cameraRef.current;
-    const controls = controlsRef.current;
-    if (!camera || !controls) return;
-
-    const targets = {
-      laptop: { pos: [-0.65, 1.15, -0.6], target: [-0.65, 0.88, -1.05] },
-      water: { pos: [-0.2, 1.1, -0.75], target: [-0.2, 0.88, -1.0] },
-      chair: { pos: [-0.65, 1.2, 0.6], target: [-0.65, 0.6, -0.2] },
-      desk: { pos: [-0.65, 1.6, 0.8], target: [-0.65, 0.75, -1.0] },
-      window: { pos: [-0.5, 1.8, 1.2], target: [-3.18, 1.8, -0.8] },
-      books: { pos: [-1.15, 1.15, -0.7], target: [-1.15, 0.85, -1.05] },
-      bed: { pos: [1.8, 1.6, 1.5], target: [1.8, 0.6, -0.6] }
-    };
-
-    const targetConfig = targets[objKey];
-    if (targetConfig) {
-      camera.position.set(...targetConfig.pos);
-      controls.target.set(...targetConfig.target);
-      controls.update();
-    }
-  }, []);
-
   // 3D Scene Initialization
   useEffect(() => {
     if (!isWebGLSupported) return;
@@ -362,159 +399,149 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.08;
     rendererRef.current = renderer;
 
     // 4. Orbit Controls
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2 - 0.03;
-    controls.minDistance = 1.0;
-    controls.maxDistance = 8.5;
     controls.target.set(0, 1.1, 0);
+    controls.maxPolarAngle = Math.PI / 2 - 0.04;
+    controls.minDistance = 0.6;
+    controls.maxDistance = 6.2;
     controlsRef.current = controls;
 
     // 5. Lighting Setup
-    const ambientLight = new THREE.AmbientLight(0x182030, 0.85);
+    const ambientLight = new THREE.AmbientLight(0x182030, 0.8);
     scene.add(ambientLight);
     ambientLightRef.current = ambientLight;
 
-    const sunLight = new THREE.DirectionalLight(0xe88a5a, 1.8);
+    const sunLight = new THREE.DirectionalLight(0xe88a5a, 1.6);
     sunLight.position.set(-7, 3, -1);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
     sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 20;
+    sunLight.shadow.camera.far = 18;
     sunLight.shadow.camera.left = -4;
     sunLight.shadow.camera.right = 4;
     sunLight.shadow.camera.top = 4;
     sunLight.shadow.camera.bottom = -4;
-    sunLight.shadow.bias = -0.0005;
+    sunLight.shadow.bias = -0.0003;
     scene.add(sunLight);
     sunLightRef.current = sunLight;
 
-    // Focused desk lamp spotlight
-    const deskLamp = new THREE.SpotLight(0xffdfb3, 2.8, 6, Math.PI / 4, 0.35, 1.2);
-    deskLamp.position.set(-0.25, 1.55, -1.05);
-    deskLamp.target.position.set(-0.65, 0.75, -1.0);
-    deskLamp.castShadow = true;
-    scene.add(deskLamp);
-    scene.add(deskLamp.target);
-    deskLampLightRef.current = deskLamp;
+    // Desk Task Lamp (Focused Spotlight)
+    const deskLampSpot = new THREE.SpotLight(0xffecc4, 2.8, 5.0, Math.PI / 4, 0.45, 1.2);
+    deskLampSpot.position.set(-1.15, 1.5, -0.9);
+    deskLampSpot.target.position.set(-0.65, 0.76, -1.0);
+    deskLampSpot.castShadow = true;
+    deskLampSpot.shadow.bias = -0.0005;
+    deskLampSpot.shadow.mapSize.width = 1024;
+    deskLampSpot.shadow.mapSize.height = 1024;
+    scene.add(deskLampSpot);
+    scene.add(deskLampSpot.target);
+    deskLampLightRef.current = deskLampSpot;
 
-    // 6. Room Architecture Construction (6.4m x 6.4m x 3.2m)
-    const roomGroup = new THREE.Group();
+    // Room interactables and world positions
     const interactables = [];
+    const worldPosMap = {};
+    const roomGroup = new THREE.Group();
 
-    // Wood Parquet Floor
-    const woodTexture = createWoodTexture();
-    const floorGeo = new THREE.PlaneGeometry(6.4, 6.4);
+    // 6. Architecture: Walls, Floor, Ceiling, Window
+    const roomWidth = 6.4;
+    const roomDepth = 6.4;
+    const roomHeight = 3.2;
+
+    // Floor (Procedural Oak Parquet)
+    const floorGeo = new THREE.PlaneGeometry(roomWidth, roomDepth);
     const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x5a3e2a,
-      map: woodTexture || undefined,
-      roughness: 0.38,
-      metalness: 0.08
+      roughness: 0.45,
+      metalness: 0.05,
+      map: createOakParquetTexture() || undefined
     });
-    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
-    floorMesh.rotation.x = -Math.PI / 2;
-    floorMesh.receiveShadow = true;
-    roomGroup.add(floorMesh);
-
-    // Ceiling
-    const ceilingGeo = new THREE.PlaneGeometry(6.4, 6.4);
-    const ceilingMat = new THREE.MeshStandardMaterial({
-      color: 0x141822,
-      roughness: 0.9
-    });
-    const ceilingMesh = new THREE.Mesh(ceilingGeo, ceilingMat);
-    ceilingMesh.position.y = 3.2;
-    ceilingMesh.rotation.x = Math.PI / 2;
-    roomGroup.add(ceilingMesh);
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    roomGroup.add(floor);
 
     // Wall Material
     const wallMat = new THREE.MeshStandardMaterial({
-      color: 0x1b202c,
-      roughness: 0.85
+      color: 0x181e2b,
+      roughness: 0.9,
+      metalness: 0.02
     });
 
     // Back Wall (Z = -3.2)
-    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 3.2), wallMat);
-    backWall.position.set(0, 1.6, -3.2);
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(roomWidth, roomHeight), wallMat);
+    backWall.position.set(0, roomHeight / 2, -roomDepth / 2);
     backWall.receiveShadow = true;
     roomGroup.add(backWall);
 
-    // Left Wall (X = -3.2) with Window Aperture
-    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 3.2), wallMat);
-    leftWall.position.set(-3.2, 1.6, 0);
-    leftWall.rotation.y = Math.PI / 2;
-    leftWall.receiveShadow = true;
-    roomGroup.add(leftWall);
-
-    // Right Wall (X = +3.2)
-    const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 3.2), wallMat);
-    rightWall.position.set(3.2, 1.6, 0);
+    // Right Wall (X = 3.2)
+    const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(roomDepth, roomHeight), wallMat);
     rightWall.rotation.y = -Math.PI / 2;
+    rightWall.position.set(roomWidth / 2, roomHeight / 2, 0);
     rightWall.receiveShadow = true;
     roomGroup.add(rightWall);
 
-    // Window Architecture (Left Wall X = -3.18)
-    const windowFrameGeo = new THREE.BoxGeometry(0.12, 1.8, 2.6);
-    const windowFrameMat = new THREE.MeshStandardMaterial({
-      color: 0x222735,
-      roughness: 0.3
-    });
-    const windowFrame = new THREE.Mesh(windowFrameGeo, windowFrameMat);
-    windowFrame.position.set(-3.18, 1.8, -0.8);
-    roomGroup.add(windowFrame);
+    // Left Wall with Window Frame (X = -3.2)
+    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(roomDepth, roomHeight), wallMat);
+    leftWall.rotation.y = Math.PI / 2;
+    leftWall.position.set(-roomWidth / 2, roomHeight / 2, 0);
+    leftWall.receiveShadow = true;
+    roomGroup.add(leftWall);
 
-    // Glass Panes
-    const windowGlassGeo = new THREE.PlaneGeometry(2.4, 1.6);
-    const windowGlassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xaaccff,
+    // Ceiling
+    const ceiling = new THREE.Mesh(
+      new THREE.PlaneGeometry(roomWidth, roomDepth),
+      new THREE.MeshStandardMaterial({ color: 0x0f131a, roughness: 0.95 })
+    );
+    ceiling.rotation.x = Math.PI / 2;
+    ceiling.position.set(0, roomHeight, 0);
+    roomGroup.add(ceiling);
+
+    // Architectural Window Frame
+    const windowFrameMat = new THREE.MeshStandardMaterial({ color: 0x090b10, roughness: 0.3 });
+    const winFrame = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.8, 2.2), windowFrameMat);
+    winFrame.position.set(-roomWidth / 2 + 0.06, 1.8, -0.8);
+    roomGroup.add(winFrame);
+
+    // Window Glass Pane
+    const winGlassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
       transmission: 0.95,
-      roughness: 0.05,
+      roughness: 0.02,
       transparent: true,
-      opacity: 0.55
+      opacity: 0.4,
+      ior: 1.52
     });
-    const windowGlass = new THREE.Mesh(windowGlassGeo, windowGlassMat);
-    windowGlass.position.set(-3.17, 1.8, -0.8);
-    windowGlass.rotation.y = Math.PI / 2;
-    windowGlass.userData = { key: "window" };
-    interactables.push(windowGlass);
-    roomGroup.add(windowGlass);
+    const winGlass = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 1.7), winGlassMat);
+    winGlass.rotation.y = Math.PI / 2;
+    winGlass.position.set(-roomWidth / 2 + 0.07, 1.8, -0.8);
+    winGlass.userData = { key: "window", priority: 30 };
+    interactables.push(winGlass);
+    roomGroup.add(winGlass);
+    worldPosMap.window = new THREE.Vector3(-roomWidth / 2 + 0.1, 1.8, -0.8);
 
-    // Window Sky Vista Backdrop
-    const skyVistaGeo = new THREE.PlaneGeometry(4.0, 2.6);
-    const skyVistaMat = new THREE.MeshBasicMaterial({ color: 0xc67248 });
-    const skyVista = new THREE.Mesh(skyVistaGeo, skyVistaMat);
-    skyVista.position.set(-3.4, 1.8, -0.8);
-    skyVista.rotation.y = Math.PI / 2;
-    windowGlowRef.current = skyVista;
-    roomGroup.add(skyVista);
+    // Window Outdoor Glow
+    const glowMat = new THREE.MeshBasicMaterial({ color: 0xc67248 });
+    const windowGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 1.9), glowMat);
+    windowGlow.rotation.y = Math.PI / 2;
+    windowGlow.position.set(-roomWidth / 2 - 0.08, 1.8, -0.8);
+    roomGroup.add(windowGlow);
+    windowGlowRef.current = windowGlow;
 
-    // Baseboards around floor
-    const baseboardMat = new THREE.MeshStandardMaterial({ color: 0x0f131a, roughness: 0.4 });
-    const bbBack = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.14, 0.04), baseboardMat);
-    bbBack.position.set(0, 0.07, -3.18);
-    roomGroup.add(bbBack);
-    const bbLeft = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.14, 6.4), baseboardMat);
-    bbLeft.position.set(-3.18, 0.07, 0);
-    roomGroup.add(bbLeft);
-    const bbRight = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.14, 6.4), baseboardMat);
-    bbRight.position.set(3.18, 0.07, 0);
-    roomGroup.add(bbRight);
+    // Wall Art: Double-Slit Quantum Interference
+    const artTexture = createWallArtTexture();
+    const artGeo = new THREE.PlaneGeometry(1.6, 1.6);
+    const artMat = new THREE.MeshBasicMaterial({ map: artTexture || undefined });
+    const artMesh = new THREE.Mesh(artGeo, artMat);
+    artMesh.position.set(0.6, 1.9, -roomDepth / 2 + 0.02);
+    roomGroup.add(artMesh);
 
-    // Area Rug
-    const rugGeo = new THREE.BoxGeometry(3.2, 0.015, 2.4);
-    const rugMat = new THREE.MeshStandardMaterial({ color: 0x181f2c, roughness: 0.9 });
-    const rug = new THREE.Mesh(rugGeo, rugMat);
-    rug.position.set(-0.5, 0.008, 0.2);
-    rug.receiveShadow = true;
-    roomGroup.add(rug);
-
-    // 7. Furniture: Modern Walnut Study Desk (X = -0.65, Z = -1.0)
+    // 7. Solid Walnut Desk (Desk Surface has low priority = 5 so it never steals focus from the glass)
     const deskGroup = new THREE.Group();
     deskGroup.position.set(-0.65, 0, -1.0);
 
@@ -528,48 +555,37 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
     deskTop.position.y = 0.75;
     deskTop.castShadow = true;
     deskTop.receiveShadow = true;
-    deskTop.userData = { key: "desk" };
+    deskTop.userData = { key: "desk", priority: 5 }; // Low priority
     interactables.push(deskTop);
     deskGroup.add(deskTop);
+    worldPosMap.desk = new THREE.Vector3(-0.65, 0.77, -1.0);
 
     // Steel Desk Legs
     const legGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.73, 16);
     const legMat = new THREE.MeshStandardMaterial({ color: 0x11141a, roughness: 0.25, metalness: 0.85 });
-    const legPositions = [
+    [
       [-0.72, 0.365, -0.36],
       [0.72, 0.365, -0.36],
       [-0.72, 0.365, 0.36],
       [0.72, 0.365, 0.36]
-    ];
-    legPositions.forEach(([lx, ly, lz]) => {
+    ].forEach(([lx, ly, lz]) => {
       const leg = new THREE.Mesh(legGeo, legMat);
       leg.position.set(lx, ly, lz);
       leg.castShadow = true;
       deskGroup.add(leg);
     });
-
     roomGroup.add(deskGroup);
 
     // 8. Interactive Laptop
     const laptopGroup = new THREE.Group();
     laptopGroup.position.set(-0.65, 0.775, -1.05);
 
-    // Base chassis
-    const laptopBaseGeo = new THREE.BoxGeometry(0.34, 0.012, 0.24);
     const laptopAluMat = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, roughness: 0.25, metalness: 0.85 });
-    const laptopBase = new THREE.Mesh(laptopBaseGeo, laptopAluMat);
+    const laptopBase = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.012, 0.24), laptopAluMat);
     laptopBase.castShadow = true;
     laptopGroup.add(laptopBase);
 
-    // Keyboard tray
-    const keyboardGeo = new THREE.PlaneGeometry(0.28, 0.12);
-    const keyboardMat = new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.6 });
-    const keyboard = new THREE.Mesh(keyboardGeo, keyboardMat);
-    keyboard.rotation.x = -Math.PI / 2;
-    keyboard.position.set(0, 0.007, 0.02);
-    laptopGroup.add(keyboard);
-
-    // Screen Lid (Opened at 105 degrees)
+    // Dynamic Display Screen with QuantMix Lab UI
     const screenGroup = new THREE.Group();
     screenGroup.position.set(0, 0.006, -0.12);
     screenGroup.rotation.x = 0.28;
@@ -579,30 +595,40 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
     screenLid.castShadow = true;
     screenGroup.add(screenLid);
 
-    // Dynamic Display Screen with QuantMix Lab UI
     const screenTexture = createLaptopScreenTexture();
-    const screenDisplayGeo = new THREE.PlaneGeometry(0.32, 0.2);
-    const screenDisplayMat = new THREE.MeshBasicMaterial({ map: screenTexture || undefined });
-    const screenDisplay = new THREE.Mesh(screenDisplayGeo, screenDisplayMat);
+    const screenDisplay = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.32, 0.2),
+      new THREE.MeshBasicMaterial({ map: screenTexture || undefined })
+    );
     screenDisplay.position.set(0, 0.11, 0.005);
-    screenDisplay.userData = { key: "laptop" };
+    screenDisplay.userData = { key: "laptop", priority: 90 };
     interactables.push(screenDisplay);
     screenGroup.add(screenDisplay);
 
     laptopGroup.add(screenGroup);
-    laptopGroup.userData = { key: "laptop" };
-    interactables.push(laptopBase);
+
+    // Generous hit box for laptop
+    const laptopHit = new THREE.Mesh(
+      new THREE.BoxGeometry(0.42, 0.32, 0.35),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    laptopHit.position.set(0, 0.15, -0.05);
+    laptopHit.userData = { key: "laptop", priority: 90 };
+    interactables.push(laptopHit);
+    laptopGroup.add(laptopHit);
+
+    worldPosMap.laptop = new THREE.Vector3(-0.65, 0.95, -1.05);
     roomGroup.add(laptopGroup);
 
-    // 9. Interactive Glass of Water
+    // 9. Interactive Glass of Water (Dedicated High-Priority Collider so Table CANNOT Steal Focus)
     const glassGroup = new THREE.Group();
     glassGroup.position.set(-0.2, 0.775, -1.0);
 
-    const glassOuterGeo = new THREE.CylinderGeometry(0.045, 0.038, 0.13, 24, 1, true);
+    const glassOuterGeo = new THREE.CylinderGeometry(0.045, 0.038, 0.13, 24);
     const glassMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       transmission: 0.96,
-      roughness: 0.04,
+      roughness: 0.03,
       transparent: true,
       opacity: 0.85,
       ior: 1.52,
@@ -627,8 +653,18 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
     waterMesh.position.y = 0.048;
     glassGroup.add(waterMesh);
 
-    glassGroup.userData = { key: "water" };
-    interactables.push(glassOuter);
+    // High-Priority Generous Hit Cylinder (Radius 0.12, Height 0.28)
+    // Priority = 100 ensures the glass is ALWAYS selected over the desk underneath!
+    const glassHit = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.12, 0.28, 16),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    glassHit.position.y = 0.08;
+    glassHit.userData = { key: "water", priority: 100 };
+    interactables.push(glassHit);
+    glassGroup.add(glassHit);
+
+    worldPosMap.water = new THREE.Vector3(-0.2, 0.88, -1.0);
     roomGroup.add(glassGroup);
 
     // 10. Stack of Physics Textbooks
@@ -643,125 +679,119 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
       book.position.y = 0.016 + idx * 0.034;
       book.rotation.y = (idx - 1) * 0.08;
       book.castShadow = true;
-      book.userData = { key: "books" };
-      interactables.push(book);
       bookGroup.add(book);
     });
+
+    const bookHit = new THREE.Mesh(
+      new THREE.BoxGeometry(0.32, 0.18, 0.28),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    bookHit.position.y = 0.08;
+    bookHit.userData = { key: "books", priority: 85 };
+    interactables.push(bookHit);
+    bookGroup.add(bookHit);
+    worldPosMap.books = new THREE.Vector3(-1.15, 0.88, -1.05);
     roomGroup.add(bookGroup);
 
-    // 11. Ergonomic Desk Chair (X = -0.65, Z = -0.3)
+    // 11. Ergonomic Desk Chair
     const chairGroup = new THREE.Group();
-    chairGroup.position.set(-0.65, 0, -0.35);
+    chairGroup.position.set(-0.65, 0, -0.2);
 
-    const chairSeatGeo = new THREE.BoxGeometry(0.48, 0.06, 0.46);
-    const chairMat = new THREE.MeshStandardMaterial({ color: 0x242832, roughness: 0.7 });
-    const chairSeat = new THREE.Mesh(chairSeatGeo, chairMat);
-    chairSeat.position.y = 0.48;
-    chairSeat.castShadow = true;
-    chairSeat.userData = { key: "chair" };
-    interactables.push(chairSeat);
-    chairGroup.add(chairSeat);
+    const chairFabricMat = new THREE.MeshStandardMaterial({ color: 0x1b2333, roughness: 0.8 });
+    const chairFrameMat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, roughness: 0.25, metalness: 0.85 });
 
-    const chairBackGeo = new THREE.BoxGeometry(0.46, 0.55, 0.05);
-    const chairBack = new THREE.Mesh(chairBackGeo, chairMat);
-    chairBack.position.set(0, 0.78, 0.22);
-    chairBack.rotation.x = -0.08;
-    chairBack.castShadow = true;
-    chairGroup.add(chairBack);
+    // Seat cushion
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.48), chairFabricMat);
+    seat.position.y = 0.48;
+    seat.castShadow = true;
+    chairGroup.add(seat);
 
-    // Chair Stem & 5-Star Caster Base
-    const stemGeo = new THREE.CylinderGeometry(0.028, 0.028, 0.42, 16);
-    const stemMat = new THREE.MeshStandardMaterial({ color: 0x111317, metalness: 0.85, roughness: 0.2 });
-    const stem = new THREE.Mesh(stemGeo, stemMat);
+    // Backrest
+    const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.52, 0.06), chairFabricMat);
+    backrest.position.set(0, 0.78, 0.22);
+    backrest.castShadow = true;
+    chairGroup.add(backrest);
+
+    // Central stem & 5-star caster base
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.44, 16), chairFrameMat);
     stem.position.y = 0.22;
+    stem.castShadow = true;
     chairGroup.add(stem);
 
-    for (let c = 0; c < 5; c++) {
-      const angle = (c / 5) * Math.PI * 2;
-      const armGeo = new THREE.BoxGeometry(0.24, 0.025, 0.04);
-      const arm = new THREE.Mesh(armGeo, stemMat);
-      arm.position.set(Math.cos(angle) * 0.12, 0.035, Math.sin(angle) * 0.12);
-      arm.rotation.y = angle;
-      chairGroup.add(arm);
-    }
+    // Hit box for chair
+    const chairHit = new THREE.Mesh(
+      new THREE.BoxGeometry(0.65, 0.95, 0.65),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    chairHit.position.y = 0.55;
+    chairHit.userData = { key: "chair", priority: 40 };
+    interactables.push(chairHit);
+    chairGroup.add(chairHit);
+    worldPosMap.chair = new THREE.Vector3(-0.65, 0.6, -0.2);
     roomGroup.add(chairGroup);
 
-    // 12. Modern Platform Bed (X = 1.8, Z = -0.6)
+    // 12. Modern Platform Bed
     const bedGroup = new THREE.Group();
     bedGroup.position.set(1.8, 0, -0.6);
 
-    // Wooden Frame
-    const bedFrame = new THREE.Mesh(
-      new THREE.BoxGeometry(2.1, 0.28, 2.3),
-      new THREE.MeshStandardMaterial({ color: 0x3a2517, roughness: 0.4 })
-    );
-    bedFrame.position.y = 0.14;
-    bedFrame.castShadow = true;
-    bedFrame.receiveShadow = true;
-    bedGroup.add(bedFrame);
+    const bedWoodMat = new THREE.MeshStandardMaterial({ color: 0x2e1e16, roughness: 0.45 });
+    const mattressMat = new THREE.MeshStandardMaterial({ color: 0xe6e9ef, roughness: 0.85 });
+    const duvetMat = new THREE.MeshStandardMaterial({ color: 0x20354a, roughness: 0.9 });
+
+    // Wooden base frame
+    const bedBase = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.28, 2.3), bedWoodMat);
+    bedBase.position.y = 0.14;
+    bedBase.castShadow = true;
+    bedBase.receiveShadow = true;
+    bedGroup.add(bedBase);
 
     // Headboard
-    const headboard = new THREE.Mesh(
-      new THREE.BoxGeometry(2.1, 0.95, 0.12),
-      new THREE.MeshStandardMaterial({ color: 0x3a2517, roughness: 0.4 })
-    );
-    headboard.position.set(0, 0.62, -1.09);
+    const headboard = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.1, 0.12), bedWoodMat);
+    headboard.position.set(0, 0.55, -1.09);
     headboard.castShadow = true;
     bedGroup.add(headboard);
 
     // Mattress
-    const mattress = new THREE.Mesh(
-      new THREE.BoxGeometry(1.95, 0.28, 2.1),
-      new THREE.MeshStandardMaterial({ color: 0xe2e5ea, roughness: 0.85 })
-    );
-    mattress.position.set(0, 0.42, 0.02);
+    const mattress = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.26, 2.1), mattressMat);
+    mattress.position.y = 0.41;
     mattress.castShadow = true;
-    mattress.userData = { key: "bed" };
-    interactables.push(mattress);
     bedGroup.add(mattress);
 
-    // Duvet / Blanket
-    const duvet = new THREE.Mesh(
-      new THREE.BoxGeometry(1.97, 0.12, 1.45),
-      new THREE.MeshStandardMaterial({ color: 0x1f2636, roughness: 0.9 })
-    );
-    duvet.position.set(0, 0.52, 0.35);
+    // Folded Duvet
+    const duvet = new THREE.Mesh(new THREE.BoxGeometry(1.92, 0.12, 1.4), duvetMat);
+    duvet.position.set(0, 0.58, 0.35);
     duvet.castShadow = true;
     bedGroup.add(duvet);
 
     // Dual Pillows
-    const pillowGeo = new THREE.BoxGeometry(0.75, 0.14, 0.44);
-    const pillowMat = new THREE.MeshStandardMaterial({ color: 0xf0f2f5, roughness: 0.8 });
-    const pillow1 = new THREE.Mesh(pillowGeo, pillowMat);
-    pillow1.position.set(-0.52, 0.6, -0.7);
-    pillow1.rotation.x = 0.12;
+    const pillowMat = new THREE.MeshStandardMaterial({ color: 0xf5f7fa, roughness: 0.9 });
+    const pillow1 = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.12, 0.45), pillowMat);
+    pillow1.position.set(-0.48, 0.58, -0.75);
+    pillow1.castShadow = true;
     bedGroup.add(pillow1);
-    const pillow2 = new THREE.Mesh(pillowGeo, pillowMat);
-    pillow2.position.set(0.52, 0.6, -0.7);
-    pillow2.rotation.x = 0.12;
+
+    const pillow2 = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.12, 0.45), pillowMat);
+    pillow2.position.set(0.48, 0.58, -0.75);
+    pillow2.castShadow = true;
     bedGroup.add(pillow2);
 
+    // Hit box for bed
+    const bedHit = new THREE.Mesh(
+      new THREE.BoxGeometry(2.3, 1.0, 2.5),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    bedHit.position.y = 0.5;
+    bedHit.userData = { key: "bed", priority: 30 };
+    interactables.push(bedHit);
+    bedGroup.add(bedHit);
+    worldPosMap.bed = new THREE.Vector3(1.8, 0.6, -0.6);
     roomGroup.add(bedGroup);
-
-    // 13. Minimalist Wall Art Frame
-    const artFrame = new THREE.Mesh(
-      new THREE.BoxGeometry(1.4, 0.9, 0.03),
-      new THREE.MeshStandardMaterial({ color: 0x12151d, roughness: 0.3 })
-    );
-    artFrame.position.set(1.8, 1.9, -3.18);
-    roomGroup.add(artFrame);
-
-    const artCanvas = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.3, 0.8),
-      new THREE.MeshBasicMaterial({ color: 0x20c4b4 })
-    );
-    artCanvas.position.set(1.8, 1.9, -3.16);
-    roomGroup.add(artCanvas);
 
     scene.add(roomGroup);
     interactiveMeshesRef.current = interactables;
+    objectWorldPositionsRef.current = worldPosMap;
 
-    // Raycaster for Hover & Selection
+    // Raycaster for Hover & Selection with Priority Sorting
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -774,16 +804,22 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
       const intersects = raycaster.intersectObjects(interactiveMeshesRef.current, true);
 
       if (intersects.length > 0) {
-        let hitObj = intersects[0].object;
-        while (hitObj && !hitObj.userData?.key && hitObj.parent) {
-          hitObj = hitObj.parent;
-        }
+        // Sort intersects by priority descending (highest priority wins), then by distance
+        intersects.sort((a, b) => {
+          const prioA = a.object.userData?.priority || 0;
+          const prioB = b.object.userData?.priority || 0;
+          if (prioB !== prioA) return prioB - prioA;
+          return a.distance - b.distance;
+        });
+
+        const hitObj = intersects[0].object;
         if (hitObj?.userData?.key) {
           setHoveredObjectName(hitObj.userData.key);
           canvas.style.cursor = "pointer";
           return;
         }
       }
+
       setHoveredObjectName(null);
       canvas.style.cursor = "default";
     };
@@ -797,10 +833,14 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
       const intersects = raycaster.intersectObjects(interactiveMeshesRef.current, true);
 
       if (intersects.length > 0) {
-        let hitObj = intersects[0].object;
-        while (hitObj && !hitObj.userData?.key && hitObj.parent) {
-          hitObj = hitObj.parent;
-        }
+        intersects.sort((a, b) => {
+          const prioA = a.object.userData?.priority || 0;
+          const prioB = b.object.userData?.priority || 0;
+          if (prioB !== prioA) return prioB - prioA;
+          return a.distance - b.distance;
+        });
+
+        const hitObj = intersects[0].object;
         if (hitObj?.userData?.key) {
           focusOnObject(hitObj.userData.key);
         }
@@ -870,6 +910,24 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
       camera.position.z = Math.max(-2.8, Math.min(2.8, camera.position.z));
       camera.position.y = Math.max(0.6, Math.min(2.8, camera.position.y));
 
+      // Calculate screen-space coordinates for the active object
+      const activeKey = selectedObject || hoveredObjectName;
+      if (activeKey && objectWorldPositionsRef.current[activeKey]) {
+        const worldPos = objectWorldPositionsRef.current[activeKey].clone();
+        worldPos.y += 0.25; // Offset slightly above object
+        worldPos.project(camera);
+
+        if (worldPos.z < 1.0) {
+          const sx = (worldPos.x * 0.5 + 0.5) * container.clientWidth;
+          const sy = (-(worldPos.y * 0.5) + 0.5) * container.clientHeight;
+          setScreenCoords({ x: sx, y: sy, key: activeKey });
+        } else {
+          setScreenCoords(null);
+        }
+      } else {
+        setScreenCoords(null);
+      }
+
       controls.update();
       renderer.render(scene, camera);
     };
@@ -884,9 +942,9 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
       controls.dispose();
       renderer.dispose();
     };
-  }, [isWebGLSupported, focusOnObject]);
+  }, [isWebGLSupported, focusOnObject, selectedObject, hoveredObjectName]);
 
-  const activeFact = selectedObject ? OBJECT_QUANTUM_FACTS[selectedObject] : null;
+  const activeFact = selectedObject ? BEDROOM_QUANTUM_FACTS[selectedObject] : null;
 
   return (
     <div className="bedroom-modal-backdrop" role="dialog" aria-modal="true" aria-label="Walkable 3D Bedroom">
@@ -913,12 +971,22 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
                 <span className="hud-env-name">Walkable 3D Bedroom</span>
               </div>
 
+              {/* Environment Switcher */}
+              <div className="environment-selector-hud">
+                <button className="env-switch-btn active" title="Currently in Bedroom Simulation">
+                  <span>Bedroom</span>
+                </button>
+                <button onClick={onSwitchToStreet} className="env-switch-btn" title="Switch to 3D Street Simulation">
+                  <span>Street</span>
+                </button>
+              </div>
+
               {/* Time of Day Lighting Controls */}
               <div className="time-of-day-picker">
                 <button
                   onClick={() => applyTimeOfDay("day")}
                   className={`tod-btn ${timeOfDay === "day" ? "active" : ""}`}
-                  title="Daylight illumination"
+                  title="Daylight mode"
                   aria-label="Daylight mode"
                 >
                   <Sun size={14} />
@@ -927,16 +995,16 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
                 <button
                   onClick={() => applyTimeOfDay("twilight")}
                   className={`tod-btn ${timeOfDay === "twilight" ? "active" : ""}`}
-                  title="Twilight study atmosphere"
+                  title="Twilight mode"
                   aria-label="Twilight mode"
                 >
                   <Sunset size={14} />
-                  <span>Twilight</span>
+                  <span>Dusk</span>
                 </button>
                 <button
                   onClick={() => applyTimeOfDay("night")}
                   className={`tod-btn ${timeOfDay === "night" ? "active" : ""}`}
-                  title="Midnight study atmosphere"
+                  title="Night mode"
                   aria-label="Night mode"
                 >
                   <Moon size={14} />
@@ -944,44 +1012,68 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
                 </button>
               </div>
 
-              {/* Camera Reset & Close Buttons */}
-              <div className="hud-actions">
+              {/* Quick Actions HUD */}
+              <div className="hud-actions-group">
+                <button
+                  onClick={onToggleTweak}
+                  className="hud-action-btn tweak-trigger"
+                  title="Open Simulation Tweak Panel [T]"
+                >
+                  <Sliders size={14} />
+                  <span>Tweak [T]</span>
+                </button>
+
                 <button
                   onClick={handleResetCamera}
                   className="hud-action-btn"
-                  title="Reset Camera Position"
-                  aria-label="Reset camera"
+                  title="Reset Camera [R]"
+                  aria-label="Reset Camera View"
                 >
-                  <RotateCcw size={15} />
-                  <span>Reset Camera</span>
+                  <RotateCcw size={14} />
+                  <span>Reset [R]</span>
                 </button>
 
                 <button
-                  onClick={() => setShowHelp(!showHelp)}
+                  onClick={() => setShowHelp((prev) => !prev)}
                   className={`hud-action-btn ${showHelp ? "active" : ""}`}
-                  title="Controls Guide"
-                  aria-label="Toggle help"
+                  title="Toggle Controls Guide [H]"
+                  aria-label="Toggle Controls Help"
                 >
-                  <HelpCircle size={15} />
+                  <HelpCircle size={14} />
                 </button>
 
-                <button
-                  onClick={onClose}
-                  className="hud-action-btn close-btn"
-                  title="Exit 3D Room"
-                  aria-label="Close 3D Room"
-                >
+                <button onClick={onClose} className="hud-action-btn close-btn" title="Exit Room [Esc]">
                   <X size={17} />
-                  <span>Exit Room</span>
+                  <span>Exit</span>
                 </button>
               </div>
             </div>
 
-            {/* Hover Target Crosshair Indicator */}
-            {hoveredObjectName && (
-              <div className="hover-indicator-pill">
-                <Sparkles size={13} color="var(--color-copper)" />
-                <span>Click to Inspect {OBJECT_QUANTUM_FACTS[hoveredObjectName]?.title || hoveredObjectName}</span>
+            {/* Screen-Space Projected Contextual Toolbar Anchor */}
+            {screenCoords && (
+              <div
+                className="screen-space-anchor-pill"
+                style={{
+                  transform: `translate(${screenCoords.x}px, ${screenCoords.y}px)`
+                }}
+              >
+                <div className="anchor-dot" />
+                <div className="anchor-card">
+                  <div className="anchor-title-row">
+                    <Sparkles size={12} color="var(--color-teal, #35d6d0)" />
+                    <strong>{BEDROOM_QUANTUM_FACTS[screenCoords.key]?.title || screenCoords.key}</strong>
+                  </div>
+                  <div className="anchor-actions">
+                    <button onClick={() => focusOnObject(screenCoords.key)} className="anchor-btn inspect-btn">
+                      Inspect [E]
+                    </button>
+                    {selectedObject === screenCoords.key && (
+                      <button onClick={() => setSelectedObject(null)} className="anchor-btn close-sub-btn">
+                        Deselect [Esc]
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -990,13 +1082,13 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
               <div className="object-quantum-drawer">
                 <div className="drawer-header">
                   <div className="drawer-title-row">
-                    <Atom size={18} color="var(--color-teal)" />
+                    <Atom size={18} color="var(--color-teal, #35d6d0)" />
                     <h4 className="drawer-title font-serif">{activeFact.title}</h4>
                   </div>
                   <button
                     onClick={() => setSelectedObject(null)}
                     className="drawer-close-btn"
-                    aria-label="Close briefing"
+                    aria-label="Close briefing [Esc]"
                   >
                     <X size={15} />
                   </button>
@@ -1007,20 +1099,68 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
                   <strong>{activeFact.phenomenon}</strong>
                 </div>
 
-                <p className="drawer-summary">{activeFact.summary}</p>
-
-                {selectedObject === "laptop" && (
+                {/* Macro vs Quantum View Mode Switcher */}
+                <div className="view-mode-tabs">
                   <button
-                    onClick={() => {
-                      onClose();
-                      onOpenLab?.();
-                    }}
-                    className="drawer-action-btn"
+                    onClick={() => setViewMode("macro")}
+                    className={`mode-tab ${viewMode === "macro" ? "active" : ""}`}
                   >
-                    <span>Launch Quantum Lab Simulation</span>
-                    <ExternalLink size={14} />
+                    <span>Macroscopic Physical View</span>
                   </button>
+                  <button
+                    onClick={() => setViewMode("quantum")}
+                    className={`mode-tab ${viewMode === "quantum" ? "active" : ""}`}
+                  >
+                    <span>Microscopic Quantum View</span>
+                  </button>
+                </div>
+
+                {viewMode === "macro" ? (
+                  <div className="view-mode-content">
+                    <p className="drawer-summary">{activeFact.macroscopicSummary}</p>
+                    <div className="scale-indicator">
+                      <Scale size={13} color="var(--color-copper, #c67248)" />
+                      <span>{activeFact.scale}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="view-mode-content">
+                    <p className="drawer-summary">{activeFact.quantumSummary}</p>
+                    <div className="equation-box">
+                      <code>{activeFact.equation}</code>
+                    </div>
+                    <div className="citation-note">
+                      <span>Source: {activeFact.citation}</span>
+                    </div>
+                  </div>
                 )}
+
+                <div className="drawer-actions-row">
+                  {selectedObject === "laptop" && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenLab?.();
+                      }}
+                      className="drawer-action-btn"
+                    >
+                      <span>Launch Quantum Lab Simulation</span>
+                      <ExternalLink size={14} />
+                    </button>
+                  )}
+                  {selectedObject === "water" && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onOpenLab?.();
+                      }}
+                      className="drawer-action-btn"
+                    >
+                      <span>Simulate Atomic Barrier Tunneling</span>
+                      <ExternalLink size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1028,23 +1168,27 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
             {showHelp && (
               <div className="bedroom-help-panel">
                 <div className="help-header">
-                  <Compass size={14} color="var(--color-teal)" />
-                  <span>3D Navigation &amp; Interaction</span>
+                  <Compass size={14} color="var(--color-teal, #35d6d0)" />
+                  <span>3D Navigation &amp; Hotkeys</span>
                 </div>
                 <ul className="help-list">
                   <li><strong>WASD / Arrows:</strong> Walk through the bedroom</li>
-                  <li><strong>Mouse Drag:</strong> Look around &amp; rotate camera</li>
-                  <li><strong>Scroll Wheel:</strong> Zoom in &amp; inspect details</li>
-                  <li><strong>Click Object:</strong> Inspect quantum physical laws</li>
+                  <li><strong>Mouse Drag:</strong> Orbit camera &amp; look around</li>
+                  <li><strong>Scroll:</strong> Zoom into desk &amp; glass details</li>
+                  <li><strong>E:</strong> Inspect hovered object</li>
+                  <li><strong>F:</strong> Focus camera on selected object</li>
+                  <li><strong>T:</strong> Open / close Simulation Tweak panel</li>
+                  <li><strong>Q:</strong> Launch analytical Quantum Lab</li>
+                  <li><strong>Esc:</strong> Deselect / close drawer</li>
                 </ul>
                 <div className="interactive-tags">
-                  <span className="tag-label">Clickable:</span>
-                  <button onClick={() => focusOnObject("laptop")} className="quick-obj-tag">Laptop</button>
+                  <span className="tag-label">Inspectable:</span>
                   <button onClick={() => focusOnObject("water")} className="quick-obj-tag">Glass of Water</button>
+                  <button onClick={() => focusOnObject("laptop")} className="quick-obj-tag">Laptop</button>
                   <button onClick={() => focusOnObject("chair")} className="quick-obj-tag">Chair</button>
                   <button onClick={() => focusOnObject("desk")} className="quick-obj-tag">Desk</button>
                   <button onClick={() => focusOnObject("bed")} className="quick-obj-tag">Bed</button>
-                  <button onClick={() => focusOnObject("window")} className="quick-obj-tag">Window</button>
+                  <button onClick={() => focusOnObject("books")} className="quick-obj-tag">Books</button>
                 </div>
               </div>
             )}
@@ -1056,11 +1200,11 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
         .bedroom-modal-backdrop {
           position: fixed;
           inset: 0;
-          z-index: 10000;
-          background: #0B0D11;
+          z-index: 950;
+          background: #0d121c;
           display: flex;
-          align-items: center;
-          justify-content: center;
+          flex-direction: column;
+          animation: fadeIn 0.2s ease-out;
         }
 
         .bedroom-viewport-container {
@@ -1071,187 +1215,243 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
         }
 
         .bedroom-canvas {
-          display: block;
           width: 100%;
           height: 100%;
-          outline: none;
+          display: block;
         }
 
-        /* Top HUD */
         .bedroom-top-hud {
           position: absolute;
-          top: 18px;
-          left: 20px;
-          right: 20px;
+          top: 14px;
+          left: 18px;
+          right: 18px;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          background: rgba(18, 21, 29, 0.88);
+          backdrop-filter: blur(14px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 8px;
+          padding: 8px 16px;
           z-index: 20;
-          pointer-events: none;
-          flex-wrap: wrap;
-          gap: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .hud-title-badge {
-          display: inline-flex;
+          display: flex;
           align-items: center;
           gap: 8px;
-          background: rgba(18, 21, 29, 0.88);
-          backdrop-filter: blur(12px);
-          border: 1px solid var(--border-stone);
-          padding: 7px 16px;
-          border-radius: var(--radius-full);
-          pointer-events: auto;
-          box-shadow: var(--shadow-sm);
+          font-family: monospace;
+          font-size: 0.82rem;
         }
 
         .hud-dot {
-          width: 8px;
-          height: 8px;
+          width: 7px;
+          height: 7px;
           border-radius: 50%;
-          background: var(--color-teal);
-          box-shadow: 0 0 8px var(--color-teal);
+          background: #35d6d0;
+          box-shadow: 0 0 8px #35d6d0;
         }
 
         .hud-brand {
-          font-size: 1.05rem;
           font-weight: 700;
-          color: var(--color-text-main);
+          letter-spacing: 0.08em;
+          color: #ffffff;
         }
 
         .hud-separator {
-          color: var(--color-text-muted);
+          color: rgba(255, 255, 255, 0.25);
         }
 
         .hud-env-name {
-          font-family: var(--font-mono);
-          font-size: 0.8rem;
-          color: var(--color-copper);
+          color: #c67248;
           font-weight: 600;
         }
 
-        .time-of-day-picker {
-          display: inline-flex;
-          background: rgba(18, 21, 29, 0.88);
-          backdrop-filter: blur(12px);
-          border: 1px solid var(--border-stone);
-          border-radius: var(--radius-full);
-          padding: 4px;
+        .environment-selector-hud {
+          display: flex;
           gap: 4px;
-          pointer-events: auto;
+          background: rgba(0, 0, 0, 0.4);
+          padding: 3px;
+          border-radius: 6px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .env-switch-btn {
+          background: transparent;
+          border: none;
+          color: #8c9bb3;
+          padding: 4px 12px;
+          border-radius: 4px;
+          font-size: 0.76rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .env-switch-btn.active {
+          background: #c67248;
+          color: #ffffff;
+        }
+
+        .env-switch-btn:hover:not(.active) {
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .time-of-day-picker {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          background: rgba(0, 0, 0, 0.35);
+          padding: 3px;
+          border-radius: 6px;
         }
 
         .tod-btn {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          padding: 5px 12px;
-          border-radius: var(--radius-full);
-          font-size: 0.78rem;
-          font-family: var(--font-mono);
-          color: var(--color-text-secondary);
+          gap: 5px;
+          background: transparent;
+          border: none;
+          color: #8c9bb3;
+          padding: 4px 10px;
+          border-radius: 4px;
+          font-size: 0.74rem;
           cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .tod-btn:hover {
-          color: var(--color-text-main);
+          transition: all 0.15s ease;
         }
 
         .tod-btn.active {
-          background: rgba(255, 255, 255, 0.12);
-          color: var(--color-text-main);
-          font-weight: 600;
+          background: rgba(198, 114, 72, 0.25);
+          color: #ffffff;
         }
 
-        .hud-actions {
+        .hud-actions-group {
           display: flex;
           align-items: center;
           gap: 8px;
-          pointer-events: auto;
         }
 
         .hud-action-btn {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(18, 21, 29, 0.88);
-          backdrop-filter: blur(12px);
-          border: 1px solid var(--border-stone);
-          color: var(--color-text-main);
-          padding: 7px 14px;
-          border-radius: var(--radius-full);
-          font-size: 0.8rem;
-          font-family: var(--font-sans);
-          font-weight: 500;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 0.76rem;
+          font-family: monospace;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.15s ease;
+        }
+
+        .hud-action-btn.tweak-trigger {
+          background: rgba(53, 214, 208, 0.16);
+          border-color: #35d6d0;
+          color: #35d6d0;
+          font-weight: 600;
         }
 
         .hud-action-btn:hover {
-          background: rgba(30, 36, 48, 0.95);
-          border-color: var(--color-teal);
-        }
-
-        .hud-action-btn.active {
-          border-color: var(--color-teal);
-          color: var(--color-teal);
+          background: rgba(255, 255, 255, 0.12);
         }
 
         .hud-action-btn.close-btn {
-          background: rgba(198, 114, 72, 0.18);
+          background: rgba(198, 114, 72, 0.2);
           border-color: rgba(198, 114, 72, 0.5);
-          color: #FFFFFF;
         }
 
-        .hud-action-btn.close-btn:hover {
-          background: rgba(198, 114, 72, 0.35);
-        }
-
-        /* Hover indicator */
-        .hover-indicator-pill {
+        /* Screen-space projected anchor card */
+        .screen-space-anchor-pill {
           position: absolute;
-          bottom: 28px;
-          left: 50%;
-          transform: translateX(-50%);
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          background: rgba(18, 21, 29, 0.9);
-          backdrop-filter: blur(10px);
-          border: 1px solid var(--color-copper-border);
-          padding: 7px 18px;
-          border-radius: var(--radius-full);
-          font-family: var(--font-mono);
-          font-size: 0.82rem;
-          color: #FFFFFF;
-          pointer-events: none;
+          top: 0;
+          left: 0;
+          pointer-events: auto;
           z-index: 15;
-          animation: fadeIn 0.15s ease;
+          transform-origin: center bottom;
         }
 
-        /* Quantum Briefing Drawer */
+        .anchor-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #35d6d0;
+          box-shadow: 0 0 10px #35d6d0;
+          margin: 0 auto 4px auto;
+        }
+
+        .anchor-card {
+          background: rgba(18, 21, 29, 0.94);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(53, 214, 208, 0.4);
+          padding: 8px 12px;
+          border-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .anchor-title-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.78rem;
+          color: #ffffff;
+        }
+
+        .anchor-actions {
+          display: flex;
+          gap: 6px;
+        }
+
+        .anchor-btn {
+          border: none;
+          border-radius: 4px;
+          padding: 3px 8px;
+          font-size: 0.7rem;
+          font-family: monospace;
+          cursor: pointer;
+        }
+
+        .inspect-btn {
+          background: #35d6d0;
+          color: #0b1020;
+          font-weight: 700;
+        }
+
+        .close-sub-btn {
+          background: rgba(255, 255, 255, 0.1);
+          color: #a9b6cf;
+        }
+
+        /* Object Drawer */
         .object-quantum-drawer {
           position: absolute;
-          top: 80px;
+          top: 75px;
           right: 20px;
-          width: 360px;
+          width: 380px;
+          max-width: calc(100vw - 30px);
           background: rgba(18, 21, 29, 0.95);
           backdrop-filter: blur(16px);
-          border: 1px solid var(--border-stone);
-          border-left: 3px solid var(--color-teal);
-          border-radius: var(--radius-md);
-          padding: 22px;
-          box-shadow: var(--shadow-float);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-left: 3px solid #35d6d0;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
           z-index: 25;
-          animation: slideInRight 0.25s ease-out;
+          animation: slideInRight 0.22s ease-out;
+          color: #f4f7ff;
         }
 
         .drawer-header {
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           justify-content: space-between;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
 
         .drawer-title-row {
@@ -1261,170 +1461,192 @@ export default function Bedroom3D({ onClose, onOpenLab }) {
         }
 
         .drawer-title {
-          font-size: 1.15rem;
-          color: var(--color-text-main);
-          font-weight: 600;
+          font-size: 1.05rem;
+          margin: 0;
+          color: #ffffff;
         }
 
         .drawer-close-btn {
-          color: var(--color-text-muted);
+          background: transparent;
+          border: none;
+          color: #a9b6cf;
           cursor: pointer;
-          padding: 4px;
-        }
-
-        .drawer-close-btn:hover {
-          color: var(--color-text-main);
         }
 
         .drawer-phenomenon-badge {
+          background: rgba(53, 214, 208, 0.12);
+          border: 1px solid rgba(53, 214, 208, 0.25);
+          border-radius: 6px;
+          padding: 6px 10px;
+          font-size: 0.72rem;
+          margin-bottom: 14px;
           display: flex;
           flex-direction: column;
-          font-size: 0.74rem;
-          font-family: var(--font-mono);
-          color: var(--color-copper);
-          margin-bottom: 10px;
-          background: var(--color-copper-dim);
-          border: 1px solid var(--color-copper-border);
-          padding: 4px 8px;
-          border-radius: 4px;
+          gap: 2px;
+        }
+
+        .drawer-phenomenon-badge span {
+          color: #8c9bb3;
+        }
+
+        .drawer-phenomenon-badge strong {
+          color: #35d6d0;
+          font-family: monospace;
+        }
+
+        .view-mode-tabs {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 6px;
+          margin-bottom: 12px;
+        }
+
+        .mode-tab {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #8c9bb3;
+          border-radius: 6px;
+          padding: 6px;
+          font-size: 0.72rem;
+          cursor: pointer;
+        }
+
+        .mode-tab.active {
+          background: rgba(53, 214, 208, 0.18);
+          border-color: #35d6d0;
+          color: #ffffff;
+          font-weight: 600;
+        }
+
+        .view-mode-content {
+          margin-bottom: 14px;
         }
 
         .drawer-summary {
-          font-size: 0.88rem;
-          color: var(--color-text-secondary);
-          line-height: 1.6;
-          margin-bottom: 16px;
+          font-size: 0.8rem;
+          line-height: 1.5;
+          color: #d1d9ea;
+          margin: 0 0 10px 0;
+        }
+
+        .scale-indicator {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.72rem;
+          color: #c67248;
+          font-family: monospace;
+        }
+
+        .equation-box {
+          background: rgba(0, 0, 0, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 6px;
+          padding: 8px 12px;
+          font-family: monospace;
+          color: #35d6d0;
+          font-size: 0.82rem;
+          margin-bottom: 8px;
+        }
+
+        .citation-note {
+          font-size: 0.68rem;
+          color: #6b7c96;
+          font-style: italic;
         }
 
         .drawer-action-btn {
           width: 100%;
-          display: inline-flex;
+          display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
-          padding: 10px;
-          border-radius: var(--radius-sm);
-          background: var(--color-teal);
-          color: #0B0D11;
+          background: #c67248;
+          color: #ffffff;
+          border: none;
+          padding: 9px 14px;
+          border-radius: 6px;
           font-weight: 700;
-          font-size: 0.84rem;
-          font-family: var(--font-mono);
+          font-size: 0.8rem;
           cursor: pointer;
-          transition: opacity 0.2s ease;
+          transition: background 0.15s ease;
         }
 
         .drawer-action-btn:hover {
-          opacity: 0.9;
+          background: #d88358;
         }
 
-        /* Help Panel */
+        /* Help panel */
         .bedroom-help-panel {
           position: absolute;
-          bottom: 24px;
+          bottom: 20px;
           left: 20px;
           width: 320px;
           background: rgba(18, 21, 29, 0.92);
-          backdrop-filter: blur(12px);
-          border: 1px solid var(--border-stone);
-          border-radius: var(--radius-md);
-          padding: 16px 18px;
+          backdrop-filter: blur(14px);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 10px;
+          padding: 14px 16px;
           z-index: 15;
+          color: #f4f7ff;
+          font-size: 0.76rem;
         }
 
         .help-header {
           display: flex;
           align-items: center;
-          gap: 7px;
-          font-family: var(--font-mono);
-          font-size: 0.78rem;
+          gap: 6px;
           font-weight: 600;
-          text-transform: uppercase;
-          color: var(--color-text-main);
           margin-bottom: 8px;
+          color: #ffffff;
         }
 
         .help-list {
           list-style: none;
+          padding: 0;
+          margin: 0 0 10px 0;
           display: flex;
           flex-direction: column;
           gap: 4px;
-          font-size: 0.76rem;
-          color: var(--color-text-secondary);
-          margin-bottom: 12px;
+          color: #a9b6cf;
         }
 
         .help-list strong {
-          color: var(--color-text-main);
+          color: #e2e8f5;
+          font-family: monospace;
         }
 
         .interactive-tags {
           display: flex;
-          align-items: center;
-          gap: 6px;
           flex-wrap: wrap;
+          gap: 5px;
+          align-items: center;
         }
 
         .tag-label {
-          font-size: 0.7rem;
-          font-family: var(--font-mono);
-          color: var(--color-text-muted);
+          font-size: 0.68rem;
+          color: #6b7c96;
         }
 
         .quick-obj-tag {
-          font-size: 0.72rem;
-          font-family: var(--font-mono);
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          color: #35d6d0;
           padding: 2px 7px;
           border-radius: 4px;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid var(--border-subtle);
-          color: var(--color-teal);
+          font-size: 0.68rem;
+          font-family: monospace;
           cursor: pointer;
-          transition: background 0.15s ease;
         }
 
         .quick-obj-tag:hover {
-          background: rgba(32, 196, 180, 0.2);
+          background: rgba(53, 214, 208, 0.15);
         }
 
         .bedroom-fallback {
-          padding: 80px 20px;
+          padding: 60px 20px;
           text-align: center;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .fallback-close-btn {
-          padding: 8px 18px;
-          background: var(--color-copper);
-          color: #FFFFFF;
-          border-radius: var(--radius-full);
-          font-weight: 600;
-          cursor: pointer;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translate(-50%, 6px); }
-          to { opacity: 1; transform: translate(-50%, 0); }
-        }
-
-        @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(20px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-
-        @media (max-width: 768px) {
-          .object-quantum-drawer {
-            left: 20px;
-            right: 20px;
-            width: auto;
-            top: auto;
-            bottom: 20px;
-          }
-          .bedroom-help-panel {
-            display: none;
-          }
+          color: #ffffff;
         }
       `}</style>
     </div>

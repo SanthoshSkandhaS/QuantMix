@@ -1,89 +1,101 @@
 # QuantMix — Virtual Quantum Mechanics Explorer
 
-> **“What if our world behaved according to the laws of Quantum Mechanics”**  
+> **“What if our world behaved according to the laws of Quantum Mechanics?”**  
 > *Step into the familiar. Discover the extraordinary hidden within it.*
+
+Existing Website: [https://quant-mix.vercel.app/](https://quant-mix.vercel.app/)  
+GitHub Repository: [https://github.com/SanthoshSkandhaS/QuantMix](https://github.com/SanthoshSkandhaS/QuantMix)
 
 ---
 
 ## 🌌 Overview
 
-**QuantMix** is an interactive educational platform designed to make quantum physics intuitive and tangible by anchoring it in everyday experiences. Rather than treating quantum mechanics as an abstract mathematical curiosity confined to laboratories, QuantMix reveals how our macroscopic everyday world—from the solidity of a bedroom floor to solar cells and photosynthesis—is governed by quantum laws.
+**QuantMix** is an interactive, scientifically grounded 3D exploration platform designed to make quantum mechanics intuitive and tangible by anchoring it in everyday experiences. Rather than treating quantum physics as an abstract mathematical curiosity confined to distant laboratories, QuantMix demonstrates how our macroscopic everyday world—from the solidity of a bedroom floor to streetlights, semiconductors, and nuclear fusion—is governed by fundamental quantum laws.
 
 ---
 
-## 🎯 Milestone 1 Deliverables (Active)
+## 🔬 Core Implemented Systems
 
-This repository contains **Milestone 1**: an exceptionally polished, responsive, and functional homepage establishing the design tokens, visual atmosphere, interactive mechanics, and architectural component boundaries for future milestones.
+### 1. Walkable 3D Bedroom Simulation
+- **Three.js WebGL Architecture**: Realistic indoor lighting, soft task-lamp spotlights, ambient shadows, PBR material properties, and procedural wood and linen textures.
+- **Priority Raycasting & Selection Lock**: The glass of water uses a dedicated priority hit collider (`priority: 100` vs desk `priority: 5`), completely resolving the cursor-drift issue where the desk stole selection focus. Selection lock ensures cursor movement or camera repositioning never switches target accidentally.
+- **Screen-Space 2D Floating Anchor**: 3D world coordinates are projected to pixel space, rendering an intuitive, stable contextual pill directly adjacent to the inspected object.
+- **Dual Inspection Modes**:
+  - *Macroscopic Physical View*: Rigid-body mechanics, mass, volume, and classical gravity.
+  - *Microscopic Quantum View*: Explains Pauli Exclusion Principle, antisymmetric electron wavefunctions ($\Psi(\mathbf{r}_1, \mathbf{r}_2) = -\Psi(\mathbf{r}_2, \mathbf{r}_1)$), and electron degeneracy pressure explaining why ordinary matter resists compression.
+- **Conflict-Free Keyboard Shortcuts**:
+  - `E` — Inspect or interact with selected object
+  - `Esc` — Close inspection or deselect
+  - `R` — Reset object position and orientation
+  - `F` — Smooth camera focus on selected object
+  - `T` — Open / close live Tweak Panel
+  - `Q` — Open Quantum Laboratory
+  - `H` — Toggle on-screen Controls HUD
+  - `M` — Seamlessly switch to 3D Street environment
+  - `WASD` / Mouse Drag — Move and orbit camera
 
-### Key Implemented Features:
-1. **Four-Second Atomic Intro**
-   - High-fidelity Canvas 2D simulation depicting quantum wave packets approaching, interfering, and scattering with luminous trails.
-   - Coalesces into the QuantMix atomic emblem and subtitle.
-   - Includes an immediate **Skip Intro** button and `Esc` keyboard shortcut.
-   - Session storage memory prevents repeated plays on page reloads; can be replayed anytime via the **Replay Intro** control.
-   - Full support for `prefers-reduced-motion`.
+### 2. Lively 3D Street Simulation
+- **Full Urban 3D Environment**: 4-lane roadway with dashed lane markings, yellow double centerlines, zebra crosswalks, concrete sidewalks, 6 commercial buildings, 4 cast-iron streetlights with directional spotlights, parked sedan, dynamic cruising vehicle, and glass transit shelter.
+- **Time of Day Modes**: Real-time switching between Daylight, Sunset, and Night illumination.
+- **Interactive Street Objects**: Raycasting on traffic signals, streetlights, asphalt, vehicles, and bus shelters revealing their underlying quantum photonics, GaN direct bandgap emission, total internal reflection, and photovoltaic sensors.
+- **Bidirectional Navigation**: Instant environment transition between Bedroom and Street via in-world HUD buttons or `M` shortcut.
 
-2. **Hero & Signature Flowing-Wave Start Button**
-   - Exact brand tagline and subtitle.
-   - Prominent **Start Exploring** button surrounded by undulating quantum field wave ripples in Teal (`#35D6D0`) and Violet (`#9B8CFF`).
-   - Dynamic expanding disturbance wave upon activation with smooth scroll transition.
-   - Physical telemetry badges displaying fundamental quantum constants ($\hbar, c$, superposition states).
+### 3. Analytical 1D Quantum Mechanics Laboratory
+- **Stationary 1D Schrödinger Barrier Solver**: Evaluates exact boundary conditions for a finite rectangular potential barrier without discretization artifacts:
+  $$-\frac{\hbar^2}{2m}\frac{d^2\psi(x)}{dx^2} + V(x)\psi(x) = E\psi(x)$$
+- **Strict Conservation**: Verifies continuous probability current conservation identity:
+  $$R + T = 1.000000 \quad (\Delta < 10^{-12})$$
+- **Dual Visualizations**:
+  - *3D Rotating Complex Wavefunction Helix*: Depicts spatial profile where horizontal axis is $x$, vertical displacement is $\text{Re}[\Psi]$, and depth is $\text{Im}[\Psi]$.
+  - *Dynamic Wavepacket Simulation*: Demonstrates wavepacket collision, evanescent tunneling, and partial reflection.
+  - *2D Probability Density Canvas*: Cross-sectional plot of $|\Psi(x)|^2$ versus potential barrier $V(x)$.
+- **Variable Particle Species**:
+  - **Electron** ($m = 1.0 \, m_e$)
+  - **Muon** ($m = 206.8 \, m_e$)
+  - **Proton** ($m = 1836.2 \, m_e$)
+  - **Alpha Particle** ($m = 7294.3 \, m_e$)  
+  Directly demonstrates how increasing particle mass exponentially magnifies attenuation constant $\kappa = \sqrt{2m(V_0 - E)}/\hbar$, suppressing transmission and explaining why macroscopic objects never tunnel.
 
-3. **Random Quantum Fact Discovery System**
-   - Section heading: **“Small things. Strange rules.”**
-   - Curated, scientifically validated collection of **22 quantum principles** (wave-particle duality, tunneling, entanglement, Pauli exclusion, semiconductors, Casimir effect, etc.).
-   - Strict non-repetition algorithm using `localStorage` rotation memory: resets only after all 22 facts are discovered.
-   - Interactive dual-mode live wave monitor (Double-Slit wave interference vs. 3D orbital probability density).
-   - "Explore deeper" mechanical explanation drawer and verified authoritative citations (NIST, Nobel Prize, HyperPhysics, MIT OCW, CERN).
+### 4. Classical vs. Quantum Comparison Engine
+- **Synchronized Side-by-Side Predictions**:
+  - *Classical Mechanics*: For $E < V_0$, kinetic energy $K = E - V_0 < 0$ requires an imaginary velocity. Classical physics predicts $100\%$ reflection ($T_{\text{class}} = 0, R_{\text{class}} = 100\%$).
+  - *Quantum Mechanics*: Wave boundary matching at $x = 0$ and $x = L$ produces an evanescent decaying tail that yields non-zero transmission ($T_{\text{quant}} > 0$).
+  - For $E > V_0$, demonstrates quantum reflection ($R > 0$) caused by the step potential impedance mismatch, contrasting with classical $100\%$ transmission.
 
-4. **Environment Exploration Showcase**
-   - Section heading: **“Your everyday world, seen differently.”**
-   - Six visual destinations:
-     1. **Your Room** *(Primary Milestone 1 Focus & Next In-Engine Environment)*
-     2. **The Sky**
-     3. **The Street**
-     4. **A Football Field**
-     5. **Inside a Bus**
-     6. **Inside the Human Body**
-   - Architectural preview drawers detailing mapped physical objects, quantum phenomena, and planned 3D mechanics.
+### 5. Floating Tweak Panel [T] & Config A/B Comparator
+- **Live Parameter Controls**: Slider and numeric controls for Particle Energy $E$ (eV), Barrier Height $V_0$ (eV), Barrier Width $L$ (nm), and species mass.
+- **Physical Presets**: STM Vacuum Gap, Transmission Resonance (Ramsauer-Townsend effect), Macroscopic Wall, Critical Threshold, and Nuclear Alpha Decay (Gamow theory).
+- **Experiment Comparison Workflow**: Allows saving Snapshot A and Snapshot B to compare dual calculated curves, transmission deltas, and attenuation ratios side-by-side in real time.
 
-5. **The Quantum Lab Preview**
-   - Introduces upcoming parameter adjustment experiments.
-   - Features first experiment: **Quantum Tunnelling Through a Potential Barrier**.
-   - Addresses beginner question: *“What happens if a particle encounters a narrower barrier?”*
-   - Illustrative before-and-after comparison ($w = 2.4\text{ nm}$ vs. $w = 0.8\text{ nm}$) showing transmission probability jump from $0.04\%$ to $42.1\%$.
-   - Dynamic SVG wavefunction diagram illustrating incident, decayed, and transmitted waves.
-
-6. **QuAntI — Future AI Companion Preview**
-   - Assistant name: **QuAntI**.
-   - Subtitle: *“Ask anything. Understand the strange. Discover what to change next.”*
-   - Stylized quantum orbital avatar with pulsing core.
-   - Interactive question chips demonstrating planned concise 1–3 sentence demeanor and experimental parameter recommendations.
-   - Clean architectural component boundary (`src/components/QuAntIPreview.jsx`) ready for future server-side AI integration.
-
-7. **Ambient Quantum Field Canvas**
-   - Responsive multi-frequency wave interference contours.
-   - Coherent particles linked by quantum state threads with gentle pointer repulsion.
-   - Automatically pauses on tab blur to preserve system resources.
+### 6. QuAntI — Context-Aware Scientific Intelligence Engine
+- **Live Simulation Telemetry**: Automatically receives active environment, selected object, particle species, $E, V_0, L$, and computed $T, R, \kappa, \lambda$.
+- **Authoritative Textbook Grounding**:
+  - OpenStax University Physics Vol 1 (Classical Mechanics)
+  - OpenStax University Physics Vol 3 (Ch 7: Quantum Mechanics & Tunneling, Ch 8: Exclusion Principle)
+  - MIT OpenCourseWare 8.04 (Quantum Physics I: 1D Barrier Scattering)
+  - Reviews of Modern Physics 75, 715 (Scattering Formalism in Nanostructures)
+- **Active Dialogue Console**: Free-form question input with Enter submission, prompt question chips, KaTeX mathematical typesetting, parameter recommendations, and textbook citations.
+- **Safe Provider Integration**: Supports optional live API key (`VITE_OPENAI_API_KEY` / `VITE_GEMINI_API_KEY`) with deterministic retrieval fallback.
 
 ---
 
-## 🎨 Color Palette & Design Tokens
+## 🗺️ Project Roadmap & Status
 
-- **Midnight Cosmos** — `#0B1020`: Primary atmospheric background
-- **Deep Slate** — `#111B2E`: Panels and elevated surfaces
-- **Quantum Teal** — `#35D6D0`: Primary interactive accent
-- **Wave Violet** — `#9B8CFF`: Quantum effects and secondary accent
-- **Main Text** — `#F4F7FF`: Headings and prominent text
-- **Secondary Text** — `#A9B6CF`: Subtitles and body descriptions
-- **Coral** — `#FF8B78`: Physical barriers and warnings
+| Milestone | Scope | Status |
+| :--- | :--- | :--- |
+| **Milestone 1** | **QuantMix Homepage, Discovery System & Design Tokens** | **Completed** |
+| **Milestone 2** | **Walkable 3D Bedroom, Priority Raycasting & Object Inspection** | **Completed** |
+| **Milestone 3** | **Analytical 1D Quantum Lab, 3D Wavefunction Helix & Conservation** | **Completed** |
+| **Milestone 4** | **Lively 3D Street Environment, Traffic & Urban Photonics** | **Completed** |
+| **Milestone 5** | **Live Tweak Panel [T], Config A/B Comparator & QuAntI AI Engine** | **Completed** |
+| **Milestone 6** | Macro Environments (The Sky, Football Field, Human Body) | Upcoming |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18.0.0 or higher recommended; developed on Node v24)
+- Node.js (v18.0.0 or higher recommended)
 - npm (v9.0.0 or higher)
 
 ### Installation
@@ -100,13 +112,16 @@ npm install
 
 ### Running Locally
 ```bash
-# Start the local development server with Hot Module Replacement (HMR)
+# Start the local development server with Vite HMR
 npm run dev
 ```
 Open your browser and navigate to `http://localhost:5173`.
 
-### Production Build
+### Production Build & Linting
 ```bash
+# Run oxlint checks
+npm run lint
+
 # Build optimized production bundle
 npm run build
 
@@ -116,17 +131,13 @@ npm run preview
 
 ---
 
-## 🗺️ Project Roadmap
-
-| Milestone | Scope | Status |
-| :--- | :--- | :--- |
-| **Milestone 1** | **QuantMix Homepage V1, Design Tokens, Discovery & Previews** | **Completed** |
-| **Milestone 2** | Walkable 3D Bedroom Simulation (Three.js / WebGL) & Quantum Lab Model | Upcoming |
-| **Milestone 3** | Live QuAntI AI Integration (Context-Aware Scientific LLM) | Upcoming |
-| **Milestone 4** | Macro Environments (The Sky & The Street) | Upcoming |
-| **Milestone 5** | Commuter & Biological Systems (Inside a Bus & Inside the Human Body) | Upcoming |
+## 📜 Scientific References & Citations
+1. OpenStax University Physics Volume 3, Chapter 7: *Quantum Tunneling of Particles through Potential Barriers*
+2. MIT OpenCourseWare 8.04, Spring 2016: *Quantum Physics I (Prof. Barton Zwiebach)*
+3. Reviews of Modern Physics 75, 715: *Quantum transport and scattering in potential barriers*
+4. NIST Reference on Constants, Units, and Uncertainty: *Reduced Planck constant $\hbar$ and physical invariants*
 
 ---
 
-## 📜 License
+## 📄 License
 This project is licensed under the [MIT License](LICENSE).

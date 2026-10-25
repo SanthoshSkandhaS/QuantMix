@@ -344,24 +344,24 @@ export default function QuantumLabPreview({
                     <div className="cq-metric">
                       <span className="metric-label">Predicted Transmission:</span>
                       <strong className="metric-value classical-val">
-                        {physicsData.classical.transmissionPercent}
+                        {physicsData?.classical?.transmissionPercent ?? "0.00%"}
                       </strong>
                     </div>
                     <div className="cq-metric">
                       <span className="metric-label">Predicted Reflection:</span>
                       <strong className="metric-value">
-                        {physicsData.classical.reflectionPercent}
+                        {physicsData?.classical?.reflectionPercent ?? "100.0%"}
                       </strong>
                     </div>
                     <div className="cq-metric">
                       <span className="metric-label">Kinetic Energy in Barrier:</span>
                       <span className="metric-detail font-mono">
-                        K₂ = (E - V₀) = {physicsData.classical.kineticEnergyRegion2Ev.toFixed(2)} eV
+                        K₂ = (E - V₀) = {physicsData?.classical?.kineticEnergyRegion2Ev != null ? physicsData.classical.kineticEnergyRegion2Ev.toFixed(2) : (particleEnergy - barrierHeight).toFixed(2)} eV
                       </span>
                     </div>
                   </div>
                   <p className="cq-explanation">
-                    {physicsData.classical.prediction}
+                    {physicsData?.classical?.prediction || physicsData?.classical?.explanation || "Classically forbidden inside the barrier."}
                   </p>
                 </div>
 
@@ -375,24 +375,24 @@ export default function QuantumLabPreview({
                     <div className="cq-metric">
                       <span className="metric-label">Calculated Transmission:</span>
                       <strong className="metric-value teal">
-                        {physicsData.formattedTransmission}
+                        {physicsData?.formattedTransmission ?? "0.0%"}
                       </strong>
                     </div>
                     <div className="cq-metric">
                       <span className="metric-label">Calculated Reflection:</span>
                       <strong className="metric-value copper">
-                        {physicsData.formattedReflection}
+                        {physicsData?.formattedReflection ?? "100.0%"}
                       </strong>
                     </div>
                     <div className="cq-metric">
                       <span className="metric-label">Evanescent Decay Constant:</span>
                       <span className="metric-detail font-mono">
-                        κ = {physicsData.kappaNm} nm⁻¹
+                        κ = {physicsData?.kappaNm ?? "0.000"} nm⁻¹
                       </span>
                     </div>
                   </div>
                   <p className="cq-explanation">
-                    {physicsData.quantumClassicalDelta.keyTakeaway}
+                    {physicsData?.quantumClassicalDelta?.keyTakeaway || physicsData?.quantumClassicalDelta?.scientificKeyTakeaway || "Evanescent wave penetration enables non-zero probability."}
                   </p>
                 </div>
 
@@ -403,7 +403,7 @@ export default function QuantumLabPreview({
                     <span>Why Do The Models Differ?</span>
                   </div>
                   <p className="delta-body">
-                    {physicsData.quantumClassicalDelta.mechanism}. In classical mechanics, kinetic energy <MathView math="K = E - V(x) < 0" inline /> would require an unphysical imaginary velocity. In quantum mechanics, particles are represented by wavefunctions whose spatial derivatives must remain continuous across interfaces, leaving a finite evanescent amplitude at the exit boundary.
+                    {physicsData?.quantumClassicalDelta?.mechanism || "Evanescent wave penetration vs classical kinetic energy barrier"}. In classical mechanics, kinetic energy <MathView math="K = E - V(x) < 0" inline /> would require an unphysical imaginary velocity. In quantum mechanics, particles are represented by wavefunctions whose spatial derivatives must remain continuous across interfaces, leaving a finite evanescent amplitude at the exit boundary.
                   </p>
                 </div>
               </div>

@@ -118,7 +118,8 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
   if (E < V0) {
     // -------------------------------------------------------------
     // REGIME 1: Quantum Tunneling (E < V0)
-    // -------------------------------------------    const deltaV = V0J - EJ;
+    // -------------------------------------------------------------
+    const deltaV = V0J - EJ;
     kappa = Math.sqrt(2 * particleMassKg * deltaV) / HBAR_JS;
     const kappaL = kappa * L;
 
@@ -252,12 +253,20 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
 
   // Classical Mechanics Comparison Calculation
   const isClassicallyAllowed = E > V0;
+  const kineticEnergyRegion2Ev = E - V0;
   const classical = {
     transmissionCoefficient: isClassicallyAllowed ? 1.0 : 0.0,
     reflectionCoefficient: isClassicallyAllowed ? 0.0 : 1.0,
+    transmissionPercent: isClassicallyAllowed ? "100.0%" : "0.00%",
+    reflectionPercent: isClassicallyAllowed ? "0.00%" : "100.0%",
     transmissionPct: isClassicallyAllowed ? "100.0%" : "0.00%",
     reflectionPct: isClassicallyAllowed ? "0.00%" : "100.0%",
+    kineticEnergyRegion2Ev,
     behavior: isClassicallyAllowed ? "Unobstructed Transmission (T = 100%)" : "Total Specular Reflection (R = 100%)",
+    prediction:
+      E < V0
+        ? `Classically, a particle with energy E = ${E.toFixed(2)} eV encountering a barrier V₀ = ${V0.toFixed(2)} eV lacks the required kinetic energy (K = E - V₀ < 0). It experiences a restoring force and reflects with 100% certainty (T_class = 0%).`
+        : `Classically, a particle with energy E = ${E.toFixed(2)} eV exceeding V₀ = ${V0.toFixed(2)} eV slows down over the barrier to kinetic energy K = ${(E - V0).toFixed(2)} eV and exits with 100% certainty (T_class = 100%). No classical reflection can occur.`,
     explanation:
       E < V0
         ? `Classically, a particle with energy E = ${E.toFixed(2)} eV encountering a barrier V₀ = ${V0.toFixed(2)} eV lacks the required kinetic energy (K = E - V₀ < 0). It experiences a restoring force and reflects with 100% certainty (T_class = 0%).`
@@ -268,6 +277,11 @@ export function calculateRectangularBarrierTunneling(energyEv, barrierHeightEv, 
     transmissionDeltaPct: (T * 100 - classical.transmissionCoefficient * 100).toFixed(2),
     isTunnellingForbiddenClassically: E < V0 && T > 0.000001,
     isOverBarrierReflectionQuantum: E > V0 && R > 0.0001,
+    mechanism: "Evanescent wave penetration vs classical kinetic energy barrier",
+    keyTakeaway:
+      E < V0
+        ? `Quantum mechanics predicts non-zero transmission T = ${formatPercentage(T * 100)} through a ${L_nm.toFixed(2)} nm barrier where classical mechanics predicts exactly 0%. The wavepacket's evanescent tail decays exponentially through the barrier.`
+        : `Even with E > V₀, quantum wave reflection occurs at the abrupt potential steps (R = ${formatPercentage(R * 100)}), forming transmission resonance peaks where k₂·L = n·π.`,
     scientificKeyTakeaway:
       E < V0
         ? `Quantum mechanics predicts non-zero transmission T = ${formatPercentage(T * 100)} through a ${L_nm.toFixed(2)} nm barrier where classical mechanics predicts exactly 0%. The wavepacket's evanescent tail decays exponentially through the barrier.`

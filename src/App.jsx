@@ -8,6 +8,7 @@ import QuantumLabPreview from "./components/QuantumLabPreview";
 import QuAntIPreview from "./components/QuAntIPreview";
 import Footer from "./components/Footer";
 import AtomicIntro from "./components/AtomicIntro";
+import Bedroom3D from "./components/Bedroom3D";
 
 /**
  * QuantMix Homepage V1
@@ -34,6 +35,7 @@ export default function App() {
   });
 
   const [forceIntro, setForceIntro] = useState(false);
+  const [showBedroom3D, setShowBedroom3D] = useState(false);
 
   const handleIntroComplete = () => {
     setShowIntro(false);
@@ -68,16 +70,29 @@ export default function App() {
             const el = document.getElementById("environments");
             if (el) el.scrollIntoView({ behavior: "smooth" });
           }}
+          onOpenBedroom={() => setShowBedroom3D(true)}
         />
 
         <DiscoverySection />
 
-        <EnvironmentPreview />
+        <EnvironmentPreview onOpenBedroom={() => setShowBedroom3D(true)} />
 
         <QuantumLabPreview />
 
         <QuAntIPreview />
       </main>
+
+      {/* Walkable 3D Bedroom Simulation Modal */}
+      {showBedroom3D && (
+        <Bedroom3D
+          onClose={() => setShowBedroom3D(false)}
+          onOpenLab={() => {
+            setShowBedroom3D(false);
+            const el = document.getElementById("lab") || document.getElementById("quantum-lab");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
+      )}
 
       {/* Finished Professional Footer */}
       <Footer onReplayIntro={handleReplayIntro} />

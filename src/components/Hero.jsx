@@ -14,7 +14,7 @@ import { ChevronDown, Orbit, Layers, Binary, Compass } from "lucide-react";
  * - Quantum constant telemetry with KaTeX mathematical typesetting
  * - Cinematic atmospheric depth
  */
-export default function Hero({ onExplore }) {
+export default function Hero({ onExplore, onOpenBedroom }) {
   const handleScrollToDiscovery = () => {
     const nextSection = document.getElementById("discovery");
     if (nextSection) {
@@ -64,12 +64,18 @@ export default function Hero({ onExplore }) {
             }}
           />
           <button
-            onClick={handleScrollToEnvironments}
+            onClick={() => {
+              if (onOpenBedroom) {
+                onOpenBedroom();
+              } else {
+                handleScrollToEnvironments();
+              }
+            }}
             className="hero-secondary-btn"
-            aria-label="View planned exploratory environments"
+            aria-label="Enter Walkable 3D Bedroom Simulation"
           >
             <Compass size={17} color="var(--color-teal)" />
-            <span>Planned Environments</span>
+            <span>Enter 3D Bedroom</span>
           </button>
         </div>
 

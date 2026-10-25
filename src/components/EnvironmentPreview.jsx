@@ -51,7 +51,7 @@ const windowAtmosphere = {
  * - Architectural windows into different worlds, each with distinctive depth.
  * - Honest roadmap notice clarifying Milestone 2 Three.js 3D implementation.
  */
-export default function EnvironmentPreview() {
+export default function EnvironmentPreview({ onOpenBedroom }) {
   const [selectedEnv, setSelectedEnv] = useState(null);
 
   return (
@@ -138,8 +138,43 @@ export default function EnvironmentPreview() {
 
                 {/* Card Action Link */}
                 <div className="env-card-footer">
-                  <span className="preview-action-text">Inspect Architectural Blueprint</span>
-                  <ArrowUpRight size={15} className="preview-arrow" />
+                  {isFirst ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", gap: "8px" }}>
+                      <button
+                        type="button"
+                        className="card-enter-3d-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onOpenBedroom) onOpenBedroom();
+                        }}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          background: "var(--color-copper)",
+                          color: "#FFFFFF",
+                          border: "none",
+                          borderRadius: "4px",
+                          padding: "6px 12px",
+                          fontSize: "0.78rem",
+                          fontWeight: "600",
+                          cursor: "pointer"
+                        }}
+                        aria-label="Enter Walkable 3D Bedroom Simulation"
+                      >
+                        <Sparkles size={13} />
+                        <span>Enter 3D Room</span>
+                      </button>
+                      <span className="preview-action-text" style={{ fontSize: "0.76rem" }}>
+                        Blueprint Details
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="preview-action-text">Inspect Architectural Blueprint</span>
+                      <ArrowUpRight size={15} className="preview-arrow" />
+                    </>
+                  )}
                 </div>
               </div>
             );
@@ -221,7 +256,33 @@ export default function EnvironmentPreview() {
                 </ul>
               </div>
 
-              <div className="modal-footer">
+              <div className="modal-footer" style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap" }}>
+                {selectedEnv.id === "your-room" && (
+                  <button
+                    type="button"
+                    className="modal-enter-3d-btn"
+                    onClick={() => {
+                      setSelectedEnv(null);
+                      if (onOpenBedroom) onOpenBedroom();
+                    }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      background: "var(--color-copper)",
+                      color: "#FFFFFF",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "10px 18px",
+                      fontSize: "0.88rem",
+                      fontWeight: "600",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <Sparkles size={16} />
+                    <span>Launch Walkable 3D Bedroom</span>
+                  </button>
+                )}
                 <button
                   className="modal-dismiss-btn"
                   onClick={() => setSelectedEnv(null)}

@@ -1,91 +1,108 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { QUANTUM_FACTS } from "../data/quantumFacts";
-import { Sparkles, RefreshCw, BookOpen, ExternalLink, ChevronDown, ChevronUp, Eye, Waves, Atom } from "lucide-react";
+import MathView, { MathText } from "./MathView";
+import {
+  Sparkles,
+  RefreshCw,
+  BookOpen,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  Waves,
+  Atom,
+  CheckCircle2
+} from "lucide-react";
 
 const STORAGE_KEY = "quantmix_seen_fact_ids_v1";
+
+// Helper to safely read seen IDs from storage
+function readStoredSeenIds() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed.filter((id) => QUANTUM_FACTS.some((f) => f.id === id));
+    }
+  } catch {
+    // Storage unavailable
+  }
+  return [];
+}
+
+// Helper to safely write seen IDs
+function writeStoredSeenIds(ids) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    // Storage unavailable fallback
+  }
+}
+
+// Initial fact selector to ensure zero-delay first paint
+function getInitialFact() {
+  const seenIds = readStoredSeenIds();
+  const unseen = QUANTUM_FACTS.filter((f) => !seenIds.includes(f.id));
+  if (unseen.length > 0) {
+    return { fact: unseen[0], seenCount: seenIds.length + 1 };
+  }
+  return { fact: QUANTUM_FACTS[0], seenCount: 1 };
+}
 
 /**
  * DiscoverySection
  * - Heading: "Small things. Strange rules."
  * - Description: "The world we experience is built on quantum rules that are often very different from our everyday intuition."
+ * - Immediate visible access on initial page load (zero null-flash)
  * - Strict non-repeating random selection with localStorage rotation memory
- * - Curated 22 facts with beginner summary, deep dive, formula, and authoritative source URLs
- * - Interactive double-slit wave interference & probability cloud simulator beside the fact card
+ * - Curated 22 facts with beginner summary, deep dive, KaTeX-typeset formula, and authoritative source URLs
+ * - Mathematical Typesetting Verification banner (testing benchmark equations)
+ * - Restyled with Scientific-Editorial identity
  */
 export default function DiscoverySection() {
-  const [currentFact, setCurrentFact] = useState(null);
-  const [seenCount, setSeenCount] = useState(0);
+  const [currentFact, setCurrentFact] = useState(() => getInitialFact().fact);
+  const [seenCount, setSeenCount] = useState(() => getInitialFact().seenCount);
   const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [simMode, setSimMode] = useState("double-slit"); // "double-slit" | "orbital"
   const simCanvasRef = useRef(null);
 
-  // Helper to safely read seen IDs from localStorage
-  const getStoredSeenIds = useCallback(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        // Filter only valid IDs in our current facts library
-        return parsed.filter((id) => QUANTUM_FACTS.some((f) => f.id === id));
-      }
-    } catch {
-      // Storage unavailable or corrupted
-    }
-    return [];
-  }, []);
-
-  // Helper to safely write seen IDs
-  const saveSeenIds = (ids) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-    } catch {
-      // Storage unavailable fallback
-    }
-  };
-
-  // Select next fact adhering to strict non-repetition rules
+  // Pick next fact adhering to strict non-repetition rules
   const pickNextFact = useCallback(() => {
     setIsTransitioning(true);
     setIsDeepDiveOpen(false);
 
+    let seenIds = readStoredSeenIds();
+
+    // If all facts have been seen, reset cycle
+    if (seenIds.length >= QUANTUM_FACTS.length) {
+      seenIds = [];
+    }
+
+    // Filter available unviewed facts
+    const unseenFacts = QUANTUM_FACTS.filter((fact) => !seenIds.includes(fact.id));
+
+    let chosenFact;
+    if (unseenFacts.length > 0) {
+      const randomIndex = Math.floor(Math.random() * unseenFacts.length);
+      chosenFact = unseenFacts[randomIndex];
+    } else {
+      chosenFact = QUANTUM_FACTS[0];
+    }
+
+    const updatedSeen = [...seenIds, chosenFact.id];
+    writeStoredSeenIds(updatedSeen);
+
+    setCurrentFact(chosenFact);
+    setSeenCount(updatedSeen.length);
+
     setTimeout(() => {
-      let seenIds = getStoredSeenIds();
-
-      // If all facts have been seen, reset cycle
-      if (seenIds.length >= QUANTUM_FACTS.length) {
-        seenIds = [];
-      }
-
-      // Filter available unviewed facts
-      const unseenFacts = QUANTUM_FACTS.filter((fact) => !seenIds.includes(fact.id));
-
-      let chosenFact;
-      if (unseenFacts.length > 0) {
-        const randomIndex = Math.floor(Math.random() * unseenFacts.length);
-        chosenFact = unseenFacts[randomIndex];
-      } else {
-        // Fallback safety
-        chosenFact = QUANTUM_FACTS[0];
-      }
-
-      // Update seen list
-      const updatedSeen = [...seenIds, chosenFact.id];
-      saveSeenIds(updatedSeen);
-
-      setCurrentFact(chosenFact);
-      setSeenCount(updatedSeen.length);
       setIsTransitioning(false);
-    }, 200);
-  }, [getStoredSeenIds]);
+    }, 150);
+  }, []);
 
-  // Initial load fact selection
-  useEffect(() => {
-    pickNextFact();
-  }, [pickNextFact]);
-
-  // Interactive Mini Scientific Canvas Simulation
+  // Scientific 2D Waveform Monitor Simulation
   useEffect(() => {
     const canvas = simCanvasRef.current;
     if (!canvas) return;
@@ -94,12 +111,12 @@ export default function DiscoverySection() {
 
     let animId;
     let width = (canvas.width = canvas.parentElement?.clientWidth || 380);
-    let height = (canvas.height = 300);
+    let height = (canvas.height = 290);
 
     const handleResize = () => {
       if (canvas.parentElement) {
         width = canvas.width = canvas.parentElement.clientWidth;
-        height = canvas.height = 300;
+        height = canvas.height = 290;
       }
     };
     window.addEventListener("resize", handleResize);
@@ -109,9 +126,25 @@ export default function DiscoverySection() {
       t += 0.03;
       ctx.clearRect(0, 0, width, height);
 
-      // Dark background with subtle grid
-      ctx.fillStyle = "#0B1020";
+      // Editorial warm parchment background for simulator
+      ctx.fillStyle = "#F5F3EC";
       ctx.fillRect(0, 0, width, height);
+
+      // Architectural grid lines
+      ctx.strokeStyle = "rgba(40, 44, 49, 0.05)";
+      ctx.lineWidth = 1;
+      for (let x = 20; x < width; x += 25) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 20; y < height; y += 25) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
 
       if (simMode === "double-slit") {
         // Double-slit wave interference simulation
@@ -120,19 +153,19 @@ export default function DiscoverySection() {
         const barrierX = width * 0.32;
 
         // Incoming plane waves
-        ctx.strokeStyle = "rgba(53, 214, 208, 0.25)";
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = "rgba(56, 73, 54, 0.3)";
+        ctx.lineWidth = 1.4;
         for (let x = 10; x < barrierX; x += 18) {
-          const shift = (x + t * 25) % barrierX;
+          const shift = (x + t * 24) % barrierX;
           ctx.beginPath();
           ctx.moveTo(shift, 20);
           ctx.lineTo(shift, height - 20);
           ctx.stroke();
         }
 
-        // Barrier with two slits
-        ctx.fillStyle = "#16243D";
-        ctx.fillRect(barrierX - 4, 15, 8, slit1Y - 25);
+        // Barrier with two slits (warm slate charcoal)
+        ctx.fillStyle = "#2A2E33";
+        ctx.fillRect(barrierX - 4, 15, 8, slit1Y - 24);
         ctx.fillRect(barrierX - 4, slit1Y + 10, 8, slit2Y - slit1Y - 20);
         ctx.fillRect(barrierX - 4, slit2Y + 10, 8, height - slit2Y - 25);
 
@@ -140,33 +173,36 @@ export default function DiscoverySection() {
         const maxR = width - barrierX;
         for (let r = 0; r < maxR; r += 16) {
           const radius = (r + t * 20) % maxR;
-          const alpha = Math.max(0, (1 - radius / maxR) * 0.45);
+          const alpha = Math.max(0, (1 - radius / maxR) * 0.4);
 
-          // Slit 1 wave
+          // Slit 1 wave (forest green)
           ctx.beginPath();
           ctx.arc(barrierX, slit1Y, radius, -Math.PI * 0.45, Math.PI * 0.45);
-          ctx.strokeStyle = `rgba(53, 214, 208, ${alpha})`;
+          ctx.strokeStyle = `rgba(56, 73, 54, ${alpha})`;
           ctx.stroke();
 
-          // Slit 2 wave
+          // Slit 2 wave (burnished copper)
           ctx.beginPath();
           ctx.arc(barrierX, slit2Y, radius, -Math.PI * 0.45, Math.PI * 0.45);
-          ctx.strokeStyle = `rgba(155, 140, 255, ${alpha})`;
+          ctx.strokeStyle = `rgba(189, 100, 60, ${alpha})`;
           ctx.stroke();
         }
 
         // Target Detection Screen at right edge
         const screenX = width - 24;
-        ctx.fillStyle = "rgba(17, 27, 46, 0.8)";
-        ctx.fillRect(screenX, 20, 10, height - 40);
+        ctx.fillStyle = "#2A2E33";
+        ctx.fillRect(screenX, 20, 8, height - 40);
 
         // Intensity fringes on screen
-        for (let y = 30; y < height - 30; y += 3) {
+        for (let y = 26; y < height - 26; y += 3) {
           const dy1 = y - slit1Y;
           const dy2 = y - slit2Y;
-          const phaseDiff = (Math.sqrt(Math.pow(width - barrierX, 2) + dy1 * dy1) - Math.sqrt(Math.pow(width - barrierX, 2) + dy2 * dy2)) * 0.35;
+          const phaseDiff =
+            (Math.sqrt(Math.pow(width - barrierX, 2) + dy1 * dy1) -
+              Math.sqrt(Math.pow(width - barrierX, 2) + dy2 * dy2)) *
+            0.35;
           const intensity = Math.pow(Math.cos(phaseDiff), 2);
-          ctx.fillStyle = `rgba(53, 214, 208, ${intensity * 0.9})`;
+          ctx.fillStyle = `rgba(189, 100, 60, ${intensity * 0.9})`;
           ctx.fillRect(screenX - intensity * 26, y, intensity * 26, 2.5);
         }
       } else {
@@ -176,27 +212,27 @@ export default function DiscoverySection() {
 
         // Orbital Probability cloud dots
         for (let i = 0; i < 280; i++) {
-          const theta = (i / 280) * Math.PI * 2 + t * 0.2;
+          const theta = (i / 280) * Math.PI * 2 + t * 0.18;
           const rBase = 65 * Math.sin(2 * theta);
-          const r = Math.abs(rBase) + (Math.sin(i * 37 + t) * 14);
+          const r = Math.abs(rBase) + Math.sin(i * 37 + t) * 14;
           const px = cx + Math.cos(theta) * r;
           const py = cy + Math.sin(theta) * r;
 
-          const dotAlpha = 0.25 + (Math.sin(i * 12 + t * 2) * 0.2);
+          const dotAlpha = 0.22 + Math.sin(i * 12 + t * 2) * 0.18;
           ctx.beginPath();
-          ctx.arc(px, py, 1.5, 0, Math.PI * 2);
-          ctx.fillStyle = i % 2 === 0 ? `rgba(53, 214, 208, ${dotAlpha})` : `rgba(155, 140, 255, ${dotAlpha})`;
+          ctx.arc(px, py, 1.4, 0, Math.PI * 2);
+          ctx.fillStyle =
+            i % 2 === 0
+              ? `rgba(56, 73, 54, ${dotAlpha})`
+              : `rgba(189, 100, 60, ${dotAlpha})`;
           ctx.fill();
         }
 
         // Nucleus
         ctx.beginPath();
-        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
-        ctx.fillStyle = "#FF8B78";
-        ctx.shadowColor = "#FF8B78";
-        ctx.shadowBlur = 12;
+        ctx.arc(cx, cy, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#BD643C";
         ctx.fill();
-        ctx.shadowBlur = 0;
       }
 
       animId = requestAnimationFrame(renderSim);
@@ -225,14 +261,43 @@ export default function DiscoverySection() {
           </p>
         </div>
 
+        {/* Mathematical Typesetting Benchmark Verification Strip */}
+        <div className="math-benchmark-banner">
+          <div className="math-benchmark-header">
+            <span className="math-benchmark-title">
+              <CheckCircle2 size={16} color="var(--color-copper)" />
+              KaTeX Mathematical Typesetting Engine
+            </span>
+            <span className="math-benchmark-tag">Live Verified Equations</span>
+          </div>
+          <div className="math-benchmark-grid">
+            <div className="math-benchmark-item">
+              <span className="math-benchmark-label">Inline Mass–Energy</span>
+              <MathView math="E = mc^2" inline />
+            </div>
+            <div className="math-benchmark-item">
+              <span className="math-benchmark-label">Stationary Schrödinger Equation</span>
+              <MathView math="\hat{H}\psi(x) = E\psi(x)" display />
+            </div>
+            <div className="math-benchmark-item">
+              <span className="math-benchmark-label">Tunneling Wavevector Decay</span>
+              <MathView math="\kappa = \frac{\sqrt{2m(V_0-E)}}{\hbar}" display />
+            </div>
+            <div className="math-benchmark-item">
+              <span className="math-benchmark-label">Transmission Probability Ratio</span>
+              <MathView math="T = \frac{J_{\mathrm{transmitted}}}{J_{\mathrm{incident}}}" display />
+            </div>
+          </div>
+        </div>
+
         {/* Discovery Workspace Grid */}
         <div className="discovery-grid">
-          {/* Left Column: Visual Wave-Particle Simulator */}
-          <div className="glass-card discovery-sim-card">
+          {/* Left Column: Visual Wave-Particle 2D Monitor */}
+          <div className="editorial-card discovery-sim-card">
             <div className="sim-header">
               <div className="sim-title-group">
                 <span className="sim-indicator-dot" />
-                <span className="sim-label">Live Quantum Waveform Monitor</span>
+                <span className="sim-label">2D Theoretical Waveform Monitor</span>
               </div>
               <div className="sim-toggle-group">
                 <button
@@ -260,39 +325,48 @@ export default function DiscoverySection() {
 
             <div className="sim-caption">
               <span className="sim-mode-tag">
-                {simMode === "double-slit" ? "Interference Pattern ψ₁ + ψ₂" : "Orbital Density |ψ(r)|²"}
+                {simMode === "double-slit" ? (
+                  <span>Interference Waveform: <MathView math="\psi_1 + \psi_2" inline /></span>
+                ) : (
+                  <span>Probability Density: <MathView math="|\psi(r)|^2" inline /></span>
+                )}
               </span>
               <p className="sim-mode-desc">
                 {simMode === "double-slit"
-                  ? "Wave interference fringes created by phase superpositions passing through dual apertures."
-                  : "Continuous 3D probability cloud depicting where electrons are most likely to materialize."}
+                  ? "Wave interference fringes created by phase superpositions passing through dual apertures. (Illustrative 2D Model)"
+                  : "Continuous 2D cross-section depicting where bound electrons are statistically predicted to localize."}
               </p>
             </div>
           </div>
 
           {/* Right Column: Curated Quantum Fact Card */}
-          <div className="glass-card fact-card">
-            {/* Rotation Progress & Tag */}
+          <div className="editorial-card fact-card">
+            {/* Rotation Progress & Concept Pill */}
             <div className="fact-card-top">
               <span className="fact-concept-pill">
                 {currentFact?.concept || "Quantum Principle"}
               </span>
               <div className="fact-progress-badge" title="Cycle resets after all 22 facts are discovered">
-                <Eye size={13} color="var(--color-teal)" />
+                <Eye size={13} color="var(--color-copper)" />
                 <span>Fact {seenCount} of {QUANTUM_FACTS.length} Discovered</span>
               </div>
             </div>
 
-            {/* Fact Content with Smooth Transition */}
-            <div className={`fact-body ${isTransitioning ? "fade-out" : "fade-in"}`}>
-              <h3 className="fact-title">{currentFact?.title}</h3>
+            {/* Fact Content */}
+            <div className={`fact-body ${isTransitioning ? "fade-transition" : ""}`}>
+              <h3 className="fact-title font-serif">{currentFact?.title}</h3>
               <p className="fact-summary">{currentFact?.summary}</p>
 
-              {/* Mathematical / Formula Strip */}
+              {/* KaTeX Mathematical Formula Box */}
               {currentFact?.formula && (
                 <div className="fact-formula-box">
-                  <span className="formula-label">{currentFact.formulaLabel}</span>
-                  <code className="formula-code">{currentFact.formula}</code>
+                  <div className="formula-header-row">
+                    <span className="formula-label">{currentFact.formulaLabel}</span>
+                    <span className="formula-engine-tag">KaTeX Rendered</span>
+                  </div>
+                  <div className="formula-render-area">
+                    <MathView math={currentFact.formula} display />
+                  </div>
                 </div>
               )}
 
@@ -300,7 +374,9 @@ export default function DiscoverySection() {
               {isDeepDiveOpen && (
                 <div className="fact-deep-dive" id="fact-deep-dive-panel">
                   <h4 className="deep-dive-heading">Scientific Mechanism</h4>
-                  <p className="deep-dive-text">{currentFact?.deepDive}</p>
+                  <div className="deep-dive-text">
+                    <MathText text={currentFact?.deepDive} />
+                  </div>
                 </div>
               )}
             </div>
@@ -361,7 +437,7 @@ export default function DiscoverySection() {
           padding: 24px;
           display: flex;
           flex-direction: column;
-          background: rgba(17, 27, 46, 0.85);
+          background: var(--color-surface);
         }
 
         .sim-header {
@@ -383,24 +459,22 @@ export default function DiscoverySection() {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: var(--color-teal);
-          box-shadow: 0 0 8px var(--color-teal);
-          animation: dotPulse 2s infinite;
+          background: var(--color-copper);
         }
 
         .sim-label {
           font-family: var(--font-mono);
-          font-size: 0.82rem;
-          color: var(--color-text-main);
+          font-size: 0.8rem;
+          color: var(--color-graphite);
           font-weight: 600;
         }
 
         .sim-toggle-group {
           display: flex;
-          background: rgba(11, 16, 32, 0.7);
+          background: var(--color-surface-muted);
           padding: 3px;
           border-radius: var(--radius-sm);
-          border: 1px solid var(--border-subtle);
+          border: 1px solid var(--border-stone);
           gap: 4px;
         }
 
@@ -409,7 +483,7 @@ export default function DiscoverySection() {
           align-items: center;
           gap: 6px;
           padding: 5px 10px;
-          border-radius: 6px;
+          border-radius: 5px;
           font-size: 0.76rem;
           font-family: var(--font-mono);
           color: var(--color-text-secondary);
@@ -417,17 +491,18 @@ export default function DiscoverySection() {
         }
 
         .sim-toggle-btn.active {
-          background: rgba(53, 214, 208, 0.15);
-          color: var(--color-teal);
-          border: 1px solid rgba(53, 214, 208, 0.3);
+          background: var(--color-surface);
+          color: var(--color-graphite);
+          border: 1px solid var(--border-stone);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .sim-canvas-container {
           width: 100%;
           border-radius: var(--radius-md);
           overflow: hidden;
-          background: #0B1020;
-          border: 1px solid rgba(169, 182, 207, 0.1);
+          background: #F5F3EC;
+          border: 1px solid var(--border-stone);
         }
 
         .sim-canvas {
@@ -439,14 +514,14 @@ export default function DiscoverySection() {
         .sim-caption {
           margin-top: 16px;
           padding-top: 12px;
-          border-top: 1px solid var(--border-subtle);
+          border-top: 1px solid var(--border-stone-light);
         }
 
         .sim-mode-tag {
           display: inline-block;
           font-family: var(--font-mono);
           font-size: 0.78rem;
-          color: var(--color-violet);
+          color: var(--color-copper);
           margin-bottom: 4px;
           font-weight: 600;
         }
@@ -462,7 +537,7 @@ export default function DiscoverySection() {
           padding: 32px;
           display: flex;
           flex-direction: column;
-          background: rgba(17, 27, 46, 0.85);
+          background: var(--color-surface);
         }
 
         .fact-card-top {
@@ -477,9 +552,9 @@ export default function DiscoverySection() {
         .fact-concept-pill {
           padding: 4px 12px;
           border-radius: var(--radius-full);
-          background: rgba(155, 140, 255, 0.12);
-          border: 1px solid rgba(155, 140, 255, 0.3);
-          color: var(--color-violet);
+          background: var(--color-forest-subtle);
+          border: 1px solid var(--color-forest-border);
+          color: var(--color-forest);
           font-size: 0.78rem;
           font-family: var(--font-mono);
           font-weight: 600;
@@ -493,32 +568,26 @@ export default function DiscoverySection() {
           gap: 6px;
           font-size: 0.78rem;
           font-family: var(--font-mono);
-          color: var(--color-teal);
-          background: rgba(53, 214, 208, 0.08);
+          color: var(--color-copper);
+          background: var(--color-copper-subtle);
           padding: 4px 10px;
           border-radius: var(--radius-full);
-          border: 1px solid rgba(53, 214, 208, 0.2);
+          border: 1px solid var(--color-copper-border);
         }
 
         .fact-body {
           flex: 1;
-          transition: opacity 0.2s ease, transform 0.2s ease;
+          transition: opacity 0.15s ease;
         }
 
-        .fact-body.fade-out {
-          opacity: 0;
-          transform: translateY(6px);
-        }
-
-        .fact-body.fade-in {
-          opacity: 1;
-          transform: translateY(0);
+        .fact-body.fade-transition {
+          opacity: 0.35;
         }
 
         .fact-title {
           font-size: clamp(1.4rem, 2.5vw, 1.85rem);
-          color: var(--color-text-main);
-          font-weight: 700;
+          color: var(--color-graphite);
+          font-weight: 600;
           margin-bottom: 14px;
           line-height: 1.25;
         }
@@ -531,57 +600,66 @@ export default function DiscoverySection() {
         }
 
         .fact-formula-box {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 12px 18px;
-          background: rgba(11, 16, 32, 0.75);
+          padding: 16px 20px;
+          background: var(--color-surface-muted);
           border-radius: var(--radius-md);
-          border: 1px solid rgba(53, 214, 208, 0.2);
+          border: 1px solid var(--border-stone);
           margin-bottom: 20px;
         }
 
+        .formula-header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+
         .formula-label {
-          font-size: 0.78rem;
+          font-size: 0.75rem;
           font-family: var(--font-mono);
           color: var(--color-text-muted);
           text-transform: uppercase;
+          letter-spacing: 0.04em;
         }
 
-        .formula-code {
+        .formula-engine-tag {
+          font-size: 0.7rem;
           font-family: var(--font-mono);
-          font-size: 1rem;
-          color: var(--color-teal);
-          font-weight: 600;
+          color: var(--color-copper);
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone-light);
+          padding: 1px 6px;
+          border-radius: 4px;
+        }
+
+        .formula-render-area {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 8px 0;
         }
 
         .fact-deep-dive {
           margin-top: 16px;
           padding: 18px;
-          background: rgba(155, 140, 255, 0.06);
-          border-left: 3px solid var(--color-violet);
+          background: var(--color-surface-muted);
+          border-left: 3px solid var(--color-forest);
           border-radius: 0 var(--radius-md) var(--radius-md) 0;
-          animation: deepDiveSlide 0.3s ease;
-        }
-
-        @keyframes deepDiveSlide {
-          from { opacity: 0; transform: translateY(-8px); }
-          to { opacity: 1; transform: translateY(0); }
         }
 
         .deep-dive-heading {
-          font-size: 0.88rem;
+          font-size: 0.82rem;
           font-family: var(--font-mono);
-          color: var(--color-violet);
+          color: var(--color-forest);
           text-transform: uppercase;
-          letter-spacing: 0.04em;
+          letter-spacing: 0.05em;
           margin-bottom: 8px;
         }
 
         .deep-dive-text {
           font-size: 0.95rem;
           color: var(--color-text-secondary);
-          line-height: 1.6;
+          line-height: 1.65;
         }
 
         .fact-actions {
@@ -591,7 +669,7 @@ export default function DiscoverySection() {
           gap: 12px;
           margin-top: 24px;
           padding-top: 20px;
-          border-top: 1px solid var(--border-subtle);
+          border-top: 1px solid var(--border-stone-light);
           flex-wrap: wrap;
         }
 
@@ -601,9 +679,9 @@ export default function DiscoverySection() {
           gap: 8px;
           padding: 10px 18px;
           border-radius: var(--radius-full);
-          background: rgba(155, 140, 255, 0.1);
-          border: 1px solid rgba(155, 140, 255, 0.3);
-          color: var(--color-violet);
+          background: var(--color-surface-muted);
+          border: 1px solid var(--border-stone);
+          color: var(--color-forest);
           font-size: 0.9rem;
           font-weight: 600;
           cursor: pointer;
@@ -611,8 +689,8 @@ export default function DiscoverySection() {
         }
 
         .btn-deep-dive:hover {
-          background: rgba(155, 140, 255, 0.2);
-          border-color: var(--color-violet);
+          background: var(--color-forest-subtle);
+          border-color: var(--color-forest);
         }
 
         .btn-next-fact {
@@ -621,20 +699,20 @@ export default function DiscoverySection() {
           gap: 8px;
           padding: 10px 20px;
           border-radius: var(--radius-full);
-          background: linear-gradient(135deg, rgba(53, 214, 208, 0.2), rgba(17, 27, 46, 0.8));
-          border: 1px solid var(--color-teal);
-          color: var(--color-text-main);
+          background: var(--color-copper);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #FFFFFF;
           font-size: 0.9rem;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
-          box-shadow: 0 0 15px rgba(53, 214, 208, 0.2);
+          box-shadow: 0 2px 8px rgba(189, 100, 60, 0.25);
         }
 
         .btn-next-fact:hover {
-          background: var(--color-teal);
-          color: var(--color-midnight);
-          box-shadow: 0 0 25px rgba(53, 214, 208, 0.4);
+          background: var(--color-copper-hover);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(189, 100, 60, 0.35);
         }
 
         .fact-reference-bar {
@@ -651,7 +729,7 @@ export default function DiscoverySection() {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          color: var(--color-teal);
+          color: var(--color-copper);
           text-decoration: underline;
           text-underline-offset: 3px;
           transition: opacity 0.2s ease;

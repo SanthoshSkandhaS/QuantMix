@@ -1,38 +1,160 @@
-import React, { useState } from "react";
-import { Sliders, FlaskConical, ArrowRight, Info, CheckCircle2, AlertCircle } from "lucide-react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { Sliders, FlaskConical, CheckCircle2, Calculator } from "lucide-react";
+import MathView from "./MathView";
+import { calculateRectangularBarrierTunneling } from "../utils/quantumPhysics";
 
 /**
  * QuantumLabPreview
  * Section introducing the future interactive scientific laboratory.
  * Features:
- * - Intended first experiment: Quantum Tunnelling through a Potential Barrier
- * - Beginner-friendly question: “What happens if a particle encounters a narrower barrier?”
- * - Illustrative interface mockup with clear "Interface Preview" labels
- * - Interactive before-and-after comparison toggle (Wide vs Narrower Barrier)
- * - Educational wave transmission diagram showing incident, decayed, and transmitted waves
+ * - Scientifically genuine 1D rectangular barrier tunneling calculation
+ * - Fully reactive controls (Barrier Width, Barrier Height, Particle Energy)
+ * - Live KaTeX-typeset quantum tunneling equations
+ * - Live-updating 2D wavepacket attenuation diagram
+ * - Clear distinction: separates physics calculation from visual rendering
  */
 export default function QuantumLabPreview() {
-  const [selectedCase, setSelectedCase] = useState("narrow"); // "wide" | "narrow"
+  // Preset scenarios
+  const [selectedCase, setSelectedCase] = useState("narrow"); // "narrow" | "wide" | "custom"
 
-  // Parameter states for illustrative controls
-  const [barrierWidth, setBarrierWidth] = useState(selectedCase === "narrow" ? 0.8 : 2.4);
-  const [barrierHeight, setBarrierHeight] = useState(5.0);
-  const [particleEnergy, setParticleEnergy] = useState(3.2);
+  // Parameter states (scientifically meaningful units: eV and nm)
+  const [barrierWidth, setBarrierWidth] = useState(0.8); // nm
+  const [barrierHeight, setBarrierHeight] = useState(5.0); // eV
+  const [particleEnergy, setParticleEnergy] = useState(3.2); // eV
+
+  // Canvas ref for wavepacket visualization
+  const waveCanvasRef = useRef(null);
+
+  // Pure scientific calculation isolated via quantum physics utility
+  const physicsData = useMemo(() => {
+    return calculateRectangularBarrierTunneling(particleEnergy, barrierHeight, barrierWidth);
+  }, [particleEnergy, barrierHeight, barrierWidth]);
 
   const handleCaseSelect = (caseType) => {
     setSelectedCase(caseType);
     if (caseType === "narrow") {
       setBarrierWidth(0.8);
-    } else {
-      setBarrierWidth(2.4);
+      setBarrierHeight(5.0);
+      setParticleEnergy(3.2);
+    } else if (caseType === "wide") {
+      setBarrierWidth(2.2);
+      setBarrierHeight(5.0);
+      setParticleEnergy(3.2);
     }
   };
 
-  const transmissionRate = selectedCase === "narrow" ? "42.1%" : "0.04%";
-  const decayDescription =
-    selectedCase === "narrow"
-      ? "Significant wave amplitude reaches the far boundary, allowing the particle to tunnel through with 42.1% probability."
-      : "The exponential wave attenuation e^(-κx) absorbs virtually the entire wavepacket; transmission collapses to 0.04%.";
+  // Synchronize 2D Wave attenuation diagram with actual calculated transmission
+  useEffect(() => {
+    const canvas = waveCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || 500);
+    let height = (canvas.height = 240);
+
+    const handleResize = () => {
+      if (canvas.parentElement) {
+        width = canvas.width = canvas.parentElement.clientWidth;
+        height = canvas.height = 240;
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    let phase = 0;
+    const render = () => {
+      phase += 0.05;
+      ctx.clearRect(0, 0, width, height);
+
+      // Clean editorial canvas background
+      ctx.fillStyle = "#F5F3EC";
+      ctx.fillRect(0, 0, width, height);
+
+      const midY = height * 0.52;
+      const barrierNormWidth = Math.min(width * 0.45, Math.max(30, (barrierWidth / 3.0) * (width * 0.35)));
+      const barrierStartX = width * 0.42 - barrierNormWidth * 0.5;
+      const barrierEndX = barrierStartX + barrierNormWidth;
+
+      // Draw Potential Barrier Rect
+      ctx.fillStyle = "rgba(42, 46, 51, 0.08)";
+      ctx.strokeStyle = "rgba(42, 46, 51, 0.4)";
+      ctx.lineWidth = 1.5;
+      const barrierHeightPx = Math.min(height * 0.75, (barrierHeight / 8.0) * (height * 0.65));
+      ctx.fillRect(barrierStartX, midY - barrierHeightPx, barrierNormWidth, barrierHeightPx);
+      ctx.strokeRect(barrierStartX, midY - barrierHeightPx, barrierNormWidth, barrierHeightPx);
+
+      // Barrier Label
+      ctx.font = "11px 'JetBrains Mono', monospace";
+      ctx.fillStyle = "#191C1F";
+      ctx.fillText(`V₀ = ${barrierHeight.toFixed(1)} eV`, barrierStartX + 6, midY - barrierHeightPx - 8);
+      ctx.fillText(`w = ${barrierWidth.toFixed(1)} nm`, barrierStartX + 6, midY + 20);
+
+      // Incident Energy Level Dotted Line
+      const energyLevelPx = midY - (particleEnergy / 8.0) * (height * 0.65);
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = "rgba(189, 100, 60, 0.6)";
+      ctx.moveTo(20, energyLevelPx);
+      ctx.lineTo(width - 20, energyLevelPx);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#BD643C";
+      ctx.fillText(`E = ${particleEnergy.toFixed(1)} eV`, 24, energyLevelPx - 6);
+
+      // Incident & Reflected Wave (Region I: x < barrierStartX)
+      ctx.beginPath();
+      ctx.strokeStyle = "#384936";
+      ctx.lineWidth = 2;
+      const kIncident = 0.08;
+      const incAmp = 28;
+
+      for (let x = 20; x <= barrierStartX; x += 2) {
+        const y = midY + Math.sin(x * kIncident - phase) * incAmp;
+        if (x === 20) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Evanescent Wave inside Barrier (Region II: barrierStartX < x < barrierEndX)
+      ctx.beginPath();
+      ctx.strokeStyle = "#BD643C";
+      ctx.lineWidth = 2.2;
+      const decayCoeff = Math.min(0.08, Math.max(0.005, Number(physicsData.kappaNm) * 0.015));
+
+      for (let x = barrierStartX; x <= barrierEndX; x += 2) {
+        const distInside = x - barrierStartX;
+        const decayFactor = Math.exp(-distInside * decayCoeff);
+        const y = midY + Math.sin(barrierStartX * kIncident - phase) * (incAmp * decayFactor);
+        if (x === barrierStartX) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Transmitted Wave (Region III: x > barrierEndX)
+      ctx.beginPath();
+      ctx.strokeStyle = "#384936";
+      ctx.lineWidth = 2;
+      // Transmitted amplitude is proportional to sqrt(T)
+      const transAmp = Math.max(1.5, incAmp * Math.sqrt(physicsData.transmissionCoefficient));
+
+      for (let x = barrierEndX; x <= width - 20; x += 2) {
+        const transPhase = (barrierEndX * kIncident - phase) + (x - barrierEndX) * kIncident;
+        const y = midY + Math.sin(transPhase) * transAmp;
+        if (x === barrierEndX) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      animId = requestAnimationFrame(render);
+    };
+
+    animId = requestAnimationFrame(render);
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [barrierWidth, barrierHeight, particleEnergy, physicsData]);
 
   return (
     <section id="lab" className="section-wrapper lab-section">
@@ -41,267 +163,202 @@ export default function QuantumLabPreview() {
         <div className="section-header">
           <div className="section-tag">
             <FlaskConical size={14} />
-            <span>Future Quantum Laboratory</span>
+            <span>Analytical Quantum Mechanics</span>
           </div>
           <h2 className="section-title">The Quantum Lab</h2>
           <p className="section-desc">
-            In upcoming milestones, modify physical parameters, run scientific models, compare outcomes, and discover why changing microscopic constants alters our macroscopic universe.
+            Explore genuine quantum calculations. Modify physical constants, observe exponential wavefunction attenuation, and verify how barrier thickness alters particle transmission.
           </p>
         </div>
 
         {/* First Experiment Feature Box */}
-        <div className="glass-card lab-preview-card">
-          {/* Top Banner Disclaimer */}
+        <div className="editorial-card lab-preview-card">
+          {/* Top Banner Status */}
           <div className="lab-banner">
             <div className="lab-banner-info">
-              <span className="lab-banner-badge">Planned Milestone 2 Feature</span>
+              <span className="lab-banner-badge">Verified 1D Scientific Model</span>
               <span className="lab-banner-title">
-                First Experiment: Quantum Tunnelling Through a Potential Barrier
+                Quantum Tunnelling Through a Finite Rectangular Barrier
               </span>
             </div>
             <div className="lab-banner-status">
-              <Info size={14} />
-              <span>Illustrative Interface Preview</span>
+              <Calculator size={14} color="var(--color-copper)" />
+              <span>Real-Time Analytical Solver</span>
             </div>
           </div>
 
-          {/* Beginner Question Callout */}
+          {/* Core Research Question */}
           <div className="beginner-question-box">
-            <span className="question-prefix">Core Research Question:</span>
-            <h3 className="question-title">“What happens if a particle encounters a narrower barrier?”</h3>
+            <span className="question-prefix">Governing Scientific Principle:</span>
+            <h3 className="question-title font-serif">
+              “What happens if a particle encounters a narrower barrier?”
+            </h3>
             <p className="question-explanation">
-              Classically, a marble without enough energy to roll over a hill will 100% reflect back. But in quantum mechanics, an electron behaves like a wave: even when its energy (E) is less than the barrier height (V₀), its probability wave penetrates into the barrier. If the barrier is thin enough, it emerges on the other side!
+              Classically, a particle with energy <MathView math="E < V_0" inline /> is completely reflected by a potential barrier. But quantum mechanics dictates that the matter wave penetrates into the barrier with exponential decay constant <MathView math="\kappa" inline />. As the barrier width <MathView math="w" inline /> decreases, the transmitted amplitude increases exponentially.
             </p>
           </div>
 
-          {/* Interactive Workspace Simulator Preview */}
+          {/* Interactive Workspace Simulator */}
           <div className="lab-workspace-grid">
-            {/* Left: Illustrative Parameter Controls */}
+            {/* Left: Parameter Controls */}
             <div className="lab-controls-panel">
               <div className="panel-header">
-                <Sliders size={16} color="var(--color-teal)" />
-                <h4>Model Parameters</h4>
-                <span className="preview-pill">Preview Mode</span>
+                <div className="panel-title-row">
+                  <Sliders size={16} color="var(--color-copper)" />
+                  <h4>Model Parameters</h4>
+                </div>
+                <span className="preview-pill">Active Solver</span>
               </div>
 
               {/* Quick Case Switcher */}
               <div className="case-switcher">
-                <span className="switcher-label">Compare Scenarios:</span>
+                <span className="switcher-label">Benchmark Scenarios:</span>
                 <div className="switcher-buttons">
-                  <button
-                    onClick={() => handleCaseSelect("wide")}
-                    className={`switcher-btn ${selectedCase === "wide" ? "active" : ""}`}
-                    aria-label="Select Wide Barrier Scenario"
-                  >
-                    <span>Wide Barrier (2.4 nm)</span>
-                  </button>
                   <button
                     onClick={() => handleCaseSelect("narrow")}
                     className={`switcher-btn ${selectedCase === "narrow" ? "active" : ""}`}
                     aria-label="Select Narrower Barrier Scenario"
                   >
-                    <span>Narrower Barrier (0.8 nm)</span>
+                    <span>Narrow (0.8 nm)</span>
+                  </button>
+                  <button
+                    onClick={() => handleCaseSelect("wide")}
+                    className={`switcher-btn ${selectedCase === "wide" ? "active" : ""}`}
+                    aria-label="Select Wide Barrier Scenario"
+                  >
+                    <span>Wide (2.2 nm)</span>
                   </button>
                 </div>
               </div>
 
-              {/* Sliders (Illustrative) */}
+              {/* Sliders connected to real calculations */}
               <div className="control-item">
                 <div className="control-label-row">
                   <span>Barrier Width (w)</span>
-                  <span className="control-value">{barrierWidth} nm</span>
+                  <span className="control-value">{barrierWidth.toFixed(1)} nm</span>
                 </div>
                 <input
                   type="range"
-                  min="0.4"
+                  min="0.2"
                   max="3.0"
-                  step="0.2"
+                  step="0.1"
                   value={barrierWidth}
                   onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    setBarrierWidth(val);
-                    setSelectedCase(val <= 1.2 ? "narrow" : "wide");
+                    setBarrierWidth(parseFloat(e.target.value));
+                    setSelectedCase("custom");
                   }}
-                  className="quantum-slider"
-                  aria-label="Barrier Width Slider"
+                  className="editorial-slider"
+                  aria-label="Barrier Width slider"
                 />
-                <span className="control-help">Thickness of the repulsive electrostatic potential</span>
+                <span className="slider-hint">Exponential sensitivity to barrier thickness</span>
               </div>
 
               <div className="control-item">
                 <div className="control-label-row">
-                  <span>Barrier Potential (V₀)</span>
+                  <span>Barrier Height (V₀)</span>
                   <span className="control-value">{barrierHeight.toFixed(1)} eV</span>
                 </div>
                 <input
                   type="range"
-                  min="3.5"
-                  max="7.0"
-                  step="0.5"
+                  min="2.0"
+                  max="8.0"
+                  step="0.2"
                   value={barrierHeight}
-                  onChange={(e) => setBarrierHeight(parseFloat(e.target.value))}
-                  className="quantum-slider"
-                  aria-label="Barrier Potential Slider"
+                  onChange={(e) => {
+                    setBarrierHeight(parseFloat(e.target.value));
+                    setSelectedCase("custom");
+                  }}
+                  className="editorial-slider"
+                  aria-label="Barrier Height slider"
                 />
-                <span className="control-help">Height of the energy barrier</span>
               </div>
 
               <div className="control-item">
                 <div className="control-label-row">
-                  <span>Incident Energy (E)</span>
+                  <span>Particle Energy (E)</span>
                   <span className="control-value">{particleEnergy.toFixed(1)} eV</span>
                 </div>
                 <input
                   type="range"
-                  min="1.0"
-                  max="3.4"
-                  step="0.2"
+                  min="0.5"
+                  max="7.5"
+                  step="0.1"
                   value={particleEnergy}
-                  onChange={(e) => setParticleEnergy(parseFloat(e.target.value))}
-                  className="quantum-slider"
-                  aria-label="Incident Particle Energy Slider"
+                  onChange={(e) => {
+                    setParticleEnergy(parseFloat(e.target.value));
+                    setSelectedCase("custom");
+                  }}
+                  className="editorial-slider"
+                  aria-label="Particle Energy slider"
                 />
-                <span className="control-help">Kinetic energy of incoming electron (E &lt; V₀)</span>
               </div>
 
-              {/* Mathematical Relation Box */}
-              <div className="lab-formula-box">
-                <span className="formula-tag">Transmission Coefficient</span>
-                <code className="formula-text">T ≈ e^&#40;-2κw&#41;</code>
-                <span className="formula-sub">where κ = √(2m(V₀ - E)) / ℏ</span>
+              {/* Governing Mathematical Formulation */}
+              <div className="lab-formula-card">
+                <span className="lab-formula-title">Exact Transmission Law:</span>
+                <MathView
+                  math="T = \frac{1}{1 + \frac{V_0^2 \sinh^2(\kappa a)}{4E(V_0-E)}}"
+                  display
+                />
+                <span className="lab-formula-sub">
+                  where <MathView math="\kappa = \frac{\sqrt{2m(V_0-E)}}{\hbar}" inline />
+                </span>
               </div>
             </div>
 
-            {/* Right: Wavefunction Visualization & Outcome Comparison */}
+            {/* Right: Visual Wave Output & Calculated Telemetry */}
             <div className="lab-visualization-panel">
-              <div className="viz-header">
-                <span className="viz-title">Simulated Wavefunction ψ(x)</span>
-                <span className={`viz-status-tag ${selectedCase === "narrow" ? "tag-high" : "tag-low"}`}>
-                  Transmission T = {transmissionRate}
-                </span>
+              {/* Telemetry Readout Cards */}
+              <div className="lab-results-grid">
+                <div className="result-card result-primary">
+                  <span className="result-label">Calculated Transmission (T)</span>
+                  <span className="result-value">{physicsData.formattedTransmission}</span>
+                  <span className="result-desc">
+                    {particleEnergy < barrierHeight
+                      ? `Quantum tunneling probability through ${barrierWidth.toFixed(1)} nm`
+                      : "Over-barrier transmission with quantum reflections"}
+                  </span>
+                </div>
+
+                <div className="result-card">
+                  <span className="result-label">Decay Parameter (κ)</span>
+                  <span className="result-value">{physicsData.kappaNm} nm⁻¹</span>
+                  <span className="result-desc">Wavefunction attenuation inside barrier</span>
+                </div>
               </div>
 
-              {/* Dynamic SVG Wavefunction Diagram */}
-              <div className="wave-diagram-container">
-                <svg
-                  viewBox="0 0 500 220"
-                  className="wave-diagram-svg"
-                  preserveAspectRatio="xMidYMid meet"
-                  aria-label="Wavefunction Tunneling Diagram"
-                >
-                  <defs>
-                    <linearGradient id="barrierGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgba(255, 139, 120, 0.4)" />
-                      <stop offset="100%" stopColor="rgba(255, 139, 120, 0.05)" />
-                    </linearGradient>
-                    <linearGradient id="waveIncidentGrad" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#35D6D0" />
-                      <stop offset="100%" stopColor="#9B8CFF" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Ground & Axis */}
-                  <line x1="20" y1="180" x2="480" y2="180" stroke="rgba(169, 182, 207, 0.2)" strokeWidth="1.5" />
-                  <text x="25" y="200" fill="#6E7E9E" fontSize="11" fontFamily="JetBrains Mono">x = 0</text>
-                  <text x="440" y="200" fill="#6E7E9E" fontSize="11" fontFamily="JetBrains Mono">Region III</text>
-
-                  {/* Potential Barrier Block */}
-                  {selectedCase === "narrow" ? (
-                    // Narrow Barrier (x=210 to 270)
-                    <>
-                      <rect x="210" y="50" width="60" height="130" fill="url(#barrierGradient)" stroke="#FF8B78" strokeWidth="2" strokeDasharray="4 2" />
-                      <text x="220" y="40" fill="#FF8B78" fontSize="11" fontFamily="JetBrains Mono" fontWeight="600">
-                        V₀ (0.8 nm)
-                      </text>
-                    </>
-                  ) : (
-                    // Wide Barrier (x=170 to 330)
-                    <>
-                      <rect x="170" y="50" width="160" height="130" fill="url(#barrierGradient)" stroke="#FF8B78" strokeWidth="2" strokeDasharray="4 2" />
-                      <text x="210" y="40" fill="#FF8B78" fontSize="11" fontFamily="JetBrains Mono" fontWeight="600">
-                        V₀ (2.4 nm)
-                      </text>
-                    </>
-                  )}
-
-                  {/* Wave Packet Paths */}
-                  {selectedCase === "narrow" ? (
-                    <>
-                      {/* Region I: Incident & Reflected Sinusoidal Wave (x=20 to 210) */}
-                      <path
-                        d="M 20 115 Q 40 70, 60 115 T 100 115 T 140 115 T 180 115 T 210 115"
-                        fill="none"
-                        stroke="#35D6D0"
-                        strokeWidth="3"
-                      />
-                      {/* Region II: Exponential Decay inside narrow barrier (x=210 to 270) */}
-                      <path
-                        d="M 210 115 Q 235 130, 270 140"
-                        fill="none"
-                        stroke="#FF8B78"
-                        strokeWidth="2.5"
-                      />
-                      {/* Region III: Transmitted Wave with notable amplitude (x=270 to 480) */}
-                      <path
-                        d="M 270 140 Q 295 110, 320 140 T 370 140 T 420 140 T 470 140"
-                        fill="none"
-                        stroke="#9B8CFF"
-                        strokeWidth="2.5"
-                      />
-                    </>
-                  ) : (
-                    <>
-                      {/* Region I: Incident wave */}
-                      <path
-                        d="M 20 115 Q 40 70, 60 115 T 100 115 T 140 115 T 170 115"
-                        fill="none"
-                        stroke="#35D6D0"
-                        strokeWidth="3"
-                      />
-                      {/* Region II: Deep exponential decay inside wide barrier (x=170 to 330) */}
-                      <path
-                        d="M 170 115 Q 210 145, 260 172 T 330 178"
-                        fill="none"
-                        stroke="#FF8B78"
-                        strokeWidth="2.5"
-                      />
-                      {/* Region III: Transmitted Wave almost flat/zero */}
-                      <path
-                        d="M 330 178 Q 355 174, 380 178 T 430 178 T 470 178"
-                        fill="none"
-                        stroke="#9B8CFF"
-                        strokeWidth="1.2"
-                        strokeDasharray="3 3"
-                        opacity="0.6"
-                      />
-                    </>
-                  )}
-
-                  {/* Labels on Diagram */}
-                  <text x="50" y="80" fill="#35D6D0" fontSize="11" fontFamily="JetBrains Mono">
-                    Incident Wave ψ_inc
-                  </text>
-                  <text x="360" y={selectedCase === "narrow" ? 100 : 160} fill="#9B8CFF" fontSize="11" fontFamily="JetBrains Mono">
-                    Transmitted Wave ψ_trans
-                  </text>
-                </svg>
+              {/* 2D Schematic Wave Canvas */}
+              <div className="wave-canvas-wrapper">
+                <div className="wave-canvas-header">
+                  <span className="canvas-title">Wavepacket Attenuation Schematic</span>
+                  <span className="canvas-badge">
+                    {particleEnergy < barrierHeight ? "Tunneling Regime" : "Over-Barrier"}
+                  </span>
+                </div>
+                <canvas ref={waveCanvasRef} className="wave-canvas" />
+                <div className="canvas-footer-legend">
+                  <span className="legend-item">
+                    <span className="legend-dot green" />
+                    <span>Propagating Wave</span>
+                  </span>
+                  <span className="legend-item">
+                    <span className="legend-dot copper" />
+                    <span>Evanescent Decay inside Barrier</span>
+                  </span>
+                </div>
               </div>
 
-              {/* Before vs After Outcome Analysis */}
-              <div className="outcome-comparison-card">
-                <div className="outcome-header">
-                  {selectedCase === "narrow" ? (
-                    <CheckCircle2 size={18} color="var(--color-teal)" />
-                  ) : (
-                    <AlertCircle size={18} color="var(--color-coral)" />
-                  )}
-                  <h5>Observation & Physical Insight</h5>
+              {/* Physical Interpretation Callout */}
+              <div className="lab-interpretation-card">
+                <div className="interpretation-header">
+                  <CheckCircle2 size={16} color="var(--color-forest)" />
+                  <strong>Scientific Interpretation:</strong>
                 </div>
-                <p className="outcome-text">{decayDescription}</p>
-                <div className="outcome-meta">
-                  <span>Tunneling Status: <strong>{selectedCase === "narrow" ? "High Transmission" : "Heavy Attenuation"}</strong></span>
-                  <span>Probability: <strong>{transmissionRate}</strong></span>
-                </div>
+                <p className="interpretation-body">
+                  {particleEnergy < barrierHeight
+                    ? `Because tunneling probability decays exponentially as e^(-2κw), increasing width from 0.8 nm to 2.2 nm reduces transmission by several orders of magnitude. The current calculated value is ${physicsData.formattedTransmission}.`
+                    : `Since particle energy exceeds the barrier height (E > V₀), transmission is classically allowed (${physicsData.formattedTransmission}), yet quantum reflections still occur at the discontinuous potential boundaries.`}
+                </p>
               </div>
             </div>
           </div>
@@ -310,17 +367,18 @@ export default function QuantumLabPreview() {
 
       <style>{`
         .lab-preview-card {
-          padding: 32px;
-          background: rgba(17, 27, 46, 0.85);
-          border: 1px solid rgba(155, 140, 255, 0.25);
+          padding: 34px;
+          background: var(--color-surface);
         }
 
         .lab-banner {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding-bottom: 20px;
-          border-bottom: 1px solid var(--border-subtle);
+          padding: 12px 18px;
+          background: var(--color-surface-muted);
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border-stone);
           margin-bottom: 24px;
           flex-wrap: wrap;
           gap: 12px;
@@ -334,44 +392,43 @@ export default function QuantumLabPreview() {
         }
 
         .lab-banner-badge {
-          font-size: 0.76rem;
           font-family: var(--font-mono);
-          padding: 4px 10px;
+          font-size: 0.72rem;
+          color: var(--color-copper);
+          background: var(--color-surface);
+          border: 1px solid var(--color-copper-border);
+          padding: 3px 8px;
           border-radius: var(--radius-full);
-          background: rgba(155, 140, 255, 0.15);
-          color: var(--color-violet);
-          border: 1px solid rgba(155, 140, 255, 0.3);
           font-weight: 600;
           text-transform: uppercase;
         }
 
         .lab-banner-title {
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: var(--color-text-main);
+          font-size: 0.92rem;
+          font-weight: 600;
+          color: var(--color-graphite);
         }
 
         .lab-banner-status {
-          display: inline-flex;
+          display: flex;
           align-items: center;
           gap: 6px;
-          font-size: 0.82rem;
           font-family: var(--font-mono);
-          color: var(--color-text-muted);
+          font-size: 0.76rem;
+          color: var(--color-copper);
+          font-weight: 600;
         }
 
         .beginner-question-box {
-          background: rgba(11, 16, 32, 0.7);
-          border-left: 3px solid var(--color-teal);
-          border-radius: 0 var(--radius-md) var(--radius-md) 0;
-          padding: 20px 24px;
-          margin-bottom: 32px;
+          margin-bottom: 28px;
+          padding-bottom: 22px;
+          border-bottom: 1px solid var(--border-stone-light);
         }
 
         .question-prefix {
-          font-size: 0.78rem;
+          font-size: 0.76rem;
           font-family: var(--font-mono);
-          color: var(--color-teal);
+          color: var(--color-forest);
           text-transform: uppercase;
           letter-spacing: 0.05em;
           display: block;
@@ -379,9 +436,8 @@ export default function QuantumLabPreview() {
         }
 
         .question-title {
-          font-size: 1.35rem;
-          color: var(--color-text-main);
-          font-weight: 700;
+          font-size: 1.55rem;
+          color: var(--color-graphite);
           margin-bottom: 10px;
         }
 
@@ -393,53 +449,61 @@ export default function QuantumLabPreview() {
 
         .lab-workspace-grid {
           display: grid;
-          grid-template-columns: 1fr 1.35fr;
+          grid-template-columns: 1fr 1.3fr;
           gap: 28px;
+          align-items: start;
         }
 
+        /* Controls Panel */
         .lab-controls-panel {
-          background: rgba(11, 16, 32, 0.6);
-          border: 1px solid var(--border-subtle);
+          padding: 22px;
+          background: var(--color-surface-muted);
           border-radius: var(--radius-md);
-          padding: 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
+          border: 1px solid var(--border-stone);
         }
 
         .panel-header {
           display: flex;
           align-items: center;
-          gap: 10px;
-          margin-bottom: 4px;
+          justify-content: space-between;
+          margin-bottom: 18px;
         }
 
-        .panel-header h4 {
-          font-size: 1rem;
-          color: var(--color-text-main);
-          flex: 1;
-        }
-
-        .preview-pill {
-          font-size: 0.72rem;
-          font-family: var(--font-mono);
-          padding: 2px 8px;
-          background: rgba(169, 182, 207, 0.1);
-          color: var(--color-text-muted);
-          border-radius: 4px;
-        }
-
-        .case-switcher {
+        .panel-title-row {
           display: flex;
-          flex-direction: column;
+          align-items: center;
           gap: 8px;
         }
 
+        .panel-title-row h4 {
+          font-size: 0.92rem;
+          font-family: var(--font-mono);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: var(--color-graphite);
+        }
+
+        .preview-pill {
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          color: var(--color-forest);
+          background: var(--color-forest-subtle);
+          padding: 2px 8px;
+          border-radius: var(--radius-full);
+          border: 1px solid var(--color-forest-border);
+        }
+
+        .case-switcher {
+          margin-bottom: 20px;
+        }
+
         .switcher-label {
-          font-size: 0.78rem;
+          display: block;
+          font-size: 0.74rem;
           font-family: var(--font-mono);
           color: var(--color-text-muted);
           text-transform: uppercase;
+          margin-bottom: 8px;
         }
 
         .switcher-buttons {
@@ -449,176 +513,217 @@ export default function QuantumLabPreview() {
         }
 
         .switcher-btn {
-          padding: 8px 12px;
+          padding: 7px 12px;
           border-radius: var(--radius-sm);
           font-size: 0.8rem;
           font-family: var(--font-mono);
-          background: rgba(17, 27, 46, 0.8);
-          border: 1px solid var(--border-subtle);
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
           color: var(--color-text-secondary);
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
         .switcher-btn.active {
-          background: rgba(53, 214, 208, 0.15);
-          border-color: var(--color-teal);
-          color: var(--color-teal);
+          background: var(--color-copper);
+          color: #FFFFFF;
+          border-color: var(--color-copper);
           font-weight: 600;
         }
 
         .control-item {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
+          margin-bottom: 18px;
         }
 
         .control-label-row {
           display: flex;
           justify-content: space-between;
-          font-size: 0.85rem;
-          color: var(--color-text-main);
+          font-size: 0.84rem;
+          font-family: var(--font-mono);
+          color: var(--color-graphite);
+          margin-bottom: 6px;
         }
 
         .control-value {
-          font-family: var(--font-mono);
-          color: var(--color-teal);
           font-weight: 600;
+          color: var(--color-copper);
         }
 
-        .quantum-slider {
+        .editorial-slider {
           width: 100%;
-          accent-color: var(--color-teal);
+          accent-color: var(--color-copper);
           cursor: pointer;
         }
 
-        .control-help {
-          font-size: 0.74rem;
+        .slider-hint {
+          display: block;
+          font-size: 0.72rem;
           color: var(--color-text-muted);
+          margin-top: 4px;
         }
 
-        .lab-formula-box {
-          background: rgba(17, 27, 46, 0.7);
-          border: 1px dashed rgba(53, 214, 208, 0.3);
+        .lab-formula-card {
+          margin-top: 20px;
+          padding: 14px;
+          background: var(--color-surface);
           border-radius: var(--radius-sm);
-          padding: 12px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          margin-top: 6px;
+          border: 1px solid var(--border-stone);
+          text-align: center;
         }
 
-        .formula-tag {
+        .lab-formula-title {
+          display: block;
           font-size: 0.72rem;
           font-family: var(--font-mono);
           color: var(--color-text-muted);
           text-transform: uppercase;
+          margin-bottom: 6px;
         }
 
-        .formula-text {
-          font-family: var(--font-mono);
-          font-size: 0.95rem;
-          color: var(--color-teal);
-          font-weight: 600;
-        }
-
-        .formula-sub {
-          font-family: var(--font-mono);
-          font-size: 0.74rem;
+        .lab-formula-sub {
+          display: block;
+          font-size: 0.78rem;
           color: var(--color-text-secondary);
+          margin-top: 6px;
         }
 
+        /* Results & Visualization */
         .lab-visualization-panel {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 18px;
         }
 
-        .viz-header {
+        .lab-results-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+        }
+
+        .result-card {
+          padding: 16px;
+          background: var(--color-surface-muted);
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border-stone);
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+          flex-direction: column;
         }
 
-        .viz-title {
+        .result-primary {
+          border-left: 3px solid var(--color-copper);
+        }
+
+        .result-label {
+          font-size: 0.72rem;
           font-family: var(--font-mono);
-          font-size: 0.88rem;
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          margin-bottom: 4px;
+        }
+
+        .result-value {
+          font-size: 1.6rem;
+          font-weight: 700;
+          font-family: var(--font-mono);
+          color: var(--color-copper);
+          margin-bottom: 4px;
+        }
+
+        .result-desc {
+          font-size: 0.78rem;
           color: var(--color-text-secondary);
+          line-height: 1.4;
         }
 
-        .viz-status-tag {
+        .wave-canvas-wrapper {
+          border: 1px solid var(--border-stone);
+          border-radius: var(--radius-md);
+          overflow: hidden;
+          background: #F5F3EC;
+        }
+
+        .wave-canvas-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 14px;
+          background: var(--color-surface);
+          border-bottom: 1px solid var(--border-stone-light);
+        }
+
+        .canvas-title {
+          font-size: 0.76rem;
           font-family: var(--font-mono);
-          font-size: 0.82rem;
-          padding: 4px 10px;
-          border-radius: var(--radius-full);
+          color: var(--color-graphite);
           font-weight: 600;
         }
 
-        .tag-high {
-          background: rgba(53, 214, 208, 0.15);
-          color: var(--color-teal);
-          border: 1px solid rgba(53, 214, 208, 0.4);
+        .canvas-badge {
+          font-size: 0.7rem;
+          font-family: var(--font-mono);
+          color: var(--color-forest);
+          background: var(--color-forest-subtle);
+          padding: 1px 6px;
+          border-radius: 4px;
         }
 
-        .tag-low {
-          background: rgba(255, 139, 120, 0.15);
-          color: var(--color-coral);
-          border: 1px solid rgba(255, 139, 120, 0.4);
-        }
-
-        .wave-diagram-container {
-          background: #0B1020;
-          border: 1px solid var(--border-subtle);
-          border-radius: var(--radius-md);
-          overflow: hidden;
-          padding: 12px;
-        }
-
-        .wave-diagram-svg {
-          width: 100%;
-          height: auto;
+        .wave-canvas {
           display: block;
+          width: 100%;
+          height: 220px;
         }
 
-        .outcome-comparison-card {
-          background: rgba(11, 16, 32, 0.6);
-          border: 1px solid var(--border-subtle);
-          border-radius: var(--radius-md);
-          padding: 18px;
+        .canvas-footer-legend {
+          display: flex;
+          gap: 16px;
+          padding: 8px 14px;
+          background: var(--color-surface);
+          border-top: 1px solid var(--border-stone-light);
+          font-size: 0.74rem;
+          font-family: var(--font-mono);
+          color: var(--color-text-secondary);
         }
 
-        .outcome-header {
+        .legend-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .legend-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+
+        .legend-dot.green {
+          background: var(--color-forest);
+        }
+
+        .legend-dot.copper {
+          background: var(--color-copper);
+        }
+
+        .lab-interpretation-card {
+          padding: 14px 18px;
+          background: var(--color-surface-muted);
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border-stone-light);
+        }
+
+        .interpretation-header {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-bottom: 8px;
+          font-size: 0.82rem;
+          color: var(--color-graphite);
+          margin-bottom: 6px;
         }
 
-        .outcome-header h5 {
-          font-size: 0.95rem;
-          color: var(--color-text-main);
-        }
-
-        .outcome-text {
-          font-size: 0.9rem;
+        .interpretation-body {
+          font-size: 0.88rem;
           color: var(--color-text-secondary);
           line-height: 1.55;
-          margin-bottom: 12px;
-        }
-
-        .outcome-meta {
-          display: flex;
-          gap: 20px;
-          font-size: 0.8rem;
-          font-family: var(--font-mono);
-          color: var(--color-text-muted);
-          border-top: 1px solid var(--border-subtle);
-          padding-top: 10px;
-          flex-wrap: wrap;
-        }
-
-        .outcome-meta strong {
-          color: var(--color-text-main);
         }
 
         @media (max-width: 900px) {

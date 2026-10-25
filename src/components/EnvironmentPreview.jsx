@@ -7,13 +7,13 @@ import {
   Trophy,
   Bus,
   HeartPulse,
-  Sparkles,
   ArrowUpRight,
   X,
   Layers,
   Atom,
-  ChevronRight,
-  ShieldAlert
+  Info,
+  Calendar,
+  Sparkles
 } from "lucide-react";
 
 // Icon mapping helper
@@ -29,16 +29,18 @@ const iconMap = {
 /**
  * EnvironmentPreview
  * Heading: "Your everyday world, seen differently."
- * 6 Visual Destinations:
- * 1. Your Room (Primary in-development focus)
+ * 6 Exploratory Destinations:
+ * 1. Your Room (Milestone 2 Dedicated Navigable 3D Bedroom)
  * 2. The Sky
  * 3. The Street
  * 4. A Football Field
  * 5. Inside a Bus
  * 6. Inside the Human Body
  *
- * Clearly labeled status badges, subtle hover states, and an interactive
- * Architectural Preview Drawer (no broken 404 links or fake simulations).
+ * Honest Representation:
+ * - Accurately labels cards as Architectural Blueprints and Concept Previews.
+ * - Outlines the upcoming Milestone 2 Three.js / React Three Fiber interactive bedroom.
+ * - Restyled in the Scientific-Editorial design system.
  */
 export default function EnvironmentPreview() {
   const [selectedEnv, setSelectedEnv] = useState(null);
@@ -50,12 +52,22 @@ export default function EnvironmentPreview() {
         <div className="section-header">
           <div className="section-tag">
             <Atom size={14} />
-            <span>Exploration Environments</span>
+            <span>Planned Exploratory Environments</span>
           </div>
           <h2 className="section-title">Your everyday world, seen differently.</h2>
           <p className="section-desc">
-            Step inside familiar physical spaces. Soon, you will be able to walk around, inspect everyday objects, and uncover the extraordinary quantum mechanics that make them possible.
+            Explore our architectural blueprints for six familiar environments. In our upcoming Milestone 2, we will launch a genuine, navigable 3D Bedroom using Three.js/React Three Fiber with realistic materials, perspective lighting, and quantum object interaction.
           </p>
+        </div>
+
+        {/* 3D Roadmap Transparency Notice */}
+        <div className="roadmap-notice-box">
+          <div className="roadmap-notice-icon">
+            <Info size={18} color="var(--color-copper)" />
+          </div>
+          <div className="roadmap-notice-text">
+            <strong>Simulation Roadmap Notice:</strong> The interactive cards and drawers below present verified physical phenomena mapped to planned spaces. Full 3D navigation and interactive physics are in active preparation for Milestone 2 (commencing with the interactive 3D Bedroom).
+          </div>
         </div>
 
         {/* 6 Destinations Grid */}
@@ -67,7 +79,7 @@ export default function EnvironmentPreview() {
             return (
               <div
                 key={env.id}
-                className={`glass-card env-card ${isFirst ? "env-card-featured" : ""}`}
+                className={`editorial-card env-card ${isFirst ? "env-card-featured" : ""}`}
                 onClick={() => setSelectedEnv(env)}
                 role="button"
                 tabIndex={0}
@@ -79,42 +91,26 @@ export default function EnvironmentPreview() {
                   }
                 }}
               >
-                {/* Background Gradient & Ambient Glow */}
-                <div
-                  className="env-card-bg"
-                  style={{
-                    background: env.gradient
-                  }}
-                  aria-hidden="true"
-                />
-
                 {/* Top Badge: Status */}
                 <div className="env-card-header">
-                  <div
-                    className="env-icon-wrapper"
-                    style={{
-                      borderColor: `rgba(${env.accent === "#35D6D0" ? "53, 214, 208" : env.accent === "#FF8B78" ? "255, 139, 120" : "155, 140, 255"}, 0.4)`
-                    }}
-                  >
-                    <IconComponent size={22} color={env.accent} />
+                  <div className={`env-icon-wrapper ${isFirst ? "icon-copper" : "icon-forest"}`}>
+                    <IconComponent size={20} />
                   </div>
-                  <span
-                    className={`env-status-badge ${isFirst ? "badge-primary" : "badge-upcoming"}`}
-                  >
-                    {env.statusBadge}
+                  <span className={`env-status-badge ${isFirst ? "badge-primary" : "badge-upcoming"}`}>
+                    {isFirst ? "Milestone 2: Navigable 3D Focus" : env.statusBadge}
                   </span>
                 </div>
 
                 {/* Main Card Content */}
                 <div className="env-card-content">
-                  <h3 className="env-card-title">{env.title}</h3>
+                  <h3 className="env-card-title font-serif">{env.title}</h3>
                   <p className="env-card-subtitle">{env.subtitle}</p>
                   <p className="env-card-desc">{env.description}</p>
                 </div>
 
-                {/* Interactive Objects Preview Pills */}
+                {/* Interactive Objects Preview */}
                 <div className="env-objects-preview">
-                  <span className="objects-label">Quantum Phenomena:</span>
+                  <span className="objects-label">Mapped Phenomena:</span>
                   <div className="objects-tags">
                     {env.interactiveObjects.slice(0, 2).map((obj, idx) => (
                       <span key={idx} className="object-tag">
@@ -131,8 +127,8 @@ export default function EnvironmentPreview() {
 
                 {/* Card Action Link */}
                 <div className="env-card-footer">
-                  <span className="preview-action-text">Inspect Planned Architecture</span>
-                  <ArrowUpRight size={16} className="preview-arrow" />
+                  <span className="preview-action-text">Inspect Architectural Blueprint</span>
+                  <ArrowUpRight size={15} className="preview-arrow" />
                 </div>
               </div>
             );
@@ -149,7 +145,7 @@ export default function EnvironmentPreview() {
             aria-labelledby="modal-env-title"
           >
             <div
-              className="glass-card env-modal"
+              className="editorial-card env-modal"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -157,12 +153,14 @@ export default function EnvironmentPreview() {
                 onClick={() => setSelectedEnv(null)}
                 aria-label="Close Preview"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
 
               <div className="modal-header">
-                <span className="modal-tag">{selectedEnv.status}</span>
-                <h3 id="modal-env-title" className="modal-title">
+                <span className="modal-tag">
+                  {selectedEnv.isFirstFocus ? "Milestone 2 Primary 3D Target" : "Architectural Blueprint"}
+                </span>
+                <h3 id="modal-env-title" className="modal-title font-serif">
                   {selectedEnv.title}
                 </h3>
                 <p className="modal-desc">{selectedEnv.description}</p>
@@ -170,9 +168,9 @@ export default function EnvironmentPreview() {
 
               {/* Status Notice */}
               <div className="modal-notice">
-                <ShieldAlert size={18} color="var(--color-teal)" className="notice-icon" />
+                <Info size={18} color="var(--color-copper)" className="notice-icon" />
                 <div className="notice-content">
-                  <strong>Architectural Blueprint:</strong> Full in-engine 3D interaction for this environment is part of upcoming project milestones. Below are the verified physical phenomena mapped to each interactive object.
+                  <strong>Architectural Blueprint:</strong> Real-time 3D in-engine navigation for this space is scheduled for upcoming milestones. Below are the verified quantum phenomena mapped to each everyday object.
                 </div>
               </div>
 
@@ -199,13 +197,13 @@ export default function EnvironmentPreview() {
               {/* Planned Features */}
               <div className="modal-section">
                 <h4 className="modal-section-title">
-                  <Sparkles size={16} />
-                  <span>Planned 3D Mechanics & Controls</span>
+                  <Calendar size={16} />
+                  <span>Planned Interactive Mechanics</span>
                 </h4>
-                <ul className="modal-features-list">
+                <ul className="modal-planned-list">
                   {selectedEnv.plannedFeatures.map((feat, i) => (
-                    <li key={i} className="modal-feature-item">
-                      <ChevronRight size={14} color="var(--color-teal)" />
+                    <li key={i} className="planned-item">
+                      <Sparkles size={13} color="var(--color-copper)" />
                       <span>{feat}</span>
                     </li>
                   ))}
@@ -217,7 +215,7 @@ export default function EnvironmentPreview() {
                   className="modal-dismiss-btn"
                   onClick={() => setSelectedEnv(null)}
                 >
-                  Close Architecture Preview
+                  Close Blueprint
                 </button>
               </div>
             </div>
@@ -226,70 +224,94 @@ export default function EnvironmentPreview() {
       </div>
 
       <style>{`
+        /* Transparency Notice Box */
+        .roadmap-notice-box {
+          display: flex;
+          align-items: flex-start;
+          gap: 14px;
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
+          border-left: 4px solid var(--color-copper);
+          border-radius: var(--radius-md);
+          padding: 16px 20px;
+          margin-bottom: 36px;
+          box-shadow: var(--shadow-sm);
+        }
+
+        .roadmap-notice-icon {
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        .roadmap-notice-text {
+          font-size: 0.92rem;
+          color: var(--color-text-secondary);
+          line-height: 1.55;
+        }
+
+        .roadmap-notice-text strong {
+          color: var(--color-graphite);
+        }
+
+        /* 6 Destinations Grid */
         .environments-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 28px;
+          gap: 24px;
         }
 
         .env-card {
-          padding: 28px;
+          padding: 26px;
           display: flex;
           flex-direction: column;
           cursor: pointer;
-          position: relative;
-          background: rgba(17, 27, 46, 0.7);
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
+          transition: all 0.25s ease;
         }
 
         .env-card:hover {
-          transform: translateY(-4px);
-        }
-
-        .env-card:hover .preview-arrow {
-          transform: translate(3px, -3px);
+          transform: translateY(-3px);
+          border-color: #C7C1B5;
+          box-shadow: var(--shadow-float);
         }
 
         .env-card-featured {
-          border-color: rgba(53, 214, 208, 0.45);
-          box-shadow: 0 0 30px rgba(53, 214, 208, 0.15);
-        }
-
-        .env-card-bg {
-          position: absolute;
-          inset: 0;
-          opacity: 0.65;
-          pointer-events: none;
-          z-index: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .env-card:hover .env-card-bg {
-          opacity: 1;
+          border-color: var(--color-copper-border);
+          box-shadow: 0 4px 20px -2px rgba(189, 100, 60, 0.12);
         }
 
         .env-card-header {
-          position: relative;
-          z-index: 1;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 20px;
+          margin-bottom: 18px;
         }
 
         .env-icon-wrapper {
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
-          background: rgba(11, 16, 32, 0.85);
-          border: 1px solid var(--border-subtle);
+          width: 40px;
+          height: 40px;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
+        .env-icon-wrapper.icon-copper {
+          background: var(--color-copper-subtle);
+          color: var(--color-copper);
+          border: 1px solid var(--color-copper-border);
+        }
+
+        .env-icon-wrapper.icon-forest {
+          background: var(--color-forest-subtle);
+          color: var(--color-forest);
+          border: 1px solid var(--color-forest-border);
+        }
+
         .env-status-badge {
-          font-size: 0.74rem;
           font-family: var(--font-mono);
+          font-size: 0.72rem;
           padding: 4px 10px;
           border-radius: var(--radius-full);
           font-weight: 600;
@@ -298,50 +320,48 @@ export default function EnvironmentPreview() {
         }
 
         .badge-primary {
-          background: rgba(53, 214, 208, 0.15);
-          color: var(--color-teal);
-          border: 1px solid rgba(53, 214, 208, 0.35);
+          background: var(--color-copper-subtle);
+          color: var(--color-copper);
+          border: 1px solid var(--color-copper-border);
         }
 
         .badge-upcoming {
-          background: rgba(169, 182, 207, 0.1);
-          color: var(--color-text-secondary);
-          border: 1px solid rgba(169, 182, 207, 0.2);
+          background: var(--color-surface-muted);
+          color: var(--color-text-muted);
+          border: 1px solid var(--border-stone-light);
         }
 
         .env-card-content {
-          position: relative;
-          z-index: 1;
           flex: 1;
+          margin-bottom: 18px;
         }
 
         .env-card-title {
-          font-size: 1.4rem;
-          font-weight: 700;
-          color: var(--color-text-main);
-          margin-bottom: 4px;
+          font-size: 1.35rem;
+          color: var(--color-graphite);
+          font-weight: 600;
+          margin-bottom: 6px;
         }
 
         .env-card-subtitle {
-          font-size: 0.85rem;
+          font-size: 0.84rem;
           font-family: var(--font-mono);
-          color: var(--color-teal);
-          margin-bottom: 12px;
+          color: var(--color-copper);
+          margin-bottom: 10px;
+          font-weight: 500;
         }
 
         .env-card-desc {
-          font-size: 0.94rem;
+          font-size: 0.92rem;
           color: var(--color-text-secondary);
           line-height: 1.55;
-          margin-bottom: 20px;
         }
 
         .env-objects-preview {
-          position: relative;
-          z-index: 1;
-          margin-bottom: 20px;
+          margin-top: auto;
           padding-top: 14px;
-          border-top: 1px solid var(--border-subtle);
+          border-top: 1px solid var(--border-stone-light);
+          margin-bottom: 14px;
         }
 
         .objects-label {
@@ -350,7 +370,7 @@ export default function EnvironmentPreview() {
           font-family: var(--font-mono);
           color: var(--color-text-muted);
           text-transform: uppercase;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
 
         .objects-tags {
@@ -360,143 +380,127 @@ export default function EnvironmentPreview() {
         }
 
         .object-tag {
-          font-size: 0.78rem;
+          font-size: 0.76rem;
           padding: 3px 8px;
-          border-radius: 6px;
-          background: rgba(11, 16, 32, 0.6);
-          border: 1px solid var(--border-subtle);
-          color: var(--color-text-secondary);
+          background: var(--color-surface-muted);
+          border-radius: 4px;
+          border: 1px solid var(--border-stone-light);
+          color: var(--color-graphite);
         }
 
         .object-tag-more {
-          font-size: 0.78rem;
-          padding: 3px 8px;
-          border-radius: 6px;
-          background: rgba(155, 140, 255, 0.1);
-          color: var(--color-violet);
+          font-size: 0.76rem;
+          padding: 3px 6px;
+          color: var(--color-copper);
+          font-family: var(--font-mono);
         }
 
         .env-card-footer {
-          position: relative;
-          z-index: 1;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding-top: 14px;
-          border-top: 1px solid var(--border-subtle);
-        }
-
-        .preview-action-text {
-          font-size: 0.84rem;
-          font-family: var(--font-mono);
-          color: var(--color-teal);
+          font-size: 0.82rem;
           font-weight: 600;
+          color: var(--color-copper);
+          padding-top: 10px;
         }
 
         .preview-arrow {
-          color: var(--color-teal);
           transition: transform 0.2s ease;
         }
 
-        /* Architectural Preview Modal */
+        .env-card:hover .preview-arrow {
+          transform: translate(2px, -2px);
+        }
+
+        /* Modal / Blueprint Drawer */
         .env-modal-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(11, 16, 32, 0.85);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background: rgba(25, 28, 31, 0.6);
+          backdrop-filter: blur(4px);
+          z-index: 1000;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 24px;
-          z-index: 1000;
-          animation: modalFadeIn 0.25s ease;
-        }
-
-        @keyframes modalFadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          padding: 20px;
         }
 
         .env-modal {
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
           max-width: 680px;
           width: 100%;
           max-height: 90vh;
           overflow-y: auto;
-          padding: 36px;
-          background: rgba(17, 27, 46, 0.95);
-          border: 1px solid rgba(53, 214, 208, 0.3);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+          padding: 34px;
+          position: relative;
+          box-shadow: var(--shadow-float);
         }
 
         .modal-close-btn {
           position: absolute;
           top: 20px;
           right: 20px;
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           border-radius: 50%;
-          background: rgba(11, 16, 32, 0.6);
-          border: 1px solid var(--border-subtle);
-          color: var(--color-text-secondary);
+          background: var(--color-surface-muted);
+          border: 1px solid var(--border-stone);
           display: flex;
           align-items: center;
           justify-content: center;
+          color: var(--color-text-secondary);
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
         .modal-close-btn:hover {
-          color: var(--color-text-main);
-          border-color: var(--color-teal);
+          background: var(--color-surface-stone);
+          color: var(--color-graphite);
         }
 
         .modal-header {
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         }
 
         .modal-tag {
-          display: inline-block;
-          font-size: 0.78rem;
           font-family: var(--font-mono);
-          color: var(--color-teal);
+          font-size: 0.75rem;
+          color: var(--color-copper);
           text-transform: uppercase;
+          letter-spacing: 0.05em;
+          display: block;
           margin-bottom: 8px;
         }
 
         .modal-title {
-          font-size: 2rem;
-          font-weight: 700;
-          color: var(--color-text-main);
+          font-size: 1.85rem;
+          color: var(--color-graphite);
           margin-bottom: 8px;
         }
 
         .modal-desc {
-          font-size: 1.05rem;
+          font-size: 1rem;
           color: var(--color-text-secondary);
           line-height: 1.6;
         }
 
         .modal-notice {
           display: flex;
-          gap: 12px;
           align-items: flex-start;
-          padding: 14px 18px;
-          background: rgba(53, 214, 208, 0.08);
-          border: 1px solid rgba(53, 214, 208, 0.25);
-          border-radius: var(--radius-md);
+          gap: 12px;
+          background: var(--color-surface-muted);
+          border-left: 3px solid var(--color-copper);
+          padding: 12px 16px;
+          border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+          font-size: 0.88rem;
+          color: var(--color-text-secondary);
           margin-bottom: 24px;
         }
 
-        .notice-icon {
-          flex-shrink: 0;
-          margin-top: 2px;
-        }
-
-        .notice-content {
-          font-size: 0.88rem;
-          color: var(--color-text-main);
-          line-height: 1.5;
+        .modal-notice strong {
+          color: var(--color-graphite);
         }
 
         .modal-section {
@@ -504,36 +508,35 @@ export default function EnvironmentPreview() {
         }
 
         .modal-section-title {
+          font-size: 0.86rem;
+          font-family: var(--font-mono);
+          color: var(--color-forest);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
           display: flex;
           align-items: center;
           gap: 8px;
-          font-size: 0.88rem;
-          font-family: var(--font-mono);
-          color: var(--color-violet);
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
           margin-bottom: 14px;
         }
 
         .modal-objects-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 14px;
+          gap: 12px;
         }
 
         .modal-object-item {
-          padding: 14px;
-          background: rgba(11, 16, 32, 0.6);
-          border: 1px solid var(--border-subtle);
+          padding: 12px 16px;
+          background: var(--color-surface-muted);
           border-radius: var(--radius-sm);
+          border: 1px solid var(--border-stone-light);
         }
 
         .modal-object-name {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
+          color: var(--color-graphite);
           font-size: 0.95rem;
-          color: var(--color-text-main);
           margin-bottom: 4px;
         }
 
@@ -541,59 +544,60 @@ export default function EnvironmentPreview() {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: var(--color-teal);
+          background: var(--color-copper);
         }
 
         .modal-object-phenomenon {
-          font-size: 0.78rem;
+          font-size: 0.82rem;
           font-family: var(--font-mono);
-          color: var(--color-teal);
+          color: var(--color-forest);
           margin-bottom: 6px;
         }
 
         .modal-object-detail {
-          font-size: 0.84rem;
+          font-size: 0.88rem;
           color: var(--color-text-secondary);
-          line-height: 1.45;
+          line-height: 1.5;
         }
 
-        .modal-features-list {
+        .modal-planned-list {
           list-style: none;
-          display: flex;
-          flex-direction: column;
+          display: grid;
           gap: 8px;
         }
 
-        .modal-feature-item {
+        .planned-item {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
           font-size: 0.9rem;
           color: var(--color-text-secondary);
         }
 
         .modal-footer {
           margin-top: 28px;
+          padding-top: 18px;
+          border-top: 1px solid var(--border-stone-light);
           display: flex;
           justify-content: flex-end;
         }
 
         .modal-dismiss-btn {
-          padding: 10px 22px;
-          border-radius: var(--radius-full);
-          background: rgba(169, 182, 207, 0.15);
-          color: var(--color-text-main);
+          padding: 9px 20px;
+          background: var(--color-graphite);
+          color: #FFFFFF;
           font-size: 0.9rem;
           font-weight: 600;
+          border-radius: var(--radius-full);
           cursor: pointer;
           transition: background 0.2s ease;
         }
 
         .modal-dismiss-btn:hover {
-          background: rgba(169, 182, 207, 0.25);
+          background: #33383F;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 990px) {
           .environments-grid {
             grid-template-columns: repeat(2, 1fr);
           }
@@ -603,8 +607,8 @@ export default function EnvironmentPreview() {
           .environments-grid {
             grid-template-columns: 1fr;
           }
-          .modal-objects-grid {
-            grid-template-columns: 1fr;
+          .env-modal {
+            padding: 22px;
           }
         }
       `}</style>

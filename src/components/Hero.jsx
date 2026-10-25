@@ -1,6 +1,7 @@
 import React from "react";
 import FlowingWaveButton from "./FlowingWaveButton";
-import { ChevronDown, Sparkles, Orbit, Layers, Binary } from "lucide-react";
+import MathView from "./MathView";
+import { ChevronDown, Orbit, Layers, Binary, Compass } from "lucide-react";
 
 /**
  * Hero
@@ -9,14 +10,21 @@ import { ChevronDown, Sparkles, Orbit, Layers, Binary } from "lucide-react";
  * - Exact Tagline: “What if our world behaved according to the laws of Quantum Mechanics”
  * - Supporting text: “Step into the familiar. Discover the extraordinary hidden within it.”
  * - Signature FlowingWaveButton ("Start Exploring")
- * - Quantum constant badges & telemetry
- * - Atmospheric scroll indicator
+ * - Quantum constant badges & telemetry with KaTeX mathematical typesetting
+ * - Direct navigation to the interesting facts section (#discovery)
  */
 export default function Hero({ onExplore }) {
-  const handleScrollDown = () => {
+  const handleScrollToDiscovery = () => {
     const nextSection = document.getElementById("discovery");
     if (nextSection) {
       nextSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleScrollToEnvironments = () => {
+    const envSection = document.getElementById("environments");
+    if (envSection) {
+      envSection.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -29,8 +37,8 @@ export default function Hero({ onExplore }) {
           <span className="badge-text">Virtual Quantum Mechanics Explorer</span>
         </div>
 
-        {/* Main Headline - Exact Tagline */}
-        <h1 className="hero-headline">
+        {/* Main Headline - Exact Tagline in Editorial Serif */}
+        <h1 className="hero-headline font-serif">
           “What if our world behaved according to the laws of Quantum Mechanics”
         </h1>
 
@@ -39,47 +47,63 @@ export default function Hero({ onExplore }) {
           Step into the familiar. Discover the extraordinary hidden within it.
         </p>
 
-        {/* Signature Start Exploring Flowing Wave Button */}
+        {/* Action CTAs */}
         <div className="hero-cta-wrapper">
-          <FlowingWaveButton targetSectionId="environments" onExplore={onExplore} />
+          <FlowingWaveButton
+            targetSectionId="discovery"
+            onExplore={() => {
+              if (onExplore) onExplore();
+              handleScrollToDiscovery();
+            }}
+          />
+          <button
+            onClick={handleScrollToEnvironments}
+            className="hero-secondary-btn"
+            aria-label="View planned exploratory environments"
+          >
+            <Compass size={17} />
+            <span>Planned Environments</span>
+          </button>
         </div>
 
         {/* Quantum Metrics / Telemetry Strip */}
         <div className="hero-telemetry-grid">
           <div className="telemetry-item">
             <div className="telemetry-icon">
-              <Binary size={16} color="var(--color-teal)" />
+              <Binary size={18} color="var(--color-copper)" />
             </div>
             <div className="telemetry-info">
               <span className="telemetry-label">Reduced Planck Constant</span>
-              <span className="telemetry-val">ℏ = 1.054 × 10⁻³⁴ J·s</span>
+              <span className="telemetry-val">
+                <MathView math="\hbar = 1.054 \times 10^{-34}\text{ J}\cdot\text{s}" inline />
+              </span>
             </div>
           </div>
 
           <div className="telemetry-item">
             <div className="telemetry-icon">
-              <Orbit size={16} color="var(--color-violet)" />
+              <Orbit size={18} color="var(--color-forest)" />
             </div>
             <div className="telemetry-info">
               <span className="telemetry-label">Exploratory Environments</span>
-              <span className="telemetry-val">6 Familiar Worlds</span>
+              <span className="telemetry-val">6 Familiar Worlds (Milestone 2 3D)</span>
             </div>
           </div>
 
           <div className="telemetry-item">
             <div className="telemetry-icon">
-              <Layers size={16} color="var(--color-coral)" />
+              <Layers size={18} color="var(--color-copper)" />
             </div>
             <div className="telemetry-info">
               <span className="telemetry-label">Planned Companion</span>
-              <span className="telemetry-val">QuAntI AI Guide</span>
+              <span className="telemetry-val">QuAntI AI Scientific Guide</span>
             </div>
           </div>
         </div>
 
         {/* Subtle Scroll Indicator */}
         <button
-          onClick={handleScrollDown}
+          onClick={handleScrollToDiscovery}
           className="hero-scroll-indicator"
           aria-label="Scroll to Quantum Discovery Section"
         >
@@ -91,18 +115,18 @@ export default function Hero({ onExplore }) {
       <style>{`
         .hero-section {
           position: relative;
-          min-height: 100vh;
+          min-height: 94vh;
           display: flex;
           align-items: center;
           justify-content: center;
           padding-top: 140px;
-          padding-bottom: 80px;
+          padding-bottom: 70px;
           z-index: 10;
         }
 
         .hero-content {
           text-align: center;
-          max-width: 980px;
+          max-width: 960px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -112,72 +136,83 @@ export default function Hero({ onExplore }) {
         .hero-badge {
           display: inline-flex;
           align-items: center;
-          gap: 10px;
-          padding: 8px 20px;
+          gap: 9px;
+          padding: 6px 18px;
           border-radius: var(--radius-full);
-          background: rgba(17, 27, 46, 0.8);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(53, 214, 208, 0.3);
-          box-shadow: 0 0 20px rgba(53, 214, 208, 0.15);
-          margin-bottom: 28px;
-          animation: badgeFloat 4s ease-in-out infinite;
-        }
-
-        @keyframes badgeFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
+          box-shadow: var(--shadow-sm);
+          margin-bottom: 26px;
         }
 
         .badge-glow-dot {
-          width: 8px;
-          height: 8px;
+          width: 7px;
+          height: 7px;
           border-radius: 50%;
-          background: var(--color-teal);
-          box-shadow: 0 0 10px var(--color-teal);
-          animation: dotPulse 2s infinite;
-        }
-
-        @keyframes dotPulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.85); }
+          background: var(--color-copper);
         }
 
         .badge-text {
           font-family: var(--font-mono);
-          font-size: 0.85rem;
+          font-size: 0.82rem;
           font-weight: 600;
-          letter-spacing: 0.06em;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
-          color: var(--color-teal);
+          color: var(--color-forest);
         }
 
         /* Hero Headline */
         .hero-headline {
-          font-size: clamp(2.4rem, 5.2vw, 4.4rem);
-          font-weight: 800;
-          line-height: 1.15;
-          letter-spacing: -0.03em;
-          color: var(--color-text-main);
-          margin-bottom: 24px;
+          font-size: clamp(2.4rem, 5.2vw, 4.2rem);
+          font-weight: 600;
+          line-height: 1.14;
+          letter-spacing: -0.025em;
+          color: var(--color-graphite);
+          margin-bottom: 22px;
           text-wrap: balance;
-          background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F8 65%, #A9B6CF 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          text-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         /* Supporting Copy */
         .hero-supporting {
-          font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+          font-size: clamp(1.12rem, 2vw, 1.35rem);
           font-weight: 400;
           color: var(--color-text-secondary);
-          max-width: 680px;
-          margin-bottom: 42px;
+          max-width: 660px;
+          margin-bottom: 38px;
           line-height: 1.6;
         }
 
         .hero-cta-wrapper {
-          margin-bottom: 56px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 50px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .hero-secondary-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 15px 24px;
+          border-radius: var(--radius-full);
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
+          color: var(--color-graphite);
+          font-family: var(--font-sans);
+          font-size: 0.98rem;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: var(--shadow-sm);
+          transition: all 0.2s ease;
+        }
+
+        .hero-secondary-btn:hover {
+          background: var(--color-surface-muted);
+          border-color: var(--color-copper);
+          color: var(--color-copper);
+          transform: translateY(-1px);
         }
 
         /* Telemetry Row */
@@ -186,33 +221,33 @@ export default function Hero({ onExplore }) {
           grid-template-columns: repeat(3, 1fr);
           gap: 16px;
           width: 100%;
-          max-width: 860px;
-          margin-bottom: 48px;
+          max-width: 880px;
+          margin-bottom: 40px;
         }
 
         .telemetry-item {
           display: flex;
           align-items: center;
           gap: 14px;
-          padding: 16px 20px;
-          background: rgba(17, 27, 46, 0.6);
-          backdrop-filter: blur(12px);
-          border: 1px solid var(--border-subtle);
+          padding: 14px 18px;
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
           border-radius: var(--radius-md);
+          box-shadow: var(--shadow-sm);
           text-align: left;
           transition: border-color var(--transition-normal);
         }
 
         .telemetry-item:hover {
-          border-color: rgba(53, 214, 208, 0.3);
+          border-color: var(--color-copper-border);
         }
 
         .telemetry-icon {
           width: 38px;
           height: 38px;
-          border-radius: 10px;
-          background: rgba(11, 16, 32, 0.8);
-          border: 1px solid rgba(169, 182, 207, 0.15);
+          border-radius: 8px;
+          background: var(--color-surface-muted);
+          border: 1px solid var(--border-stone-light);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -225,7 +260,7 @@ export default function Hero({ onExplore }) {
         }
 
         .telemetry-label {
-          font-size: 0.74rem;
+          font-size: 0.72rem;
           font-family: var(--font-mono);
           color: var(--color-text-muted);
           text-transform: uppercase;
@@ -233,9 +268,9 @@ export default function Hero({ onExplore }) {
         }
 
         .telemetry-val {
-          font-size: 0.92rem;
+          font-size: 0.88rem;
           font-weight: 600;
-          color: var(--color-text-main);
+          color: var(--color-graphite);
           font-family: var(--font-mono);
         }
 
@@ -246,7 +281,7 @@ export default function Hero({ onExplore }) {
           align-items: center;
           gap: 6px;
           color: var(--color-text-muted);
-          font-size: 0.8rem;
+          font-size: 0.78rem;
           font-family: var(--font-mono);
           letter-spacing: 0.05em;
           text-transform: uppercase;
@@ -258,7 +293,7 @@ export default function Hero({ onExplore }) {
         }
 
         .hero-scroll-indicator:hover {
-          color: var(--color-teal);
+          color: var(--color-copper);
         }
 
         .scroll-arrow {
@@ -267,11 +302,11 @@ export default function Hero({ onExplore }) {
 
         @keyframes arrowBounce {
           0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(6px); }
-          60% { transform: translateY(3px); }
+          40% { transform: translateY(5px); }
+          60% { transform: translateY(2px); }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 820px) {
           .hero-telemetry-grid {
             grid-template-columns: 1fr;
             max-width: 420px;

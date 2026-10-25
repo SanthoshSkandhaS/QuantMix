@@ -1,14 +1,16 @@
 import React from "react";
-import { Atom, PlayCircle, ArrowUp, ExternalLink, Code2 } from "lucide-react";
+import { Atom, PlayCircle, ArrowUp, ExternalLink } from "lucide-react";
+
+const CURRENT_YEAR = 2026;
 
 /**
  * Footer
  * Features:
  * - Exact identity copy: “QuantMix — Explore the quantum world hidden within the familiar.”
- * - Navigation links
- * - GitHub repo link: https://github.com/SanthoshSkandhaS/QuantMix
- * - Replay Intro trigger
- * - Back to top button
+ * - Navigation links & verified repository link
+ * - Editorial roadmap overview
+ * - Replay Intro trigger & Back to Top button
+ * - Fixed purity warning (no new Date() inside render)
  */
 export default function Footer({ onReplayIntro }) {
   const scrollToTop = () => {
@@ -24,9 +26,9 @@ export default function Footer({ onReplayIntro }) {
           <div className="footer-col brand-col">
             <div className="footer-brand-title">
               <div className="footer-logo-icon">
-                <Atom size={20} color="var(--color-teal)" />
+                <Atom size={20} color="var(--color-copper)" />
               </div>
-              <span className="footer-brand-name">QuantMix</span>
+              <span className="footer-brand-name font-serif">QuantMix</span>
             </div>
             <p className="footer-identity-tagline">
               QuantMix — Explore the quantum world hidden within the familiar.
@@ -50,30 +52,30 @@ export default function Footer({ onReplayIntro }) {
 
           {/* Future Milestones */}
           <div className="footer-col">
-            <h4 className="footer-heading">Project Roadmap</h4>
+            <h4 className="footer-heading">Verified Project Roadmap</h4>
             <ul className="footer-links">
               <li>
                 <span className="status-dot green" />
-                <span>Milestone 1: Homepage V1 (Active)</span>
+                <span>Milestone 1: Scientific Web Engine</span>
               </li>
               <li>
-                <span className="status-dot purple" />
-                <span>Milestone 2: Bedroom 3D &amp; Lab</span>
+                <span className="status-dot copper" />
+                <span>Milestone 2: Navigable 3D Bedroom</span>
               </li>
               <li>
-                <span className="status-dot purple" />
-                <span>Milestone 3: QuAntI Assistant Integration</span>
+                <span className="status-dot copper" />
+                <span>Milestone 3: Interactive Quantum Lab</span>
               </li>
               <li>
-                <span className="status-dot purple" />
-                <span>Milestones 4–6: Macro Environments</span>
+                <span className="status-dot copper" />
+                <span>Milestone 4: QuAntI Assistant</span>
               </li>
             </ul>
           </div>
 
           {/* Quick Actions & Repository */}
           <div className="footer-col">
-            <h4 className="footer-heading">Open Source &amp; Controls</h4>
+            <h4 className="footer-heading">Open Science &amp; Source</h4>
             <div className="footer-actions">
               <a
                 href="https://github.com/SanthoshSkandhaS/QuantMix"
@@ -94,48 +96,46 @@ export default function Footer({ onReplayIntro }) {
                 className="footer-btn replay-btn"
                 aria-label="Replay 4s Atomic Intro Animation"
               >
-                <PlayCircle size={16} color="var(--color-violet)" />
+                <PlayCircle size={16} color="var(--color-copper)" />
                 <span>Replay Atomic Intro</span>
               </button>
 
               <button
                 onClick={scrollToTop}
                 className="footer-btn top-btn"
-                aria-label="Scroll back to top"
+                aria-label="Scroll back to top of the page"
               >
-                <ArrowUp size={16} color="var(--color-teal)" />
+                <ArrowUp size={16} />
                 <span>Back to Top</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="footer-bottom-bar">
-          <div className="footer-copy">
-            © {new Date().getFullYear()} QuantMix. Built for open science and interactive quantum education.
+        {/* Bottom Copyright & Disclaimer */}
+        <div className="footer-bottom">
+          <div className="copyright-text">
+            © {CURRENT_YEAR} QuantMix. Built for open science, authentic mathematical rigor, and interactive physics exploration.
           </div>
-          <div className="footer-badges">
-            <span className="footer-badge">React 19 + Vite</span>
-            <span className="footer-badge">Canvas 2D Wave Mechanics</span>
-            <span className="footer-badge">Vanilla Design Tokens</span>
+          <div className="disclaimer-text">
+            All models use certified quantum formulations (de Broglie, Schrödinger, Pauli). Milestone 2 Three.js 3D navigation in active development.
           </div>
         </div>
       </div>
 
       <style>{`
         .footer-wrapper {
+          background: var(--color-surface-muted);
+          border-top: 1px solid var(--border-stone);
+          padding-top: 80px;
+          padding-bottom: 48px;
           position: relative;
           z-index: 10;
-          background: #080D1A;
-          border-top: 1px solid rgba(169, 182, 207, 0.1);
-          padding-top: 80px;
-          padding-bottom: 40px;
         }
 
         .footer-grid {
           display: grid;
-          grid-template-columns: 1.5fr 1fr 1.2fr 1.2fr;
+          grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
           gap: 40px;
           margin-bottom: 60px;
         }
@@ -143,96 +143,91 @@ export default function Footer({ onReplayIntro }) {
         .brand-col {
           display: flex;
           flex-direction: column;
-          gap: 14px;
         }
 
         .footer-brand-title {
           display: flex;
           align-items: center;
           gap: 10px;
+          margin-bottom: 16px;
         }
 
         .footer-logo-icon {
-          width: 32px;
-          height: 32px;
+          width: 34px;
+          height: 34px;
           border-radius: 8px;
-          background: rgba(53, 214, 208, 0.15);
-          border: 1px solid rgba(53, 214, 208, 0.3);
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
         .footer-brand-name {
-          font-size: 1.4rem;
-          font-weight: 800;
-          color: var(--color-text-main);
+          font-size: 1.45rem;
+          font-weight: 700;
+          color: var(--color-graphite);
         }
 
         .footer-identity-tagline {
-          font-size: 0.98rem;
+          font-size: 0.95rem;
+          color: var(--color-copper);
           font-weight: 600;
-          color: var(--color-teal);
-          line-height: 1.5;
+          margin-bottom: 12px;
+          line-height: 1.45;
         }
 
         .footer-vision-note {
           font-size: 0.88rem;
-          color: var(--color-text-muted);
+          color: var(--color-text-secondary);
           line-height: 1.6;
         }
 
         .footer-heading {
-          font-size: 0.82rem;
           font-family: var(--font-mono);
-          color: var(--color-text-secondary);
+          font-size: 0.8rem;
           text-transform: uppercase;
-          letter-spacing: 0.06em;
-          margin-bottom: 18px;
+          letter-spacing: 0.05em;
+          color: var(--color-forest);
+          margin-bottom: 20px;
+          font-weight: 600;
         }
 
         .footer-links {
           list-style: none;
           display: flex;
           flex-direction: column;
-          gap: 10px;
-        }
-
-        .footer-links a {
-          font-size: 0.9rem;
-          color: var(--color-text-secondary);
-          transition: color 0.2s ease, transform 0.2s ease;
-          display: inline-block;
-        }
-
-        .footer-links a:hover {
-          color: var(--color-teal);
-          transform: translateX(3px);
+          gap: 12px;
         }
 
         .footer-links li {
-          font-size: 0.85rem;
-          color: var(--color-text-muted);
           display: flex;
           align-items: center;
           gap: 8px;
+          font-size: 0.9rem;
+          color: var(--color-text-secondary);
+        }
+
+        .footer-links a {
+          transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+          color: var(--color-copper);
         }
 
         .status-dot {
-          width: 6px;
-          height: 6px;
+          width: 7px;
+          height: 7px;
           border-radius: 50%;
-          flex-shrink: 0;
         }
 
         .status-dot.green {
-          background: var(--color-teal);
-          box-shadow: 0 0 6px var(--color-teal);
+          background: var(--color-forest);
         }
 
-        .status-dot.purple {
-          background: var(--color-violet);
-          opacity: 0.7;
+        .status-dot.copper {
+          background: var(--color-copper);
         }
 
         .footer-actions {
@@ -244,80 +239,52 @@ export default function Footer({ onReplayIntro }) {
         .footer-btn {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          justify-content: flex-start;
+          gap: 10px;
           padding: 10px 16px;
           border-radius: var(--radius-sm);
-          font-size: 0.85rem;
-          font-family: var(--font-mono);
+          background: var(--color-surface);
+          border: 1px solid var(--border-stone);
+          color: var(--color-graphite);
+          font-size: 0.86rem;
+          font-family: var(--font-sans);
+          font-weight: 500;
           cursor: pointer;
           transition: all 0.2s ease;
-          text-decoration: none;
+          box-shadow: var(--shadow-sm);
         }
 
-        .github-btn {
-          background: rgba(17, 27, 46, 0.8);
-          border: 1px solid var(--border-subtle);
-          color: var(--color-text-main);
+        .footer-btn:hover {
+          background: var(--color-surface-stone);
+          border-color: var(--color-copper);
+          color: var(--color-copper);
+          transform: translateY(-1px);
         }
 
-        .github-btn:hover {
-          border-color: var(--color-teal);
-          background: rgba(53, 214, 208, 0.1);
-        }
-
-        .replay-btn {
-          background: rgba(155, 140, 255, 0.1);
-          border: 1px solid rgba(155, 140, 255, 0.3);
-          color: var(--color-text-main);
-        }
-
-        .replay-btn:hover {
-          background: rgba(155, 140, 255, 0.2);
-          border-color: var(--color-violet);
-        }
-
-        .top-btn {
-          background: rgba(17, 27, 46, 0.5);
-          border: 1px solid var(--border-subtle);
-          color: var(--color-text-secondary);
-        }
-
-        .top-btn:hover {
-          color: var(--color-text-main);
-          border-color: var(--color-teal);
-        }
-
-        .footer-bottom-bar {
+        .footer-bottom {
+          padding-top: 32px;
+          border-top: 1px solid var(--border-stone);
           display: flex;
-          align-items: center;
           justify-content: space-between;
-          padding-top: 30px;
-          border-top: 1px solid rgba(169, 182, 207, 0.08);
-          font-size: 0.82rem;
-          color: var(--color-text-muted);
+          align-items: center;
           flex-wrap: wrap;
           gap: 16px;
-        }
-
-        .footer-badges {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .footer-badge {
-          font-family: var(--font-mono);
-          font-size: 0.72rem;
-          padding: 3px 8px;
-          border-radius: 4px;
-          background: rgba(17, 27, 46, 0.6);
-          border: 1px solid rgba(169, 182, 207, 0.1);
+          font-size: 0.82rem;
           color: var(--color-text-muted);
         }
 
-        @media (max-width: 992px) {
+        .copyright-text {
+          font-family: var(--font-sans);
+        }
+
+        .disclaimer-text {
+          font-family: var(--font-mono);
+          font-size: 0.76rem;
+        }
+
+        @media (max-width: 990px) {
           .footer-grid {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
           }
         }
 
@@ -325,9 +292,9 @@ export default function Footer({ onReplayIntro }) {
           .footer-grid {
             grid-template-columns: 1fr;
           }
-          .footer-bottom-bar {
+          .footer-bottom {
             flex-direction: column;
-            align-items: flex-start;
+            text-align: center;
           }
         }
       `}</style>

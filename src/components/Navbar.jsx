@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Atom, Menu, X, PlayCircle, Sparkles, ExternalLink } from "lucide-react";
+import { Atom, Menu, X, PlayCircle } from "lucide-react";
 
 /**
  * Navbar
  * Features:
- * - QuantMix wordmark & quantum badge
+ * - Editorial wordmark & quantum badge
  * - Smooth scroll navigation links
- * - Scroll progress indicator along the top edge
- * - Sticky blurred header with scroll elevation
+ * - Scroll progress indicator along top edge
+ * - Sticky blurred header with warm ivory elevation
  * - "Replay Intro" trigger
  * - Mobile responsive drawer
  */
@@ -65,7 +65,7 @@ export default function Navbar({ onReplayIntro }) {
 
   return (
     <>
-      {/* Top Scroll Progress Line */}
+      {/* Top Scroll Progress Line in Burnished Copper & Forest Green */}
       <div
         style={{
           position: "fixed",
@@ -73,7 +73,7 @@ export default function Navbar({ onReplayIntro }) {
           left: 0,
           height: "3px",
           width: `${scrollProgress}%`,
-          background: "linear-gradient(90deg, #35D6D0, #9B8CFF)",
+          background: "linear-gradient(90deg, #BD643C, #384936)",
           zIndex: 1000,
           transition: "width 0.1s linear"
         }}
@@ -87,12 +87,12 @@ export default function Navbar({ onReplayIntro }) {
           left: 0,
           right: 0,
           zIndex: 900,
-          transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-          backgroundColor: scrolled ? "rgba(11, 16, 32, 0.88)" : "transparent",
-          backdropFilter: scrolled ? "blur(16px)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
-          borderBottom: scrolled ? "1px solid rgba(169, 182, 207, 0.1)" : "1px solid transparent",
-          padding: scrolled ? "12px 0" : "20px 0"
+          transition: "all 0.25s ease-out",
+          backgroundColor: scrolled ? "rgba(251, 251, 247, 0.94)" : "transparent",
+          backdropFilter: scrolled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+          borderBottom: scrolled ? "1px solid var(--border-stone)" : "1px solid transparent",
+          padding: scrolled ? "14px 0" : "22px 0"
         }}
       >
         <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -103,114 +103,70 @@ export default function Navbar({ onReplayIntro }) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
+              gap: "10px",
               textDecoration: "none"
             }}
             aria-label="QuantMix Home"
           >
             <div
               style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "12px",
-                background: "linear-gradient(135deg, rgba(53, 214, 208, 0.2), rgba(155, 140, 255, 0.25))",
-                border: "1px solid rgba(53, 214, 208, 0.4)",
+                width: "32px",
+                height: "32px",
+                borderRadius: "8px",
+                background: "var(--color-surface)",
+                border: "1px solid var(--border-stone)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#35D6D0",
-                boxShadow: "0 0 16px rgba(53, 214, 208, 0.25)"
+                color: "var(--color-copper)"
               }}
             >
-              <Atom size={22} className="spin-atomic" />
+              <Atom size={19} />
             </div>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span
-                  style={{
-                    fontSize: "1.35rem",
-                    fontWeight: 800,
-                    letterSpacing: "-0.02em",
-                    color: "var(--color-text-main)"
-                  }}
-                >
-                  QuantMix
-                </span>
-                <span
-                  style={{
-                    fontSize: "0.68rem",
-                    padding: "2px 7px",
-                    borderRadius: "999px",
-                    background: "rgba(155, 140, 255, 0.15)",
-                    border: "1px solid rgba(155, 140, 255, 0.3)",
-                    color: "var(--color-violet)",
-                    fontFamily: "var(--font-mono)",
-                    fontWeight: 600
-                  }}
-                >
-                  v1.0
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "0.72rem",
-                  color: "var(--color-text-secondary)",
-                  fontFamily: "var(--font-mono)",
-                  letterSpacing: "0.02em"
-                }}
-              >
-                Virtual Quantum Explorer
-              </div>
-            </div>
+            <span
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "1.35rem",
+                fontWeight: 700,
+                color: "var(--color-graphite)",
+                letterSpacing: "-0.02em"
+              }}
+            >
+              QuantMix
+            </span>
           </a>
 
-          {/* Desktop Navigation Links */}
+          {/* Desktop Nav Items */}
           <nav
             style={{
               display: "none",
               alignItems: "center",
-              gap: "8px"
+              gap: "28px"
             }}
             className="desktop-nav"
             aria-label="Main Navigation"
           >
-            {navLinks.map((link) => {
-              const isActive = activeSection === link.id;
-              return (
-                <a
-                  key={link.id}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "999px",
-                    fontSize: "0.92rem",
-                    fontWeight: isActive ? 600 : 500,
-                    color: isActive ? "var(--color-teal)" : "var(--color-text-secondary)",
-                    backgroundColor: isActive ? "rgba(53, 214, 208, 0.08)" : "transparent",
-                    border: isActive ? "1px solid rgba(53, 214, 208, 0.25)" : "1px solid transparent",
-                    transition: "all 0.2s ease"
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.color = "var(--color-text-main)";
-                      e.currentTarget.style.backgroundColor = "rgba(17, 27, 46, 0.6)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.color = "var(--color-text-secondary)";
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }
-                  }}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
+            {navLinks.map((link) => (
+              <a
+                key={link.id}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                style={{
+                  fontSize: "0.92rem",
+                  fontWeight: 500,
+                  color: activeSection === link.id ? "var(--color-copper)" : "var(--color-text-secondary)",
+                  position: "relative",
+                  transition: "color 0.2s ease",
+                  padding: "4px 0"
+                }}
+                className={`nav-link-item ${activeSection === link.id ? "active" : ""}`}
+              >
+                {link.label}
+              </a>
+            ))}
           </nav>
 
-          {/* Action Area: Replay Intro Button & Mobile Toggle */}
+          {/* Right Action CTA: Replay Intro Button & Mobile Menu Toggle */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <button
               onClick={onReplayIntro}
@@ -218,141 +174,116 @@ export default function Navbar({ onReplayIntro }) {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "999px",
-                background: "rgba(17, 27, 46, 0.7)",
-                border: "1px solid rgba(155, 140, 255, 0.25)",
-                color: "var(--color-text-secondary)",
+                padding: "6px 14px",
+                borderRadius: "var(--radius-full)",
+                background: "var(--color-surface)",
+                border: "1px solid var(--border-stone)",
+                color: "var(--color-graphite)",
                 fontSize: "0.82rem",
-                fontFamily: "var(--font-mono)",
+                fontWeight: 500,
+                fontFamily: "var(--font-sans)",
                 cursor: "pointer",
-                transition: "all 0.2s ease"
+                boxShadow: "var(--shadow-sm)"
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "var(--color-violet)";
-                e.currentTarget.style.color = "var(--color-text-main)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(155, 140, 255, 0.25)";
-                e.currentTarget.style.color = "var(--color-text-secondary)";
-              }}
-              title="Watch the 4-second atomic collision introductory animation again"
-              aria-label="Replay Atomic Introduction Animation"
+              className="replay-intro-btn"
+              title="Replay the 4-second atomic collision intro"
             >
-              <PlayCircle size={15} color="var(--color-violet)" />
-              <span className="replay-text">Replay Intro</span>
+              <PlayCircle size={15} color="var(--color-copper)" />
+              <span>Intro</span>
             </button>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="mobile-menu-btn"
-              aria-label={mobileMenuOpen ? "Close Menu" : "Open Navigation Menu"}
-              aria-expanded={mobileMenuOpen}
               style={{
-                display: "flex",
+                display: "none",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "40px",
-                height: "40px",
-                borderRadius: "10px",
-                background: "rgba(17, 27, 46, 0.8)",
-                border: "1px solid var(--border-subtle)",
-                color: "var(--color-text-main)",
-                cursor: "pointer"
+                width: "36px",
+                height: "36px",
+                borderRadius: "6px",
+                background: "var(--color-surface)",
+                border: "1px solid var(--border-stone)",
+                color: "var(--color-graphite)"
               }}
+              className="mobile-toggle-btn"
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div
+            style={{
+              background: "var(--color-surface)",
+              borderTop: "1px solid var(--border-stone)",
+              borderBottom: "1px solid var(--border-stone)",
+              padding: "20px 24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px"
+            }}
+          >
+            {navLinks.map((link) => (
+              <a
+                key={link.id}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  color: activeSection === link.id ? "var(--color-copper)" : "var(--color-graphite)",
+                  padding: "6px 0"
+                }}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        )}
       </header>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: "70px",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(11, 16, 32, 0.96)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            zIndex: 890,
-            display: "flex",
-            flexDirection: "column",
-            padding: "32px 24px",
-            gap: "16px"
-          }}
-        >
-          {navLinks.map((link) => (
-            <a
-              key={link.id}
-              href={link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
-              style={{
-                fontSize: "1.25rem",
-                fontWeight: 600,
-                color: activeSection === link.id ? "var(--color-teal)" : "var(--color-text-main)",
-                padding: "12px 16px",
-                borderRadius: "12px",
-                background: activeSection === link.id ? "rgba(53, 214, 208, 0.1)" : "rgba(17, 27, 46, 0.5)",
-                border: "1px solid rgba(169, 182, 207, 0.1)"
-              }}
-            >
-              {link.label}
-            </a>
-          ))}
-
-          <div style={{ marginTop: "auto", borderTop: "1px solid var(--border-subtle)", paddingTop: "20px" }}>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onReplayIntro();
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                width: "100%",
-                padding: "14px",
-                borderRadius: "12px",
-                background: "rgba(155, 140, 255, 0.12)",
-                border: "1px solid rgba(155, 140, 255, 0.3)",
-                color: "var(--color-text-main)",
-                fontWeight: 600
-              }}
-            >
-              <PlayCircle size={18} color="var(--color-violet)" />
-              <span>Replay 4s Atomic Intro</span>
-            </button>
-          </div>
-        </div>
-      )}
-
       <style>{`
-        @media (min-width: 860px) {
+        @media (min-width: 769px) {
           .desktop-nav {
             display: flex !important;
           }
-          .mobile-menu-btn {
+          .mobile-toggle-btn {
             display: none !important;
           }
         }
-        @media (max-width: 480px) {
-          .replay-text {
-            display: none;
+
+        @media (max-width: 768px) {
+          .desktop-nav {
+            display: none !important;
+          }
+          .mobile-toggle-btn {
+            display: flex !important;
           }
         }
-        @keyframes spinAtomic {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+
+        .nav-link-item:hover {
+          color: var(--color-copper) !important;
         }
-        .spin-atomic {
-          animation: spinAtomic 25s linear infinite;
+
+        .nav-link-item.active::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: var(--color-copper);
+          border-radius: 2px;
+        }
+
+        .replay-intro-btn:hover {
+          background: var(--color-surface-muted) !important;
+          border-color: var(--color-copper) !important;
         }
       `}</style>
     </>

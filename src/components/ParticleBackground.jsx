@@ -3,11 +3,11 @@ import React, { useEffect, useRef } from "react";
 /**
  * ParticleBackground
  * High-performance, lightweight scientific 2D canvas simulation.
- * Features:
- * - Ambient quantum probability field with faint sinusoidal wave interference contours
- * - Luminous floating particles with state-coherence threads
- * - Gentle mouse-repulsion / interaction with smooth damping
- * - Automatically pauses when document is hidden to conserve CPU/GPU
+ * Redesigned for the Scientific-Editorial identity:
+ * - Subtle archival quantum wave contour lines (restrained olive & stone)
+ * - Fine coherent particle nodes (copper & muted forest green)
+ * - Gentle mouse-repulsion with smooth damping
+ * - Automatically pauses when tab is hidden to conserve resources
  * - Honors prefers-reduced-motion
  */
 export default function ParticleBackground() {
@@ -59,8 +59,8 @@ export default function ParticleBackground() {
 
     window.addEventListener("resize", handleResize);
 
-    // Particle pool setup (scaled appropriately for mobile vs desktop)
-    const particleCount = Math.min(width < 768 ? 28 : 55, 65);
+    // Particle pool setup (clean & restrained)
+    const particleCount = Math.min(width < 768 ? 20 : 38, 45);
     let particles = [];
 
     class Particle {
@@ -71,17 +71,17 @@ export default function ParticleBackground() {
       reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.radius = 1.2 + Math.random() * 2.2;
+        this.radius = 1.0 + Math.random() * 1.6;
         this.baseX = this.x;
         this.baseY = this.y;
-        this.vx = (Math.random() - 0.5) * 0.45;
-        this.vy = (Math.random() - 0.5) * 0.45;
-        this.alpha = 0.2 + Math.random() * 0.55;
+        this.vx = (Math.random() - 0.5) * 0.3;
+        this.vy = (Math.random() - 0.5) * 0.3;
+        this.alpha = 0.15 + Math.random() * 0.35;
         this.phase = Math.random() * Math.PI * 2;
-        this.colorType = Math.random() > 0.45 ? "teal" : "violet";
+        this.colorType = Math.random() > 0.5 ? "copper" : "forest";
       }
 
-      update(time) {
+      update() {
         if (!prefersReducedMotion) {
           this.x += this.vx;
           this.y += this.vy;
@@ -97,9 +97,9 @@ export default function ParticleBackground() {
             const dx = this.x - mouse.x;
             const dy = this.y - mouse.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            const maxDist = 180;
+            const maxDist = 160;
             if (dist < maxDist && dist > 0) {
-              const force = (1 - dist / maxDist) * 1.5;
+              const force = (1 - dist / maxDist) * 1.2;
               this.x += (dx / dist) * force;
               this.y += (dy / dist) * force;
             }
@@ -108,28 +108,17 @@ export default function ParticleBackground() {
       }
 
       draw(context, time) {
-        const pulse = 0.8 + Math.sin(time * 0.002 + this.phase) * 0.2;
+        const pulse = 0.85 + Math.sin(time * 0.0015 + this.phase) * 0.15;
         const currentAlpha = this.alpha * pulse;
 
         context.beginPath();
         context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        if (this.colorType === "teal") {
-          context.fillStyle = `rgba(53, 214, 208, ${currentAlpha})`;
+        if (this.colorType === "copper") {
+          context.fillStyle = `rgba(189, 100, 60, ${currentAlpha})`;
         } else {
-          context.fillStyle = `rgba(155, 140, 255, ${currentAlpha})`;
+          context.fillStyle = `rgba(56, 73, 54, ${currentAlpha})`;
         }
         context.fill();
-
-        // Subtle glow aura around larger particles
-        if (this.radius > 2.2) {
-          context.beginPath();
-          context.arc(this.x, this.y, this.radius * 2.8, 0, Math.PI * 2);
-          context.fillStyle =
-            this.colorType === "teal"
-              ? `rgba(53, 214, 208, ${currentAlpha * 0.15})`
-              : `rgba(155, 140, 255, ${currentAlpha * 0.15})`;
-          context.fill();
-        }
       }
     }
 
@@ -143,7 +132,6 @@ export default function ParticleBackground() {
     initParticles();
 
     // Render loop
-    let lastTime = 0;
     const render = (time) => {
       if (document.hidden) {
         animationFrameId = requestAnimationFrame(render);
@@ -151,25 +139,25 @@ export default function ParticleBackground() {
       }
 
       // Smooth mouse lerp
-      mouse.x += (mouse.targetX - mouse.x) * 0.06;
-      mouse.y += (mouse.targetY - mouse.y) * 0.06;
+      mouse.x += (mouse.targetX - mouse.x) * 0.05;
+      mouse.y += (mouse.targetY - mouse.y) * 0.05;
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Subtle Quantum Wave Interference Background lines
+      // 1. Subtle Quantum Wave Interference Background contours
       if (!prefersReducedMotion) {
         ctx.save();
         ctx.lineWidth = 1;
-        const waveCount = width < 768 ? 2 : 4;
+        const waveCount = width < 768 ? 2 : 3;
         for (let w = 0; w < waveCount; w++) {
           ctx.beginPath();
-          const baseOffsetY = height * (0.25 + w * 0.2);
-          const freq = 0.0018 + w * 0.0006;
-          const speed = (w % 2 === 0 ? 1 : -1) * (0.0008 + w * 0.0002);
-          const amp = 30 + w * 14;
+          const baseOffsetY = height * (0.28 + w * 0.22);
+          const freq = 0.0012 + w * 0.0004;
+          const speed = (w % 2 === 0 ? 1 : -1) * (0.0004 + w * 0.0001);
+          const amp = 24 + w * 10;
 
-          for (let x = 0; x <= width; x += 30) {
-            const y = baseOffsetY + Math.sin(x * freq + time * speed) * amp + Math.cos(x * freq * 0.5 - time * speed * 0.8) * (amp * 0.4);
+          for (let x = 0; x <= width; x += 35) {
+            const y = baseOffsetY + Math.sin(x * freq + time * speed) * amp + Math.cos(x * freq * 0.4 - time * speed * 0.6) * (amp * 0.35);
             if (x === 0) {
               ctx.moveTo(x, y);
             } else {
@@ -178,15 +166,15 @@ export default function ParticleBackground() {
           }
           ctx.strokeStyle =
             w % 2 === 0
-              ? `rgba(53, 214, 208, 0.035)`
-              : `rgba(155, 140, 255, 0.035)`;
+              ? `rgba(56, 73, 54, 0.035)`
+              : `rgba(189, 100, 60, 0.03)`;
           ctx.stroke();
         }
         ctx.restore();
       }
 
       // 2. Coherence Lines between nearby particles
-      const maxConnectDist = width < 768 ? 95 : 130;
+      const maxConnectDist = width < 768 ? 85 : 120;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
@@ -194,20 +182,20 @@ export default function ParticleBackground() {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < maxConnectDist) {
-            const alpha = (1 - dist / maxConnectDist) * 0.16;
+            const alpha = (1 - dist / maxConnectDist) * 0.08;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(155, 140, 255, ${alpha})`;
+            ctx.strokeStyle = `rgba(56, 73, 54, ${alpha})`;
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
       }
 
-      // 3. Particles
+      // 3. Update & Draw Particles
       for (let i = 0; i < particles.length; i++) {
-        particles[i].update(time);
+        particles[i].update();
         particles[i].draw(ctx, time);
       }
 
@@ -227,17 +215,17 @@ export default function ParticleBackground() {
   return (
     <canvas
       ref={canvasRef}
-      aria-hidden="true"
       style={{
         position: "fixed",
         top: 0,
         left: 0,
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100%",
         pointerEvents: "none",
         zIndex: 0,
-        opacity: 0.95
+        opacity: 0.9
       }}
+      aria-hidden="true"
     />
   );
 }

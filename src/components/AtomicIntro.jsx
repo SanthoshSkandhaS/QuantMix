@@ -1,22 +1,59 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { FastForward, Sparkles } from "lucide-react";
 
+// Top-level pure helper: Draw Gaussian wave packet
+function drawWavePacket(ctx, x, y, color, radius, phase) {
+  const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+  grad.addColorStop(0, color);
+  grad.addColorStop(0.4, color);
+  grad.addColorStop(1, "transparent");
+
+  ctx.save();
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Wave ring fringes
+  for (let f = 1; f <= 3; f++) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius * (0.4 + f * 0.28), 0, Math.PI * 2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.2;
+    ctx.globalAlpha = (0.7 / f) * (0.6 + Math.sin(phase * 10 + f) * 0.4);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Top-level pure helper: Draw rotated orbital ellipse
+function drawOrbitalRing(ctx, cx, cy, rx, ry, rotation, color) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rotation);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+  ctx.restore();
+}
+
 /**
  * AtomicIntro
  * Approximately 4-second artistic quantum interaction animation.
  * Features:
- * - Two luminous quantum wave packets approaching, colliding/interfering, scattering with glowing trails.
+ * - Two luminous quantum wave packets approaching, interfering, and scattering.
  * - Coalesces into the QuantMix atomic emblem and subtitle.
  * - Immediate "Skip Intro" button and Escape key listener.
- * - Automatic transition into the homepage.
  * - Honors prefers-reduced-motion.
- * - Uses sessionStorage to prevent repeated plays during a browsing session unless explicitly requested.
+ * - Restyled in the Scientific-Editorial design system.
  */
 export default function AtomicIntro({ onComplete, forceShow = false }) {
   const canvasRef = useRef(null);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(4);
-  const startTimeRef = useRef(Date.now());
+  const startTimeRef = useRef(null);
   const animFrameRef = useRef(null);
   const completedRef = useRef(false);
 
@@ -77,17 +114,17 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
     const centerY = height * 0.46;
 
     const scatteredParticles = [];
-    const SCATTER_COUNT = width < 768 ? 36 : 60;
+    const SCATTER_COUNT = width < 768 ? 32 : 55;
     for (let i = 0; i < SCATTER_COUNT; i++) {
       const angle = (i / SCATTER_COUNT) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-      const speed = 1.2 + Math.random() * 3.8;
+      const speed = 1.2 + Math.random() * 3.5;
       scatteredParticles.push({
         x: centerX,
         y: centerY,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        radius: 1.2 + Math.random() * 2.2,
-        color: Math.random() > 0.4 ? "#35D6D0" : "#9B8CFF",
+        radius: 1.2 + Math.random() * 2.0,
+        color: Math.random() > 0.5 ? "#BD643C" : "#384936",
         alpha: 1,
         trail: []
       });
@@ -98,20 +135,20 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
     const render = () => {
       const now = Date.now();
       const elapsed = now - startTime;
-      const progress = Math.min(elapsed / DURATION_MS, 1);
+      const progress = Math.min(1, elapsed / DURATION_MS);
 
-      // Update countdown display
-      const remainingSec = Math.max(0, Math.ceil((DURATION_MS - elapsed) / 1000));
-      setSecondsRemaining(remainingSec);
+      // Update remaining countdown seconds
+      const secLeft = Math.max(0, Math.ceil((DURATION_MS - elapsed) / 1000));
+      setSecondsRemaining(secLeft);
 
-      // Deep cosmos clear with slight persistence for particle glow
-      ctx.fillStyle = "#0B1020";
+      // Deep graphite archival canvas during intro for high optical contrast
+      ctx.fillStyle = "#191C1F";
       ctx.fillRect(0, 0, width, height);
 
-      // Subtle background ambient grid
+      // Architectural background grid
+      ctx.strokeStyle = "rgba(221, 216, 206, 0.06)";
       ctx.lineWidth = 1;
-      ctx.strokeStyle = "rgba(17, 27, 46, 0.45)";
-      const gridSize = 48;
+      const gridSize = 45;
       for (let x = 0; x < width; x += gridSize) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
@@ -125,20 +162,20 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
         ctx.stroke();
       }
 
-      // --- PHASE 1: Wave packets approach (0.0 -> 0.38) ---
+      // --- PHASE 1: Wave packets approach (0.0 -> 0.42) ---
       if (progress < 0.42) {
         const approachT = progress / 0.42;
         const dist = (1 - approachT) * (width * 0.38);
 
-        // Packet 1 (Teal, incoming from left)
+        // Packet 1 (Copper, incoming from left)
         const p1X = centerX - dist;
-        const p1Y = centerY + Math.sin(approachT * Math.PI * 4) * 18;
-        drawWavePacket(ctx, p1X, p1Y, "#35D6D0", 24 * (0.8 + approachT * 0.4), approachT);
+        const p1Y = centerY + Math.sin(approachT * Math.PI * 4) * 16;
+        drawWavePacket(ctx, p1X, p1Y, "#BD643C", 24 * (0.8 + approachT * 0.4), approachT);
 
-        // Packet 2 (Violet, incoming from right)
+        // Packet 2 (Forest, incoming from right)
         const p2X = centerX + dist;
-        const p2Y = centerY - Math.sin(approachT * Math.PI * 4) * 18;
-        drawWavePacket(ctx, p2X, p2Y, "#9B8CFF", 24 * (0.8 + approachT * 0.4), approachT);
+        const p2Y = centerY - Math.sin(approachT * Math.PI * 4) * 16;
+        drawWavePacket(ctx, p2X, p2Y, "#384936", 24 * (0.8 + approachT * 0.4), approachT);
       }
 
       // --- PHASE 2: Collision, Interference Ripples & Particle Scattering (0.35 -> 0.85) ---
@@ -150,7 +187,7 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
           ripples.push({
             r: 5,
             maxR: Math.min(width, height) * 0.55,
-            color: ripples.length % 2 === 0 ? "rgba(53, 214, 208," : "rgba(155, 140, 255,",
+            color: ripples.length % 2 === 0 ? "rgba(189, 100, 60," : "rgba(56, 73, 54,",
             alpha: 0.85
           });
         }
@@ -158,13 +195,13 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
         // Draw and expand ripples
         for (let i = ripples.length - 1; i >= 0; i--) {
           const rip = ripples[i];
-          rip.r += 3.2;
+          rip.r += 3.0;
           rip.alpha *= 0.96;
           if (rip.alpha > 0.02 && rip.r < rip.maxR) {
             ctx.beginPath();
             ctx.arc(centerX, centerY, rip.r, 0, Math.PI * 2);
             ctx.strokeStyle = `${rip.color}${rip.alpha})`;
-            ctx.lineWidth = 2.2;
+            ctx.lineWidth = 2.0;
             ctx.stroke();
           } else {
             ripples.splice(i, 1);
@@ -173,13 +210,13 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
 
         // Scatter particles outwards
         for (let p of scatteredParticles) {
-          p.x += p.vx * (1 + collisionT * 0.5);
-          p.y += p.vy * (1 + collisionT * 0.5);
+          p.x += p.vx * (1 + collisionT * 0.4);
+          p.y += p.vy * (1 + collisionT * 0.4);
           p.alpha = Math.max(0, 1 - collisionT * 0.95);
 
           // Store trail
           p.trail.push({ x: p.x, y: p.y });
-          if (p.trail.length > 7) p.trail.shift();
+          if (p.trail.length > 6) p.trail.shift();
 
           // Draw trail
           if (p.trail.length > 1) {
@@ -203,43 +240,26 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
           ctx.fill();
           ctx.globalAlpha = 1;
         }
-
-        // Central core flash
-        const coreFlashAlpha = Math.max(0, 1 - collisionT * 2.5);
-        if (coreFlashAlpha > 0) {
-          const grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 80);
-          grad.addColorStop(0, `rgba(255, 255, 255, ${coreFlashAlpha * 0.9})`);
-          grad.addColorStop(0.3, `rgba(53, 214, 208, ${coreFlashAlpha * 0.7})`);
-          grad.addColorStop(0.7, `rgba(155, 140, 255, ${coreFlashAlpha * 0.3})`);
-          grad.addColorStop(1, "transparent");
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
-          ctx.fill();
-        }
       }
 
       // --- PHASE 3: Brand Coalescence (0.65 -> 1.0) ---
       if (progress >= 0.65) {
         const brandT = (progress - 0.65) / 0.35;
-        const brandAlpha = Math.min(1, brandT * 2.2);
+        const brandAlpha = Math.min(1, brandT * 2.0);
 
         ctx.save();
         ctx.globalAlpha = brandAlpha;
 
         // Draw quantum orbital rings
         const ringAngle = brandT * Math.PI * 0.8;
-        drawOrbitalRing(ctx, centerX, centerY, 65, 24, -ringAngle, "#35D6D0");
-        drawOrbitalRing(ctx, centerX, centerY, 65, 24, ringAngle + 0.6, "#9B8CFF");
+        drawOrbitalRing(ctx, centerX, centerY, 65, 24, -ringAngle, "#BD643C");
+        drawOrbitalRing(ctx, centerX, centerY, 65, 24, ringAngle + 0.6, "#384936");
 
-        // Central glowing quantum core
+        // Central quantum core
         ctx.beginPath();
-        ctx.arc(centerX, centerY, 8 + Math.sin(now * 0.008) * 2, 0, Math.PI * 2);
-        ctx.fillStyle = "#35D6D0";
-        ctx.shadowColor = "#35D6D0";
-        ctx.shadowBlur = 20;
+        ctx.arc(centerX, centerY, 7 + Math.sin(now * 0.008) * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#BD643C";
         ctx.fill();
-        ctx.shadowBlur = 0;
 
         ctx.restore();
       }
@@ -259,46 +279,6 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
     };
   }, [completeIntro, forceShow]);
 
-  // Helper: Draw Gaussian wave packet
-  function drawWavePacket(ctx, x, y, color, radius, phase) {
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-    grad.addColorStop(0, color);
-    grad.addColorStop(0.4, color);
-    grad.addColorStop(1, "transparent");
-
-    ctx.save();
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Wave ring fringes
-    for (let f = 1; f <= 3; f++) {
-      ctx.beginPath();
-      ctx.arc(x, y, radius * (0.4 + f * 0.28), 0, Math.PI * 2);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.2;
-      ctx.globalAlpha = (0.7 / f) * (0.6 + Math.sin(phase * 10 + f) * 0.4);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  // Helper: Draw rotated orbital ellipse
-  function drawOrbitalRing(ctx, cx, cy, rx, ry, rotation, color) {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(rotation);
-    ctx.beginPath();
-    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.8;
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 12;
-    ctx.stroke();
-    ctx.restore();
-  }
-
   return (
     <div
       role="dialog"
@@ -308,12 +288,12 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        backgroundColor: "#0B1020",
+        backgroundColor: "#191C1F",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        transition: "opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s ease",
+        transition: "opacity 0.45s ease, transform 0.45s ease",
         opacity: isFadingOut ? 0 : 1,
         pointerEvents: isFadingOut ? "none" : "auto"
       }}
@@ -346,18 +326,17 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
             display: "inline-flex",
             alignItems: "center",
             gap: "8px",
-            background: "rgba(17, 27, 46, 0.7)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid rgba(53, 214, 208, 0.2)",
+            background: "rgba(35, 38, 42, 0.8)",
+            border: "1px solid rgba(221, 216, 206, 0.2)",
             borderRadius: "9999px",
             padding: "6px 14px",
             fontSize: "0.8rem",
             fontFamily: "var(--font-mono)",
-            color: "var(--color-teal)"
+            color: "#E5E1D8"
           }}
         >
-          <Sparkles size={14} className="spin-slow" />
-          <span>Atomic Collision Intro ({secondsRemaining}s)</span>
+          <Sparkles size={14} color="#BD643C" />
+          <span>Atomic Wave Collision ({secondsRemaining}s)</span>
         </div>
 
         <button
@@ -368,53 +347,41 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
             display: "inline-flex",
             alignItems: "center",
             gap: "8px",
-            background: "rgba(17, 27, 46, 0.85)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(53, 214, 208, 0.4)",
+            background: "#BD643C",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
             borderRadius: "9999px",
             padding: "8px 18px",
             fontSize: "0.88rem",
             fontWeight: 600,
-            color: "var(--color-text-main)",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
-            transition: "all 0.2s ease",
+            color: "#FFFFFF",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
             cursor: "pointer"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = "var(--color-teal)";
-            e.currentTarget.style.boxShadow = "0 0 20px rgba(53, 214, 208, 0.35)";
-            e.currentTarget.style.transform = "scale(1.03)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = "rgba(53, 214, 208, 0.4)";
-            e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.4)";
-            e.currentTarget.style.transform = "scale(1)";
           }}
         >
           <span>Skip Intro</span>
-          <FastForward size={15} color="var(--color-teal)" />
+          <FastForward size={14} />
         </button>
       </div>
 
-      {/* Center Cinematic Title overlay */}
+      {/* Center Branding Content */}
       <div
         style={{
           position: "relative",
           zIndex: 5,
-          marginTop: "160px",
           textAlign: "center",
+          maxWidth: "600px",
+          padding: "0 20px",
           pointerEvents: "none",
-          padding: "0 20px"
+          marginTop: "160px"
         }}
       >
         <h1
           style={{
-            fontSize: "clamp(2rem, 5vw, 3.8rem)",
-            fontWeight: 800,
-            letterSpacing: "-0.03em",
-            background: "linear-gradient(135deg, #F4F7FF 30%, #35D6D0 80%, #9B8CFF 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            fontFamily: "var(--font-serif)",
+            fontSize: "clamp(2rem, 5vw, 3rem)",
+            fontWeight: 700,
+            color: "#FBFBF7",
+            letterSpacing: "-0.02em",
             marginBottom: "8px"
           }}
         >
@@ -422,27 +389,15 @@ export default function AtomicIntro({ onComplete, forceShow = false }) {
         </h1>
         <p
           style={{
-            fontSize: "clamp(0.95rem, 2vw, 1.2rem)",
             fontFamily: "var(--font-mono)",
-            color: "var(--color-text-secondary)",
+            fontSize: "0.86rem",
+            color: "#C7C1B5",
             letterSpacing: "0.08em",
             textTransform: "uppercase"
           }}
         >
           Virtual Quantum Mechanics Explorer
         </p>
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          bottom: "24px",
-          color: "var(--color-text-muted)",
-          fontSize: "0.78rem",
-          fontFamily: "var(--font-mono)"
-        }}
-      >
-        Press <kbd style={{ background: "#111B2E", padding: "2px 6px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.1)" }}>Esc</kbd> to skip immediately
       </div>
     </div>
   );

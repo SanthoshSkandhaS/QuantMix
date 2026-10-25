@@ -4,11 +4,9 @@ import { ArrowRight, Compass } from "lucide-react";
 /**
  * FlowingWaveButton
  * Signature Quantum Start Button:
- * - Redesigned for the Scientific-Editorial identity:
- * - Burnished copper and deep forest wave ripples
- * - Tactile editorial surface with smooth organic wave disturbance on activation
+ * - Burnished copper core with restrained teal wave ripples
+ * - Tactile, prominent, bold button surface
  * - Smooth scroll navigation to exploration section
- * - Accessible focus and hover states
  */
 export default function FlowingWaveButton({ targetSectionId = "environments", onExplore }) {
   const [isActivating, setIsActivating] = useState(false);
@@ -46,7 +44,7 @@ export default function FlowingWaveButton({ targetSectionId = "environments", on
         aria-label="Start Exploring QuantMix Environments"
       >
         <span className="btn-icon">
-          <Compass size={19} className="compass-icon" />
+          <Compass size={20} className="compass-icon" />
         </span>
         <span className="btn-label">Start Exploring</span>
         <ArrowRight size={18} className="arrow-icon" />
@@ -72,19 +70,19 @@ export default function FlowingWaveButton({ targetSectionId = "environments", on
         }
 
         .quantum-field-ripple.ripple-1 {
-          border: 1.5px solid rgba(189, 100, 60, 0.35);
+          border: 1.5px solid rgba(198, 114, 72, 0.4);
           animation: wavePulse1 4s cubic-bezier(0.25, 1, 0.5, 1) infinite;
         }
 
         .quantum-field-ripple.ripple-2 {
           inset: -20px;
-          border: 1px solid rgba(56, 73, 54, 0.25);
+          border: 1px solid rgba(32, 196, 180, 0.3);
           animation: wavePulse2 4s cubic-bezier(0.25, 1, 0.5, 1) 0.9s infinite;
         }
 
         .quantum-field-ripple.ripple-3 {
-          inset: -30px;
-          border: 1px dashed rgba(189, 100, 60, 0.2);
+          inset: -32px;
+          border: 1px dashed rgba(198, 114, 72, 0.2);
           animation: wavePulse3 4s cubic-bezier(0.25, 1, 0.5, 1) 1.8s infinite;
         }
 
@@ -147,8 +145,8 @@ export default function FlowingWaveButton({ targetSectionId = "environments", on
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          padding: 16px 34px;
-          background: linear-gradient(135deg, #BD643C 0%, #A5532E 100%);
+          padding: 16px 36px;
+          background: linear-gradient(135deg, #C67248 0%, #A8542C 100%);
           color: #FFFFFF;
           font-family: var(--font-sans);
           font-size: 1.05rem;
@@ -156,7 +154,7 @@ export default function FlowingWaveButton({ targetSectionId = "environments", on
           letter-spacing: 0.01em;
           border-radius: var(--radius-full);
           border: 1px solid rgba(255, 255, 255, 0.25);
-          box-shadow: 0 4px 16px rgba(189, 100, 60, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 20px rgba(198, 114, 72, 0.4), 0 2px 6px rgba(0, 0, 0, 0.5);
           cursor: pointer;
           transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           overflow: hidden;
@@ -164,20 +162,20 @@ export default function FlowingWaveButton({ targetSectionId = "environments", on
 
         .flowing-wave-btn:hover {
           transform: translateY(-2px);
-          background: linear-gradient(135deg, #C86F45 0%, #B05B34 100%);
-          box-shadow: 0 8px 24px rgba(189, 100, 60, 0.38), 0 2px 6px rgba(0, 0, 0, 0.1);
+          background: linear-gradient(135deg, #D47E53 0%, #B85F36 100%);
+          box-shadow: 0 8px 28px rgba(198, 114, 72, 0.5), 0 3px 8px rgba(0, 0, 0, 0.6);
         }
 
         .flowing-wave-btn:active, .flowing-wave-btn.btn-active {
           transform: translateY(1px);
-          box-shadow: 0 2px 8px rgba(189, 100, 60, 0.3);
+          box-shadow: 0 2px 10px rgba(198, 114, 72, 0.3);
         }
 
         .btn-icon {
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #FFF0E6;
+          color: #FFF2EB;
         }
 
         .compass-icon {
@@ -195,7 +193,7 @@ export default function FlowingWaveButton({ targetSectionId = "environments", on
 
         .arrow-icon {
           transition: transform 0.25s ease;
-          color: #FFF0E6;
+          color: #FFF2EB;
         }
 
         .flowing-wave-btn:hover .arrow-icon {

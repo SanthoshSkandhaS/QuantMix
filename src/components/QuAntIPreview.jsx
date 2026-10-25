@@ -5,12 +5,13 @@ import { MathText } from "./MathView";
 /**
  * QuAntIPreview
  * Section introducing future AI Companion:
+ * - Scientific Dialogue Console (distinct identity, NOT a generic chatbot)
  * - Exact Name: QuAntI
  * - Heading: "Meet QuAntI."
  * - Description: "Ask anything. Understand the strange. Discover what to change next."
  * - KaTeX mathematical typesetting for explanations
  * - Scientifically consistent numerical claims matching the 1D barrier solver
- * - Restyled in the Scientific-Editorial design system
+ * - Deep obsidian and stone styling with restrained copper & teal accents
  */
 export default function QuAntIPreview() {
   const [selectedChipIndex, setSelectedChipIndex] = useState(0);
@@ -71,12 +72,12 @@ export default function QuAntIPreview() {
           </p>
         </div>
 
-        {/* QuAntI Interactive Interface Box */}
+        {/* QuAntI Interactive Scientific Console */}
         <div className="editorial-card quanti-card">
           {/* Top Assistant Status Strip */}
           <div className="quanti-status-bar">
             <div className="quanti-identity">
-              {/* Editorial Scientific Emblem Avatar */}
+              {/* Scientific Emblem Avatar */}
               <div className="quanti-avatar">
                 <span className="quanti-core-dot" />
                 <span className="quanti-ring ring-1" />
@@ -84,8 +85,8 @@ export default function QuAntIPreview() {
               </div>
               <div className="quanti-info">
                 <div className="quanti-name-row">
-                  <span className="quanti-name">QuAntI</span>
-                  <span className="quanti-badge">Planned Companion Guide</span>
+                  <span className="quanti-name font-serif">QuAntI</span>
+                  <span className="quanti-badge">Scientific Guide Console</span>
                 </div>
                 <span className="quanti-subtext">Quantum Intuition & Scientific Dialogue Engine</span>
               </div>
@@ -99,7 +100,7 @@ export default function QuAntIPreview() {
 
           {/* Sample Prompts Chips */}
           <div className="quanti-chips-wrapper">
-            <span className="chips-label">Sample Questions:</span>
+            <span className="chips-label">Inquire by Scientific Topic:</span>
             <div className="chips-row">
               {sampleConversations.map((item, idx) => (
                 <button
@@ -117,52 +118,48 @@ export default function QuAntIPreview() {
 
           {/* Dialogue Display Box */}
           <div className="quanti-dialogue-panel">
-            {/* User Question Bubble */}
-            <div className="dialogue-row user-row">
-              <div className="dialogue-bubble user-bubble">
-                <span className="bubble-speaker">You</span>
-                <p className="bubble-text">{currentSample.question}</p>
-              </div>
+            {/* User Inquiry Box */}
+            <div className="dialogue-block user-block">
+              <span className="block-label">Your Question</span>
+              <p className="block-text">{currentSample.question}</p>
             </div>
 
-            {/* QuAntI Answer Bubble */}
-            <div className="dialogue-row ai-row">
-              <div className="dialogue-bubble ai-bubble">
-                <div className="ai-bubble-header">
-                  <span className="bubble-speaker">QuAntI</span>
-                  <span className="verified-pill">Physics Grounded</span>
-                </div>
-                <div className="bubble-text">
-                  <MathText text={currentSample.answer} />
-                </div>
-
-                {/* Follow-up Note */}
-                {currentSample.followUp && (
-                  <div className="dialogue-followup">
-                    <CornerDownRight size={14} className="followup-icon" />
-                    <span><MathText text={currentSample.followUp} /></span>
-                  </div>
-                )}
-
-                {/* Recommended Model Parameter Action Tip */}
-                {currentSample.parameterTip && (
-                  <div className="parameter-recommendation-box">
-                    <div className="param-header">
-                      <Sliders size={14} color="var(--color-copper)" />
-                      <span className="param-title">Lab Parameter Recommendation:</span>
-                    </div>
-                    <div className="param-content">
-                      <div className="param-detail">
-                        <span className="param-key">{currentSample.parameterTip.param}:</span>
-                        <span className="param-action">{currentSample.parameterTip.suggestion}</span>
-                      </div>
-                      <span className="param-outcome">
-                        Expected Result: {currentSample.parameterTip.expectedOutcome}
-                      </span>
-                    </div>
-                  </div>
-                )}
+            {/* QuAntI Response Box */}
+            <div className="dialogue-block ai-block">
+              <div className="ai-block-header">
+                <span className="block-label ai-label">QuAntI Scientific Analysis</span>
+                <span className="verified-pill">Physics Grounded</span>
               </div>
+              <div className="block-text">
+                <MathText text={currentSample.answer} />
+              </div>
+
+              {/* Follow-up Note */}
+              {currentSample.followUp && (
+                <div className="dialogue-followup">
+                  <CornerDownRight size={14} className="followup-icon" />
+                  <span><MathText text={currentSample.followUp} /></span>
+                </div>
+              )}
+
+              {/* Recommended Model Parameter Action Tip */}
+              {currentSample.parameterTip && (
+                <div className="parameter-recommendation-box">
+                  <div className="param-header">
+                    <Sliders size={14} color="var(--color-copper)" />
+                    <span className="param-title">Lab Parameter Recommendation:</span>
+                  </div>
+                  <div className="param-content">
+                    <div className="param-detail">
+                      <span className="param-key">{currentSample.parameterTip.param}:</span>
+                      <span className="param-action">{currentSample.parameterTip.suggestion}</span>
+                    </div>
+                    <span className="param-outcome">
+                      Expected Result: {currentSample.parameterTip.expectedOutcome}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -185,7 +182,7 @@ export default function QuAntIPreview() {
       <style>{`
         .quanti-card {
           padding: 34px;
-          background: var(--color-surface);
+          background: var(--color-bg-card);
         }
 
         .quanti-status-bar {
@@ -193,7 +190,7 @@ export default function QuAntIPreview() {
           align-items: center;
           justify-content: space-between;
           padding-bottom: 22px;
-          border-bottom: 1px solid var(--border-stone-light);
+          border-bottom: 1px solid var(--border-subtle);
           flex-wrap: wrap;
           gap: 14px;
         }
@@ -209,7 +206,7 @@ export default function QuAntIPreview() {
           width: 44px;
           height: 44px;
           border-radius: 50%;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.95);
           border: 1px solid var(--border-stone);
           display: flex;
           align-items: center;
@@ -227,7 +224,7 @@ export default function QuAntIPreview() {
           position: absolute;
           inset: 4px;
           border-radius: 50%;
-          border: 1px solid rgba(189, 100, 60, 0.35);
+          border: 1px solid rgba(198, 114, 72, 0.4);
         }
 
         .quanti-info {
@@ -242,20 +239,19 @@ export default function QuAntIPreview() {
         }
 
         .quanti-name {
-          font-family: var(--font-serif);
           font-size: 1.35rem;
           font-weight: 700;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
         }
 
         .quanti-badge {
           font-family: var(--font-mono);
           font-size: 0.72rem;
-          color: var(--color-forest);
-          background: var(--color-forest-subtle);
+          color: var(--color-teal);
+          background: var(--color-teal-dim);
           padding: 2px 8px;
           border-radius: var(--radius-full);
-          border: 1px solid var(--color-forest-border);
+          border: 1px solid var(--color-teal-border);
         }
 
         .quanti-subtext {
@@ -299,7 +295,7 @@ export default function QuAntIPreview() {
           gap: 6px;
           padding: 8px 14px;
           border-radius: var(--radius-full);
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.9);
           border: 1px solid var(--border-stone);
           color: var(--color-text-secondary);
           font-size: 0.84rem;
@@ -309,93 +305,83 @@ export default function QuAntIPreview() {
         }
 
         .quanti-chip-btn:hover {
-          background: var(--color-surface-stone);
-          color: var(--color-graphite);
+          background: rgba(32, 38, 52, 0.9);
+          color: var(--color-text-main);
         }
 
         .quanti-chip-btn.active {
-          background: var(--color-surface);
+          background: rgba(24, 28, 38, 0.95);
           border-color: var(--color-copper);
           color: var(--color-copper);
           font-weight: 600;
-          box-shadow: 0 1px 4px rgba(189, 100, 60, 0.15);
+          box-shadow: 0 1px 6px rgba(198, 114, 72, 0.2);
         }
 
         .quanti-dialogue-panel {
           display: flex;
           flex-direction: column;
-          gap: 18px;
+          gap: 16px;
           margin-bottom: 24px;
         }
 
-        .dialogue-row {
-          display: flex;
-          width: 100%;
-        }
-
-        .user-row {
-          justify-content: flex-end;
-        }
-
-        .ai-row {
-          justify-content: flex-start;
-        }
-
-        .dialogue-bubble {
-          max-width: 82%;
-          padding: 18px 22px;
+        .dialogue-block {
+          padding: 20px 24px;
           border-radius: var(--radius-md);
         }
 
-        .user-bubble {
-          background: var(--color-surface-muted);
-          border: 1px solid var(--border-stone);
-          border-bottom-right-radius: 2px;
+        .user-block {
+          background: rgba(18, 21, 29, 0.85);
+          border: 1px solid var(--border-subtle);
         }
 
-        .ai-bubble {
-          background: var(--color-surface);
+        .ai-block {
+          background: rgba(24, 28, 38, 0.95);
           border: 1px solid var(--border-stone);
           border-left: 3px solid var(--color-copper);
-          border-bottom-left-radius: 2px;
           box-shadow: var(--shadow-sm);
         }
 
-        .ai-bubble-header {
+        .block-label {
+          display: block;
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          color: var(--color-text-muted);
+          margin-bottom: 8px;
+        }
+
+        .ai-label {
+          color: var(--color-copper);
+        }
+
+        .ai-block-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
           margin-bottom: 8px;
         }
 
-        .bubble-speaker {
-          font-family: var(--font-mono);
-          font-size: 0.74rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          color: var(--color-text-muted);
-        }
-
         .verified-pill {
           font-family: var(--font-mono);
           font-size: 0.68rem;
-          color: var(--color-forest);
-          background: var(--color-forest-subtle);
+          color: var(--color-teal);
+          background: var(--color-teal-dim);
           padding: 1px 6px;
           border-radius: var(--radius-full);
-          border: 1px solid var(--color-forest-border);
+          border: 1px solid var(--color-teal-border);
         }
 
-        .bubble-text {
+        .block-text {
           font-size: 0.96rem;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           line-height: 1.6;
         }
 
         .dialogue-followup {
-          margin-top: 12px;
+          margin-top: 14px;
           padding-top: 10px;
-          border-top: 1px solid var(--border-stone-light);
+          border-top: 1px solid var(--border-subtle);
           display: flex;
           align-items: flex-start;
           gap: 8px;
@@ -412,9 +398,9 @@ export default function QuAntIPreview() {
         .parameter-recommendation-box {
           margin-top: 14px;
           padding: 12px 16px;
-          background: var(--color-surface-muted);
+          background: rgba(18, 21, 29, 0.8);
           border-radius: var(--radius-sm);
-          border: 1px solid var(--border-stone-light);
+          border: 1px solid var(--border-subtle);
         }
 
         .param-header {
@@ -438,12 +424,12 @@ export default function QuAntIPreview() {
 
         .param-key {
           font-weight: 600;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           margin-right: 6px;
         }
 
         .param-action {
-          color: var(--color-forest);
+          color: var(--color-teal);
           font-family: var(--font-mono);
         }
 
@@ -455,7 +441,7 @@ export default function QuAntIPreview() {
         .quanti-input-mock {
           display: flex;
           gap: 10px;
-          background: var(--color-surface-muted);
+          background: rgba(18, 21, 29, 0.85);
           padding: 8px 12px;
           border-radius: var(--radius-full);
           border: 1px solid var(--border-stone);
@@ -473,19 +459,13 @@ export default function QuAntIPreview() {
         }
 
         .mock-send-btn {
-          padding: 8px 18px;
+          padding: 8px 20px;
           border-radius: var(--radius-full);
-          background: var(--color-surface-stone);
+          background: rgba(255, 255, 255, 0.08);
           color: var(--color-text-muted);
           font-size: 0.84rem;
           font-weight: 600;
           cursor: not-allowed;
-        }
-
-        @media (max-width: 768px) {
-          .dialogue-bubble {
-            max-width: 95%;
-          }
         }
       `}</style>
     </section>

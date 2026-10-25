@@ -5,16 +5,15 @@ import { calculateRectangularBarrierTunneling } from "../utils/quantumPhysics";
 
 /**
  * QuantumLabPreview
- * Section introducing the future interactive scientific laboratory.
+ * Section introducing the interactive scientific laboratory.
  * Features:
  * - Scientifically genuine 1D rectangular barrier tunneling calculation
  * - Fully reactive controls (Barrier Width, Barrier Height, Particle Energy)
  * - Live KaTeX-typeset quantum tunneling equations
  * - Live-updating 2D wavepacket attenuation diagram
- * - Clear distinction: separates physics calculation from visual rendering
+ * - Deep cinematic obsidian instrument console styling
  */
 export default function QuantumLabPreview() {
-  // Preset scenarios
   const [selectedCase, setSelectedCase] = useState("narrow"); // "narrow" | "wide" | "custom"
 
   // Parameter states (scientifically meaningful units: eV and nm)
@@ -22,7 +21,6 @@ export default function QuantumLabPreview() {
   const [barrierHeight, setBarrierHeight] = useState(5.0); // eV
   const [particleEnergy, setParticleEnergy] = useState(3.2); // eV
 
-  // Canvas ref for wavepacket visualization
   const waveCanvasRef = useRef(null);
 
   // Pure scientific calculation isolated via quantum physics utility
@@ -67,8 +65,8 @@ export default function QuantumLabPreview() {
       phase += 0.05;
       ctx.clearRect(0, 0, width, height);
 
-      // Clean editorial canvas background
-      ctx.fillStyle = "#F5F3EC";
+      // Deep obsidian instrument monitor background
+      ctx.fillStyle = "#0B0D12";
       ctx.fillRect(0, 0, width, height);
 
       const midY = height * 0.52;
@@ -77,8 +75,8 @@ export default function QuantumLabPreview() {
       const barrierEndX = barrierStartX + barrierNormWidth;
 
       // Draw Potential Barrier Rect
-      ctx.fillStyle = "rgba(42, 46, 51, 0.08)";
-      ctx.strokeStyle = "rgba(42, 46, 51, 0.4)";
+      ctx.fillStyle = "rgba(198, 114, 72, 0.12)";
+      ctx.strokeStyle = "rgba(198, 114, 72, 0.5)";
       ctx.lineWidth = 1.5;
       const barrierHeightPx = Math.min(height * 0.75, (barrierHeight / 8.0) * (height * 0.65));
       ctx.fillRect(barrierStartX, midY - barrierHeightPx, barrierNormWidth, barrierHeightPx);
@@ -86,7 +84,7 @@ export default function QuantumLabPreview() {
 
       // Barrier Label
       ctx.font = "11px 'JetBrains Mono', monospace";
-      ctx.fillStyle = "#191C1F";
+      ctx.fillStyle = "#A3ACB9";
       ctx.fillText(`V₀ = ${barrierHeight.toFixed(1)} eV`, barrierStartX + 6, midY - barrierHeightPx - 8);
       ctx.fillText(`w = ${barrierWidth.toFixed(1)} nm`, barrierStartX + 6, midY + 20);
 
@@ -94,17 +92,17 @@ export default function QuantumLabPreview() {
       const energyLevelPx = midY - (particleEnergy / 8.0) * (height * 0.65);
       ctx.beginPath();
       ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = "rgba(189, 100, 60, 0.6)";
+      ctx.strokeStyle = "rgba(32, 196, 180, 0.5)";
       ctx.moveTo(20, energyLevelPx);
       ctx.lineTo(width - 20, energyLevelPx);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = "#BD643C";
+      ctx.fillStyle = "#20C4B4";
       ctx.fillText(`E = ${particleEnergy.toFixed(1)} eV`, 24, energyLevelPx - 6);
 
       // Incident & Reflected Wave (Region I: x < barrierStartX)
       ctx.beginPath();
-      ctx.strokeStyle = "#384936";
+      ctx.strokeStyle = "#20C4B4";
       ctx.lineWidth = 2;
       const kIncident = 0.08;
       const incAmp = 28;
@@ -118,7 +116,7 @@ export default function QuantumLabPreview() {
 
       // Evanescent Wave inside Barrier (Region II: barrierStartX < x < barrierEndX)
       ctx.beginPath();
-      ctx.strokeStyle = "#BD643C";
+      ctx.strokeStyle = "#C67248";
       ctx.lineWidth = 2.2;
       const decayCoeff = Math.min(0.08, Math.max(0.005, Number(physicsData.kappaNm) * 0.015));
 
@@ -133,9 +131,8 @@ export default function QuantumLabPreview() {
 
       // Transmitted Wave (Region III: x > barrierEndX)
       ctx.beginPath();
-      ctx.strokeStyle = "#384936";
+      ctx.strokeStyle = "#20C4B4";
       ctx.lineWidth = 2;
-      // Transmitted amplitude is proportional to sqrt(T)
       const transAmp = Math.max(1.5, incAmp * Math.sqrt(physicsData.transmissionCoefficient));
 
       for (let x = barrierEndX; x <= width - 20; x += 2) {
@@ -338,7 +335,7 @@ export default function QuantumLabPreview() {
                 <canvas ref={waveCanvasRef} className="wave-canvas" />
                 <div className="canvas-footer-legend">
                   <span className="legend-item">
-                    <span className="legend-dot green" />
+                    <span className="legend-dot teal" />
                     <span>Propagating Wave</span>
                   </span>
                   <span className="legend-item">
@@ -351,12 +348,12 @@ export default function QuantumLabPreview() {
               {/* Physical Interpretation Callout */}
               <div className="lab-interpretation-card">
                 <div className="interpretation-header">
-                  <CheckCircle2 size={16} color="var(--color-forest)" />
+                  <CheckCircle2 size={16} color="var(--color-teal)" />
                   <strong>Scientific Interpretation:</strong>
                 </div>
                 <p className="interpretation-body">
                   {particleEnergy < barrierHeight
-                    ? `Because tunneling probability decays exponentially as e^(-2κw), increasing width from 0.8 nm to 2.2 nm reduces transmission by several orders of magnitude. The current calculated value is ${physicsData.formattedTransmission}.`
+                    ? `Because tunneling probability decays exponentially as e^(-2κw), increasing width from 0.8 nm to 2.2 nm reduces transmission by several orders of magnitude. Current calculated transmission: ${physicsData.formattedTransmission}.`
                     : `Since particle energy exceeds the barrier height (E > V₀), transmission is classically allowed (${physicsData.formattedTransmission}), yet quantum reflections still occur at the discontinuous potential boundaries.`}
                 </p>
               </div>
@@ -368,7 +365,7 @@ export default function QuantumLabPreview() {
       <style>{`
         .lab-preview-card {
           padding: 34px;
-          background: var(--color-surface);
+          background: var(--color-bg-card);
         }
 
         .lab-banner {
@@ -376,7 +373,7 @@ export default function QuantumLabPreview() {
           align-items: center;
           justify-content: space-between;
           padding: 12px 18px;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.9);
           border-radius: var(--radius-sm);
           border: 1px solid var(--border-stone);
           margin-bottom: 24px;
@@ -395,7 +392,7 @@ export default function QuantumLabPreview() {
           font-family: var(--font-mono);
           font-size: 0.72rem;
           color: var(--color-copper);
-          background: var(--color-surface);
+          background: var(--color-copper-dim);
           border: 1px solid var(--color-copper-border);
           padding: 3px 8px;
           border-radius: var(--radius-full);
@@ -406,7 +403,7 @@ export default function QuantumLabPreview() {
         .lab-banner-title {
           font-size: 0.92rem;
           font-weight: 600;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
         }
 
         .lab-banner-status {
@@ -422,13 +419,13 @@ export default function QuantumLabPreview() {
         .beginner-question-box {
           margin-bottom: 28px;
           padding-bottom: 22px;
-          border-bottom: 1px solid var(--border-stone-light);
+          border-bottom: 1px solid var(--border-subtle);
         }
 
         .question-prefix {
           font-size: 0.76rem;
           font-family: var(--font-mono);
-          color: var(--color-forest);
+          color: var(--color-teal);
           text-transform: uppercase;
           letter-spacing: 0.05em;
           display: block;
@@ -437,7 +434,7 @@ export default function QuantumLabPreview() {
 
         .question-title {
           font-size: 1.55rem;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           margin-bottom: 10px;
         }
 
@@ -457,7 +454,7 @@ export default function QuantumLabPreview() {
         /* Controls Panel */
         .lab-controls-panel {
           padding: 22px;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.95);
           border-radius: var(--radius-md);
           border: 1px solid var(--border-stone);
         }
@@ -480,17 +477,17 @@ export default function QuantumLabPreview() {
           font-family: var(--font-mono);
           text-transform: uppercase;
           letter-spacing: 0.04em;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
         }
 
         .preview-pill {
           font-family: var(--font-mono);
           font-size: 0.72rem;
-          color: var(--color-forest);
-          background: var(--color-forest-subtle);
+          color: var(--color-teal);
+          background: var(--color-teal-dim);
           padding: 2px 8px;
           border-radius: var(--radius-full);
-          border: 1px solid var(--color-forest-border);
+          border: 1px solid var(--color-teal-border);
         }
 
         .case-switcher {
@@ -517,7 +514,7 @@ export default function QuantumLabPreview() {
           border-radius: var(--radius-sm);
           font-size: 0.8rem;
           font-family: var(--font-mono);
-          background: var(--color-surface);
+          background: rgba(18, 21, 29, 0.8);
           border: 1px solid var(--border-stone);
           color: var(--color-text-secondary);
           cursor: pointer;
@@ -540,7 +537,7 @@ export default function QuantumLabPreview() {
           justify-content: space-between;
           font-size: 0.84rem;
           font-family: var(--font-mono);
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           margin-bottom: 6px;
         }
 
@@ -565,7 +562,7 @@ export default function QuantumLabPreview() {
         .lab-formula-card {
           margin-top: 20px;
           padding: 14px;
-          background: var(--color-surface);
+          background: rgba(18, 21, 29, 0.85);
           border-radius: var(--radius-sm);
           border: 1px solid var(--border-stone);
           text-align: center;
@@ -602,7 +599,7 @@ export default function QuantumLabPreview() {
 
         .result-card {
           padding: 16px;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.95);
           border-radius: var(--radius-sm);
           border: 1px solid var(--border-stone);
           display: flex;
@@ -639,7 +636,7 @@ export default function QuantumLabPreview() {
           border: 1px solid var(--border-stone);
           border-radius: var(--radius-md);
           overflow: hidden;
-          background: #F5F3EC;
+          background: #0B0D12;
         }
 
         .wave-canvas-header {
@@ -647,22 +644,22 @@ export default function QuantumLabPreview() {
           justify-content: space-between;
           align-items: center;
           padding: 8px 14px;
-          background: var(--color-surface);
-          border-bottom: 1px solid var(--border-stone-light);
+          background: rgba(24, 28, 38, 0.95);
+          border-bottom: 1px solid var(--border-subtle);
         }
 
         .canvas-title {
           font-size: 0.76rem;
           font-family: var(--font-mono);
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           font-weight: 600;
         }
 
         .canvas-badge {
           font-size: 0.7rem;
           font-family: var(--font-mono);
-          color: var(--color-forest);
-          background: var(--color-forest-subtle);
+          color: var(--color-teal);
+          background: var(--color-teal-dim);
           padding: 1px 6px;
           border-radius: 4px;
         }
@@ -677,8 +674,8 @@ export default function QuantumLabPreview() {
           display: flex;
           gap: 16px;
           padding: 8px 14px;
-          background: var(--color-surface);
-          border-top: 1px solid var(--border-stone-light);
+          background: rgba(24, 28, 38, 0.95);
+          border-top: 1px solid var(--border-subtle);
           font-size: 0.74rem;
           font-family: var(--font-mono);
           color: var(--color-text-secondary);
@@ -696,8 +693,8 @@ export default function QuantumLabPreview() {
           border-radius: 50%;
         }
 
-        .legend-dot.green {
-          background: var(--color-forest);
+        .legend-dot.teal {
+          background: var(--color-teal);
         }
 
         .legend-dot.copper {
@@ -706,9 +703,9 @@ export default function QuantumLabPreview() {
 
         .lab-interpretation-card {
           padding: 14px 18px;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.95);
           border-radius: var(--radius-sm);
-          border: 1px solid var(--border-stone-light);
+          border: 1px solid var(--border-stone);
         }
 
         .interpretation-header {
@@ -716,7 +713,7 @@ export default function QuantumLabPreview() {
           align-items: center;
           gap: 8px;
           font-size: 0.82rem;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           margin-bottom: 6px;
         }
 

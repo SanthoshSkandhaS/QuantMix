@@ -10,7 +10,7 @@ const CURRENT_YEAR = 2026;
  * - Navigation links & verified repository link
  * - Editorial roadmap overview
  * - Replay Intro trigger & Back to Top button
- * - Fixed purity warning (no new Date() inside render)
+ * - Deep cinematic ink styling
  */
 export default function Footer({ onReplayIntro }) {
   const scrollToTop = () => {
@@ -55,7 +55,7 @@ export default function Footer({ onReplayIntro }) {
             <h4 className="footer-heading">Verified Project Roadmap</h4>
             <ul className="footer-links">
               <li>
-                <span className="status-dot green" />
+                <span className="status-dot teal" />
                 <span>Milestone 1: Scientific Web Engine</span>
               </li>
               <li>
@@ -94,10 +94,10 @@ export default function Footer({ onReplayIntro }) {
               <button
                 onClick={onReplayIntro}
                 className="footer-btn replay-btn"
-                aria-label="Replay 4s Atomic Intro Animation"
+                aria-label="Replay Cinematic Quantum Intro"
               >
                 <PlayCircle size={16} color="var(--color-copper)" />
-                <span>Replay Atomic Intro</span>
+                <span>Replay Intro</span>
               </button>
 
               <button
@@ -125,8 +125,8 @@ export default function Footer({ onReplayIntro }) {
 
       <style>{`
         .footer-wrapper {
-          background: var(--color-surface-muted);
-          border-top: 1px solid var(--border-stone);
+          background: #0E1015;
+          border-top: 1px solid var(--border-subtle);
           padding-top: 80px;
           padding-bottom: 48px;
           position: relative;
@@ -156,7 +156,7 @@ export default function Footer({ onReplayIntro }) {
           width: 34px;
           height: 34px;
           border-radius: 8px;
-          background: var(--color-surface);
+          background: rgba(24, 28, 38, 0.95);
           border: 1px solid var(--border-stone);
           display: flex;
           align-items: center;
@@ -166,7 +166,7 @@ export default function Footer({ onReplayIntro }) {
         .footer-brand-name {
           font-size: 1.45rem;
           font-weight: 700;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
         }
 
         .footer-identity-tagline {
@@ -188,7 +188,7 @@ export default function Footer({ onReplayIntro }) {
           font-size: 0.8rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          color: var(--color-forest);
+          color: var(--color-teal);
           margin-bottom: 20px;
           font-weight: 600;
         }
@@ -222,8 +222,8 @@ export default function Footer({ onReplayIntro }) {
           border-radius: 50%;
         }
 
-        .status-dot.green {
-          background: var(--color-forest);
+        .status-dot.teal {
+          background: var(--color-teal);
         }
 
         .status-dot.copper {
@@ -243,9 +243,9 @@ export default function Footer({ onReplayIntro }) {
           gap: 10px;
           padding: 10px 16px;
           border-radius: var(--radius-sm);
-          background: var(--color-surface);
+          background: rgba(24, 28, 38, 0.9);
           border: 1px solid var(--border-stone);
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           font-size: 0.86rem;
           font-family: var(--font-sans);
           font-weight: 500;
@@ -255,7 +255,7 @@ export default function Footer({ onReplayIntro }) {
         }
 
         .footer-btn:hover {
-          background: var(--color-surface-stone);
+          background: rgba(32, 38, 52, 0.95);
           border-color: var(--color-copper);
           color: var(--color-copper);
           transform: translateY(-1px);
@@ -263,7 +263,7 @@ export default function Footer({ onReplayIntro }) {
 
         .footer-bottom {
           padding-top: 32px;
-          border-top: 1px solid var(--border-stone);
+          border-top: 1px solid var(--border-subtle);
           display: flex;
           justify-content: space-between;
           align-items: center;

@@ -16,7 +16,6 @@ import {
 
 const STORAGE_KEY = "quantmix_seen_fact_ids_v1";
 
-// Helper to safely read seen IDs from storage
 function readStoredSeenIds() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -31,7 +30,6 @@ function readStoredSeenIds() {
   return [];
 }
 
-// Helper to safely write seen IDs
 function writeStoredSeenIds(ids) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
@@ -40,7 +38,6 @@ function writeStoredSeenIds(ids) {
   }
 }
 
-// Initial fact selector to ensure zero-delay first paint
 function getInitialFact() {
   const seenIds = readStoredSeenIds();
   const unseen = QUANTUM_FACTS.filter((f) => !seenIds.includes(f.id));
@@ -52,13 +49,13 @@ function getInitialFact() {
 
 /**
  * DiscoverySection
- * - Heading: "Small things. Strange rules."
- * - Description: "The world we experience is built on quantum rules that are often very different from our everyday intuition."
+ * Heading: "Small things. Strange rules."
+ * Features:
  * - Immediate visible access on initial page load (zero null-flash)
  * - Strict non-repeating random selection with localStorage rotation memory
  * - Curated 22 facts with beginner summary, deep dive, KaTeX-typeset formula, and authoritative source URLs
- * - Mathematical Typesetting Verification banner (testing benchmark equations)
- * - Restyled with Scientific-Editorial identity
+ * - Mathematical Typesetting Verification banner
+ * - Deep cinematic obsidian styling with restrained teal & copper accents
  */
 export default function DiscoverySection() {
   const [currentFact, setCurrentFact] = useState(() => getInitialFact().fact);
@@ -75,12 +72,10 @@ export default function DiscoverySection() {
 
     let seenIds = readStoredSeenIds();
 
-    // If all facts have been seen, reset cycle
     if (seenIds.length >= QUANTUM_FACTS.length) {
       seenIds = [];
     }
 
-    // Filter available unviewed facts
     const unseenFacts = QUANTUM_FACTS.filter((fact) => !seenIds.includes(fact.id));
 
     let chosenFact;
@@ -126,12 +121,12 @@ export default function DiscoverySection() {
       t += 0.03;
       ctx.clearRect(0, 0, width, height);
 
-      // Editorial warm parchment background for simulator
-      ctx.fillStyle = "#F5F3EC";
+      // Deep obsidian simulator background
+      ctx.fillStyle = "#0E1117";
       ctx.fillRect(0, 0, width, height);
 
-      // Architectural grid lines
-      ctx.strokeStyle = "rgba(40, 44, 49, 0.05)";
+      // Grid lines
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
       ctx.lineWidth = 1;
       for (let x = 20; x < width; x += 25) {
         ctx.beginPath();
@@ -153,7 +148,7 @@ export default function DiscoverySection() {
         const barrierX = width * 0.32;
 
         // Incoming plane waves
-        ctx.strokeStyle = "rgba(56, 73, 54, 0.3)";
+        ctx.strokeStyle = "rgba(32, 196, 180, 0.28)";
         ctx.lineWidth = 1.4;
         for (let x = 10; x < barrierX; x += 18) {
           const shift = (x + t * 24) % barrierX;
@@ -163,8 +158,8 @@ export default function DiscoverySection() {
           ctx.stroke();
         }
 
-        // Barrier with two slits (warm slate charcoal)
-        ctx.fillStyle = "#2A2E33";
+        // Barrier with two slits
+        ctx.fillStyle = "#1E2430";
         ctx.fillRect(barrierX - 4, 15, 8, slit1Y - 24);
         ctx.fillRect(barrierX - 4, slit1Y + 10, 8, slit2Y - slit1Y - 20);
         ctx.fillRect(barrierX - 4, slit2Y + 10, 8, height - slit2Y - 25);
@@ -173,24 +168,24 @@ export default function DiscoverySection() {
         const maxR = width - barrierX;
         for (let r = 0; r < maxR; r += 16) {
           const radius = (r + t * 20) % maxR;
-          const alpha = Math.max(0, (1 - radius / maxR) * 0.4);
+          const alpha = Math.max(0, (1 - radius / maxR) * 0.45);
 
-          // Slit 1 wave (forest green)
+          // Slit 1 wave (teal)
           ctx.beginPath();
           ctx.arc(barrierX, slit1Y, radius, -Math.PI * 0.45, Math.PI * 0.45);
-          ctx.strokeStyle = `rgba(56, 73, 54, ${alpha})`;
+          ctx.strokeStyle = `rgba(32, 196, 180, ${alpha})`;
           ctx.stroke();
 
-          // Slit 2 wave (burnished copper)
+          // Slit 2 wave (copper)
           ctx.beginPath();
           ctx.arc(barrierX, slit2Y, radius, -Math.PI * 0.45, Math.PI * 0.45);
-          ctx.strokeStyle = `rgba(189, 100, 60, ${alpha})`;
+          ctx.strokeStyle = `rgba(198, 114, 72, ${alpha})`;
           ctx.stroke();
         }
 
         // Target Detection Screen at right edge
         const screenX = width - 24;
-        ctx.fillStyle = "#2A2E33";
+        ctx.fillStyle = "#1B202B";
         ctx.fillRect(screenX, 20, 8, height - 40);
 
         // Intensity fringes on screen
@@ -202,7 +197,7 @@ export default function DiscoverySection() {
               Math.sqrt(Math.pow(width - barrierX, 2) + dy2 * dy2)) *
             0.35;
           const intensity = Math.pow(Math.cos(phaseDiff), 2);
-          ctx.fillStyle = `rgba(189, 100, 60, ${intensity * 0.9})`;
+          ctx.fillStyle = `rgba(198, 114, 72, ${intensity * 0.9})`;
           ctx.fillRect(screenX - intensity * 26, y, intensity * 26, 2.5);
         }
       } else {
@@ -223,15 +218,15 @@ export default function DiscoverySection() {
           ctx.arc(px, py, 1.4, 0, Math.PI * 2);
           ctx.fillStyle =
             i % 2 === 0
-              ? `rgba(56, 73, 54, ${dotAlpha})`
-              : `rgba(189, 100, 60, ${dotAlpha})`;
+              ? `rgba(32, 196, 180, ${dotAlpha})`
+              : `rgba(198, 114, 72, ${dotAlpha})`;
           ctx.fill();
         }
 
         // Nucleus
         ctx.beginPath();
         ctx.arc(cx, cy, 5.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#BD643C";
+        ctx.fillStyle = "#C67248";
         ctx.fill();
       }
 
@@ -425,6 +420,71 @@ export default function DiscoverySection() {
       </div>
 
       <style>{`
+        .math-benchmark-banner {
+          background: rgba(18, 21, 29, 0.9);
+          border: 1px solid var(--border-stone);
+          border-left: 4px solid var(--color-copper);
+          border-radius: var(--radius-md);
+          padding: 20px 24px;
+          margin-bottom: 40px;
+          box-shadow: var(--shadow-sm);
+        }
+
+        .math-benchmark-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 14px;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        .math-benchmark-title {
+          font-family: var(--font-mono);
+          font-size: 0.82rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--color-teal);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .math-benchmark-tag {
+          font-family: var(--font-mono);
+          font-size: 0.74rem;
+          background: var(--color-copper-dim);
+          color: var(--color-copper);
+          border: 1px solid var(--color-copper-border);
+          padding: 2px 8px;
+          border-radius: var(--radius-full);
+        }
+
+        .math-benchmark-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+          gap: 14px;
+          margin-top: 10px;
+        }
+
+        .math-benchmark-item {
+          background: rgba(24, 28, 38, 0.95);
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-sm);
+          padding: 12px 16px;
+          text-align: center;
+        }
+
+        .math-benchmark-label {
+          font-size: 0.72rem;
+          font-family: var(--font-mono);
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          margin-bottom: 6px;
+          display: block;
+        }
+
         .discovery-grid {
           display: grid;
           grid-template-columns: 1fr 1.2fr;
@@ -437,7 +497,7 @@ export default function DiscoverySection() {
           padding: 24px;
           display: flex;
           flex-direction: column;
-          background: var(--color-surface);
+          background: var(--color-bg-card);
         }
 
         .sim-header {
@@ -459,22 +519,23 @@ export default function DiscoverySection() {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: var(--color-copper);
+          background: var(--color-teal);
+          box-shadow: 0 0 8px var(--color-teal);
         }
 
         .sim-label {
           font-family: var(--font-mono);
           font-size: 0.8rem;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           font-weight: 600;
         }
 
         .sim-toggle-group {
           display: flex;
-          background: var(--color-surface-muted);
+          background: rgba(11, 13, 17, 0.8);
           padding: 3px;
           border-radius: var(--radius-sm);
-          border: 1px solid var(--border-stone);
+          border: 1px solid var(--border-subtle);
           gap: 4px;
         }
 
@@ -486,23 +547,22 @@ export default function DiscoverySection() {
           border-radius: 5px;
           font-size: 0.76rem;
           font-family: var(--font-mono);
-          color: var(--color-text-secondary);
+          color: var(--color-text-muted);
           transition: all 0.2s ease;
         }
 
         .sim-toggle-btn.active {
-          background: var(--color-surface);
-          color: var(--color-graphite);
+          background: rgba(24, 28, 38, 0.95);
+          color: var(--color-text-main);
           border: 1px solid var(--border-stone);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .sim-canvas-container {
           width: 100%;
           border-radius: var(--radius-md);
           overflow: hidden;
-          background: #F5F3EC;
-          border: 1px solid var(--border-stone);
+          background: #0E1117;
+          border: 1px solid var(--border-subtle);
         }
 
         .sim-canvas {
@@ -514,7 +574,7 @@ export default function DiscoverySection() {
         .sim-caption {
           margin-top: 16px;
           padding-top: 12px;
-          border-top: 1px solid var(--border-stone-light);
+          border-top: 1px solid var(--border-subtle);
         }
 
         .sim-mode-tag {
@@ -537,7 +597,7 @@ export default function DiscoverySection() {
           padding: 32px;
           display: flex;
           flex-direction: column;
-          background: var(--color-surface);
+          background: var(--color-bg-card);
         }
 
         .fact-card-top {
@@ -552,9 +612,9 @@ export default function DiscoverySection() {
         .fact-concept-pill {
           padding: 4px 12px;
           border-radius: var(--radius-full);
-          background: var(--color-forest-subtle);
-          border: 1px solid var(--color-forest-border);
-          color: var(--color-forest);
+          background: var(--color-teal-dim);
+          border: 1px solid var(--color-teal-border);
+          color: var(--color-teal);
           font-size: 0.78rem;
           font-family: var(--font-mono);
           font-weight: 600;
@@ -569,7 +629,7 @@ export default function DiscoverySection() {
           font-size: 0.78rem;
           font-family: var(--font-mono);
           color: var(--color-copper);
-          background: var(--color-copper-subtle);
+          background: var(--color-copper-dim);
           padding: 4px 10px;
           border-radius: var(--radius-full);
           border: 1px solid var(--color-copper-border);
@@ -586,7 +646,7 @@ export default function DiscoverySection() {
 
         .fact-title {
           font-size: clamp(1.4rem, 2.5vw, 1.85rem);
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           font-weight: 600;
           margin-bottom: 14px;
           line-height: 1.25;
@@ -601,7 +661,7 @@ export default function DiscoverySection() {
 
         .fact-formula-box {
           padding: 16px 20px;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.9);
           border-radius: var(--radius-md);
           border: 1px solid var(--border-stone);
           margin-bottom: 20px;
@@ -626,8 +686,8 @@ export default function DiscoverySection() {
           font-size: 0.7rem;
           font-family: var(--font-mono);
           color: var(--color-copper);
-          background: var(--color-surface);
-          border: 1px solid var(--border-stone-light);
+          background: rgba(198, 114, 72, 0.12);
+          border: 1px solid var(--color-copper-border);
           padding: 1px 6px;
           border-radius: 4px;
         }
@@ -642,15 +702,15 @@ export default function DiscoverySection() {
         .fact-deep-dive {
           margin-top: 16px;
           padding: 18px;
-          background: var(--color-surface-muted);
-          border-left: 3px solid var(--color-forest);
+          background: rgba(24, 28, 38, 0.9);
+          border-left: 3px solid var(--color-teal);
           border-radius: 0 var(--radius-md) var(--radius-md) 0;
         }
 
         .deep-dive-heading {
           font-size: 0.82rem;
           font-family: var(--font-mono);
-          color: var(--color-forest);
+          color: var(--color-teal);
           text-transform: uppercase;
           letter-spacing: 0.05em;
           margin-bottom: 8px;
@@ -669,7 +729,7 @@ export default function DiscoverySection() {
           gap: 12px;
           margin-top: 24px;
           padding-top: 20px;
-          border-top: 1px solid var(--border-stone-light);
+          border-top: 1px solid var(--border-subtle);
           flex-wrap: wrap;
         }
 
@@ -679,9 +739,9 @@ export default function DiscoverySection() {
           gap: 8px;
           padding: 10px 18px;
           border-radius: var(--radius-full);
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.9);
           border: 1px solid var(--border-stone);
-          color: var(--color-forest);
+          color: var(--color-text-main);
           font-size: 0.9rem;
           font-weight: 600;
           cursor: pointer;
@@ -689,30 +749,31 @@ export default function DiscoverySection() {
         }
 
         .btn-deep-dive:hover {
-          background: var(--color-forest-subtle);
-          border-color: var(--color-forest);
+          background: rgba(32, 38, 52, 0.9);
+          border-color: var(--color-teal);
+          color: var(--color-teal);
         }
 
         .btn-next-fact {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 10px 20px;
+          padding: 10px 22px;
           border-radius: var(--radius-full);
-          background: var(--color-copper);
+          background: linear-gradient(135deg, #C67248 0%, #A8542C 100%);
           border: 1px solid rgba(255, 255, 255, 0.2);
           color: #FFFFFF;
           font-size: 0.9rem;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
-          box-shadow: 0 2px 8px rgba(189, 100, 60, 0.25);
+          box-shadow: 0 4px 16px rgba(198, 114, 72, 0.35);
         }
 
         .btn-next-fact:hover {
-          background: var(--color-copper-hover);
+          background: linear-gradient(135deg, #D47E53 0%, #B85F36 100%);
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(189, 100, 60, 0.35);
+          box-shadow: 0 6px 20px rgba(198, 114, 72, 0.45);
         }
 
         .fact-reference-bar {
@@ -729,7 +790,7 @@ export default function DiscoverySection() {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          color: var(--color-copper);
+          color: var(--color-teal);
           text-decoration: underline;
           text-underline-offset: 3px;
           transition: opacity 0.2s ease;

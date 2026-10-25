@@ -114,9 +114,9 @@ export default function ParticleBackground() {
         context.beginPath();
         context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         if (this.colorType === "copper") {
-          context.fillStyle = `rgba(189, 100, 60, ${currentAlpha})`;
+          context.fillStyle = `rgba(198, 114, 72, ${currentAlpha})`;
         } else {
-          context.fillStyle = `rgba(56, 73, 54, ${currentAlpha})`;
+          context.fillStyle = `rgba(32, 196, 180, ${currentAlpha})`;
         }
         context.fill();
       }
@@ -166,8 +166,8 @@ export default function ParticleBackground() {
           }
           ctx.strokeStyle =
             w % 2 === 0
-              ? `rgba(56, 73, 54, 0.035)`
-              : `rgba(189, 100, 60, 0.03)`;
+              ? `rgba(32, 196, 180, 0.04)`
+              : `rgba(198, 114, 72, 0.035)`;
           ctx.stroke();
         }
         ctx.restore();
@@ -186,7 +186,7 @@ export default function ParticleBackground() {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(56, 73, 54, ${alpha})`;
+            ctx.strokeStyle = `rgba(32, 196, 180, ${alpha})`;
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }

@@ -26,6 +26,16 @@ const iconMap = {
   HeartPulse
 };
 
+// Window theme backgrounds per environment to create diverse visual depth
+const windowAtmosphere = {
+  "your-room": "radial-gradient(ellipse at 80% 20%, rgba(198, 114, 72, 0.16) 0%, rgba(18, 21, 29, 0.96) 70%)",
+  "the-sky": "radial-gradient(ellipse at 50% 10%, rgba(32, 196, 180, 0.18) 0%, rgba(18, 21, 29, 0.96) 70%)",
+  "the-street": "radial-gradient(ellipse at 20% 80%, rgba(198, 114, 72, 0.14) 0%, rgba(18, 21, 29, 0.96) 70%)",
+  "football-field": "radial-gradient(ellipse at 50% 20%, rgba(32, 196, 180, 0.14) 0%, rgba(18, 21, 29, 0.96) 70%)",
+  "inside-bus": "radial-gradient(ellipse at 70% 50%, rgba(198, 114, 72, 0.12) 0%, rgba(18, 21, 29, 0.96) 70%)",
+  "human-body": "radial-gradient(ellipse at 30% 30%, rgba(220, 80, 70, 0.14) 0%, rgba(18, 21, 29, 0.96) 70%)"
+};
+
 /**
  * EnvironmentPreview
  * Heading: "Your everyday world, seen differently."
@@ -38,9 +48,8 @@ const iconMap = {
  * 6. Inside the Human Body
  *
  * Honest Representation:
- * - Accurately labels cards as Architectural Blueprints and Concept Previews.
- * - Outlines the upcoming Milestone 2 Three.js / React Three Fiber interactive bedroom.
- * - Restyled in the Scientific-Editorial design system.
+ * - Architectural windows into different worlds, each with distinctive depth.
+ * - Honest roadmap notice clarifying Milestone 2 Three.js 3D implementation.
  */
 export default function EnvironmentPreview() {
   const [selectedEnv, setSelectedEnv] = useState(null);
@@ -52,11 +61,11 @@ export default function EnvironmentPreview() {
         <div className="section-header">
           <div className="section-tag">
             <Atom size={14} />
-            <span>Planned Exploratory Environments</span>
+            <span>Exploration Environments</span>
           </div>
           <h2 className="section-title">Your everyday world, seen differently.</h2>
           <p className="section-desc">
-            Explore our architectural blueprints for six familiar environments. In our upcoming Milestone 2, we will launch a genuine, navigable 3D Bedroom using Three.js/React Three Fiber with realistic materials, perspective lighting, and quantum object interaction.
+            Windows into six physical spaces. In Milestone 2, we launch a genuine, navigable 3D Bedroom using Three.js and React Three Fiber with realistic physics, lighting, and quantum interactions.
           </p>
         </div>
 
@@ -66,20 +75,22 @@ export default function EnvironmentPreview() {
             <Info size={18} color="var(--color-copper)" />
           </div>
           <div className="roadmap-notice-text">
-            <strong>Simulation Roadmap Notice:</strong> The interactive cards and drawers below present verified physical phenomena mapped to planned spaces. Full 3D navigation and interactive physics are in active preparation for Milestone 2 (commencing with the interactive 3D Bedroom).
+            <strong>Simulation Roadmap Notice:</strong> The interactive windows below showcase planned scientific research and architectural blueprints. Full 3D navigation and interactive physics are in active preparation for Milestone 2 (commencing with the interactive 3D Bedroom).
           </div>
         </div>
 
-        {/* 6 Destinations Grid */}
+        {/* 6 Destinations Grid (Architectural Windows) */}
         <div className="environments-grid">
           {ENVIRONMENTS.map((env) => {
             const IconComponent = iconMap[env.icon] || Home;
             const isFirst = env.isFirstFocus;
+            const windowBg = windowAtmosphere[env.id] || "rgba(18, 21, 29, 0.95)";
 
             return (
               <div
                 key={env.id}
                 className={`editorial-card env-card ${isFirst ? "env-card-featured" : ""}`}
+                style={{ background: windowBg }}
                 onClick={() => setSelectedEnv(env)}
                 role="button"
                 tabIndex={0}
@@ -93,7 +104,7 @@ export default function EnvironmentPreview() {
               >
                 {/* Top Badge: Status */}
                 <div className="env-card-header">
-                  <div className={`env-icon-wrapper ${isFirst ? "icon-copper" : "icon-forest"}`}>
+                  <div className={`env-icon-wrapper ${isFirst ? "icon-copper" : "icon-teal"}`}>
                     <IconComponent size={20} />
                   </div>
                   <span className={`env-status-badge ${isFirst ? "badge-primary" : "badge-upcoming"}`}>
@@ -229,7 +240,7 @@ export default function EnvironmentPreview() {
           display: flex;
           align-items: flex-start;
           gap: 14px;
-          background: var(--color-surface);
+          background: rgba(18, 21, 29, 0.9);
           border: 1px solid var(--border-stone);
           border-left: 4px solid var(--color-copper);
           border-radius: var(--radius-md);
@@ -250,7 +261,7 @@ export default function EnvironmentPreview() {
         }
 
         .roadmap-notice-text strong {
-          color: var(--color-graphite);
+          color: var(--color-text-main);
         }
 
         /* 6 Destinations Grid */
@@ -265,20 +276,20 @@ export default function EnvironmentPreview() {
           display: flex;
           flex-direction: column;
           cursor: pointer;
-          background: var(--color-surface);
-          border: 1px solid var(--border-stone);
+          border: 1px solid var(--border-subtle);
+          box-shadow: var(--shadow-card);
           transition: all 0.25s ease;
         }
 
         .env-card:hover {
           transform: translateY(-3px);
-          border-color: #C7C1B5;
+          border-color: var(--border-stone-hover);
           box-shadow: var(--shadow-float);
         }
 
         .env-card-featured {
           border-color: var(--color-copper-border);
-          box-shadow: 0 4px 20px -2px rgba(189, 100, 60, 0.12);
+          box-shadow: 0 4px 20px -2px rgba(198, 114, 72, 0.15);
         }
 
         .env-card-header {
@@ -298,15 +309,15 @@ export default function EnvironmentPreview() {
         }
 
         .env-icon-wrapper.icon-copper {
-          background: var(--color-copper-subtle);
+          background: var(--color-copper-dim);
           color: var(--color-copper);
           border: 1px solid var(--color-copper-border);
         }
 
-        .env-icon-wrapper.icon-forest {
-          background: var(--color-forest-subtle);
-          color: var(--color-forest);
-          border: 1px solid var(--color-forest-border);
+        .env-icon-wrapper.icon-teal {
+          background: var(--color-teal-dim);
+          color: var(--color-teal);
+          border: 1px solid var(--color-teal-border);
         }
 
         .env-status-badge {
@@ -320,15 +331,15 @@ export default function EnvironmentPreview() {
         }
 
         .badge-primary {
-          background: var(--color-copper-subtle);
+          background: var(--color-copper-dim);
           color: var(--color-copper);
           border: 1px solid var(--color-copper-border);
         }
 
         .badge-upcoming {
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.85);
           color: var(--color-text-muted);
-          border: 1px solid var(--border-stone-light);
+          border: 1px solid var(--border-subtle);
         }
 
         .env-card-content {
@@ -338,7 +349,7 @@ export default function EnvironmentPreview() {
 
         .env-card-title {
           font-size: 1.35rem;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           font-weight: 600;
           margin-bottom: 6px;
         }
@@ -360,7 +371,7 @@ export default function EnvironmentPreview() {
         .env-objects-preview {
           margin-top: auto;
           padding-top: 14px;
-          border-top: 1px solid var(--border-stone-light);
+          border-top: 1px solid var(--border-subtle);
           margin-bottom: 14px;
         }
 
@@ -382,10 +393,10 @@ export default function EnvironmentPreview() {
         .object-tag {
           font-size: 0.76rem;
           padding: 3px 8px;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.9);
           border-radius: 4px;
-          border: 1px solid var(--border-stone-light);
-          color: var(--color-graphite);
+          border: 1px solid var(--border-subtle);
+          color: var(--color-text-main);
         }
 
         .object-tag-more {
@@ -401,7 +412,7 @@ export default function EnvironmentPreview() {
           justify-content: space-between;
           font-size: 0.82rem;
           font-weight: 600;
-          color: var(--color-copper);
+          color: var(--color-teal);
           padding-top: 10px;
         }
 
@@ -417,8 +428,8 @@ export default function EnvironmentPreview() {
         .env-modal-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(25, 28, 31, 0.6);
-          backdrop-filter: blur(4px);
+          background: rgba(7, 9, 13, 0.82);
+          backdrop-filter: blur(8px);
           z-index: 1000;
           display: flex;
           align-items: center;
@@ -427,7 +438,7 @@ export default function EnvironmentPreview() {
         }
 
         .env-modal {
-          background: var(--color-surface);
+          background: #141720;
           border: 1px solid var(--border-stone);
           max-width: 680px;
           width: 100%;
@@ -445,8 +456,8 @@ export default function EnvironmentPreview() {
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          background: var(--color-surface-muted);
-          border: 1px solid var(--border-stone);
+          background: rgba(24, 28, 38, 0.9);
+          border: 1px solid var(--border-subtle);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -456,8 +467,8 @@ export default function EnvironmentPreview() {
         }
 
         .modal-close-btn:hover {
-          background: var(--color-surface-stone);
-          color: var(--color-graphite);
+          background: rgba(35, 42, 56, 0.9);
+          color: var(--color-text-main);
         }
 
         .modal-header {
@@ -476,7 +487,7 @@ export default function EnvironmentPreview() {
 
         .modal-title {
           font-size: 1.85rem;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           margin-bottom: 8px;
         }
 
@@ -490,7 +501,7 @@ export default function EnvironmentPreview() {
           display: flex;
           align-items: flex-start;
           gap: 12px;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.9);
           border-left: 3px solid var(--color-copper);
           padding: 12px 16px;
           border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
@@ -500,7 +511,7 @@ export default function EnvironmentPreview() {
         }
 
         .modal-notice strong {
-          color: var(--color-graphite);
+          color: var(--color-text-main);
         }
 
         .modal-section {
@@ -510,7 +521,7 @@ export default function EnvironmentPreview() {
         .modal-section-title {
           font-size: 0.86rem;
           font-family: var(--font-mono);
-          color: var(--color-forest);
+          color: var(--color-teal);
           text-transform: uppercase;
           letter-spacing: 0.04em;
           display: flex;
@@ -526,16 +537,16 @@ export default function EnvironmentPreview() {
 
         .modal-object-item {
           padding: 12px 16px;
-          background: var(--color-surface-muted);
+          background: rgba(24, 28, 38, 0.9);
           border-radius: var(--radius-sm);
-          border: 1px solid var(--border-stone-light);
+          border: 1px solid var(--border-subtle);
         }
 
         .modal-object-name {
           display: flex;
           align-items: center;
           gap: 8px;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           font-size: 0.95rem;
           margin-bottom: 4px;
         }
@@ -550,7 +561,7 @@ export default function EnvironmentPreview() {
         .modal-object-phenomenon {
           font-size: 0.82rem;
           font-family: var(--font-mono);
-          color: var(--color-forest);
+          color: var(--color-teal);
           margin-bottom: 6px;
         }
 
@@ -577,24 +588,25 @@ export default function EnvironmentPreview() {
         .modal-footer {
           margin-top: 28px;
           padding-top: 18px;
-          border-top: 1px solid var(--border-stone-light);
+          border-top: 1px solid var(--border-subtle);
           display: flex;
           justify-content: flex-end;
         }
 
         .modal-dismiss-btn {
-          padding: 9px 20px;
-          background: var(--color-graphite);
+          padding: 9px 22px;
+          background: rgba(255, 255, 255, 0.1);
           color: #FFFFFF;
           font-size: 0.9rem;
           font-weight: 600;
           border-radius: var(--radius-full);
+          border: 1px solid var(--border-stone);
           cursor: pointer;
           transition: background 0.2s ease;
         }
 
         .modal-dismiss-btn:hover {
-          background: #33383F;
+          background: rgba(255, 255, 255, 0.18);
         }
 
         @media (max-width: 990px) {

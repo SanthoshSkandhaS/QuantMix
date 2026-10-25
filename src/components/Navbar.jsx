@@ -7,7 +7,7 @@ import { Atom, Menu, X, PlayCircle } from "lucide-react";
  * - Editorial wordmark & quantum badge
  * - Smooth scroll navigation links
  * - Scroll progress indicator along top edge
- * - Sticky blurred header with warm ivory elevation
+ * - Sticky blurred header with deep ink elevation
  * - "Replay Intro" trigger
  * - Mobile responsive drawer
  */
@@ -22,13 +22,11 @@ export default function Navbar({ onReplayIntro }) {
       const scrollY = window.scrollY;
       setScrolled(scrollY > 20);
 
-      // Calculate progress
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (docHeight > 0) {
         setScrollProgress((scrollY / docHeight) * 100);
       }
 
-      // Detect active section
       const sections = ["hero", "discovery", "environments", "lab", "quanti"];
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
@@ -65,7 +63,7 @@ export default function Navbar({ onReplayIntro }) {
 
   return (
     <>
-      {/* Top Scroll Progress Line in Burnished Copper & Forest Green */}
+      {/* Top Scroll Progress Line */}
       <div
         style={{
           position: "fixed",
@@ -73,7 +71,7 @@ export default function Navbar({ onReplayIntro }) {
           left: 0,
           height: "3px",
           width: `${scrollProgress}%`,
-          background: "linear-gradient(90deg, #BD643C, #384936)",
+          background: "linear-gradient(90deg, #C67248, #20C4B4)",
           zIndex: 1000,
           transition: "width 0.1s linear"
         }}
@@ -88,10 +86,10 @@ export default function Navbar({ onReplayIntro }) {
           right: 0,
           zIndex: 900,
           transition: "all 0.25s ease-out",
-          backgroundColor: scrolled ? "rgba(251, 251, 247, 0.94)" : "transparent",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
-          borderBottom: scrolled ? "1px solid var(--border-stone)" : "1px solid transparent",
+          backgroundColor: scrolled ? "rgba(11, 13, 17, 0.92)" : "transparent",
+          backdropFilter: scrolled ? "blur(14px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(14px)" : "none",
+          borderBottom: scrolled ? "1px solid var(--border-subtle)" : "1px solid transparent",
           padding: scrolled ? "14px 0" : "22px 0"
         }}
       >
@@ -113,7 +111,7 @@ export default function Navbar({ onReplayIntro }) {
                 width: "32px",
                 height: "32px",
                 borderRadius: "8px",
-                background: "var(--color-surface)",
+                background: "rgba(24, 28, 38, 0.95)",
                 border: "1px solid var(--border-stone)",
                 display: "flex",
                 alignItems: "center",
@@ -128,7 +126,7 @@ export default function Navbar({ onReplayIntro }) {
                 fontFamily: "var(--font-serif)",
                 fontSize: "1.35rem",
                 fontWeight: 700,
-                color: "var(--color-graphite)",
+                color: "var(--color-text-main)",
                 letterSpacing: "-0.02em"
               }}
             >
@@ -166,7 +164,7 @@ export default function Navbar({ onReplayIntro }) {
             ))}
           </nav>
 
-          {/* Right Action CTA: Replay Intro Button & Mobile Menu Toggle */}
+          {/* Right Action CTA */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <button
               onClick={onReplayIntro}
@@ -176,9 +174,9 @@ export default function Navbar({ onReplayIntro }) {
                 gap: "6px",
                 padding: "6px 14px",
                 borderRadius: "var(--radius-full)",
-                background: "var(--color-surface)",
+                background: "rgba(24, 28, 38, 0.85)",
                 border: "1px solid var(--border-stone)",
-                color: "var(--color-graphite)",
+                color: "var(--color-text-main)",
                 fontSize: "0.82rem",
                 fontWeight: 500,
                 fontFamily: "var(--font-sans)",
@@ -186,7 +184,7 @@ export default function Navbar({ onReplayIntro }) {
                 boxShadow: "var(--shadow-sm)"
               }}
               className="replay-intro-btn"
-              title="Replay the 4-second atomic collision intro"
+              title="Replay the cinematic quantum intro"
             >
               <PlayCircle size={15} color="var(--color-copper)" />
               <span>Intro</span>
@@ -202,9 +200,9 @@ export default function Navbar({ onReplayIntro }) {
                 width: "36px",
                 height: "36px",
                 borderRadius: "6px",
-                background: "var(--color-surface)",
+                background: "rgba(24, 28, 38, 0.9)",
                 border: "1px solid var(--border-stone)",
-                color: "var(--color-graphite)"
+                color: "var(--color-text-main)"
               }}
               className="mobile-toggle-btn"
               aria-label="Toggle navigation menu"
@@ -219,7 +217,7 @@ export default function Navbar({ onReplayIntro }) {
         {mobileMenuOpen && (
           <div
             style={{
-              background: "var(--color-surface)",
+              background: "#12151D",
               borderTop: "1px solid var(--border-stone)",
               borderBottom: "1px solid var(--border-stone)",
               padding: "20px 24px",
@@ -236,7 +234,7 @@ export default function Navbar({ onReplayIntro }) {
                 style={{
                   fontSize: "1rem",
                   fontWeight: 500,
-                  color: activeSection === link.id ? "var(--color-copper)" : "var(--color-graphite)",
+                  color: activeSection === link.id ? "var(--color-copper)" : "var(--color-text-main)",
                   padding: "6px 0"
                 }}
               >
@@ -282,7 +280,7 @@ export default function Navbar({ onReplayIntro }) {
         }
 
         .replay-intro-btn:hover {
-          background: var(--color-surface-muted) !important;
+          background: rgba(32, 38, 52, 0.95) !important;
           border-color: var(--color-copper) !important;
         }
       `}</style>

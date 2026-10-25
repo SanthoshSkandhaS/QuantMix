@@ -6,12 +6,13 @@ import { ChevronDown, Orbit, Layers, Binary, Compass } from "lucide-react";
 /**
  * Hero
  * Prominent landing section featuring:
+ * - Brand Name: QUANTMIX
  * - Subtitle: Virtual Quantum Mechanics Explorer
- * - Exact Tagline: “What if our world behaved according to the laws of Quantum Mechanics”
+ * - Exact Tagline: “What if our world behaved according to the laws of Quantum Mechanics?”
  * - Supporting text: “Step into the familiar. Discover the extraordinary hidden within it.”
  * - Signature FlowingWaveButton ("Start Exploring")
- * - Quantum constant badges & telemetry with KaTeX mathematical typesetting
- * - Direct navigation to the interesting facts section (#discovery)
+ * - Quantum constant telemetry with KaTeX mathematical typesetting
+ * - Cinematic atmospheric depth
  */
 export default function Hero({ onExplore }) {
   const handleScrollToDiscovery = () => {
@@ -30,16 +31,22 @@ export default function Hero({ onExplore }) {
 
   return (
     <section id="hero" className="hero-section">
+      {/* Cinematic Quantum Waveform Aura */}
+      <div className="hero-quantum-aura" aria-hidden="true" />
+
       <div className="container hero-content">
-        {/* Scientific Badge */}
-        <div className="hero-badge" data-testid="hero-badge">
-          <span className="badge-glow-dot" aria-hidden="true" />
-          <span className="badge-text">Virtual Quantum Mechanics Explorer</span>
+        {/* Brand Tag & Scientific Subtitle */}
+        <div className="hero-identity-group">
+          <span className="hero-brand-eyebrow">QUANTMIX</span>
+          <div className="hero-badge" data-testid="hero-badge">
+            <span className="badge-glow-dot" aria-hidden="true" />
+            <span className="badge-text">Virtual Quantum Mechanics Explorer</span>
+          </div>
         </div>
 
-        {/* Main Headline - Exact Tagline in Editorial Serif */}
+        {/* Main Headline - Exact Tagline */}
         <h1 className="hero-headline font-serif">
-          “What if our world behaved according to the laws of Quantum Mechanics”
+          “What if our world behaved according to the laws of Quantum Mechanics?”
         </h1>
 
         {/* Supporting Copy */}
@@ -61,7 +68,7 @@ export default function Hero({ onExplore }) {
             className="hero-secondary-btn"
             aria-label="View planned exploratory environments"
           >
-            <Compass size={17} />
+            <Compass size={17} color="var(--color-teal)" />
             <span>Planned Environments</span>
           </button>
         </div>
@@ -82,7 +89,7 @@ export default function Hero({ onExplore }) {
 
           <div className="telemetry-item">
             <div className="telemetry-icon">
-              <Orbit size={18} color="var(--color-forest)" />
+              <Orbit size={18} color="var(--color-teal)" />
             </div>
             <div className="telemetry-info">
               <span className="telemetry-label">Exploratory Environments</span>
@@ -124,12 +131,50 @@ export default function Hero({ onExplore }) {
           z-index: 10;
         }
 
+        /* Ambient Cinematic Quantum Wave Aura */
+        .hero-quantum-aura {
+          position: absolute;
+          top: 15%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 900px;
+          height: 520px;
+          background: radial-gradient(ellipse at center, rgba(32, 196, 180, 0.08) 0%, rgba(198, 114, 72, 0.05) 45%, transparent 70%);
+          pointer-events: none;
+          z-index: 0;
+          filter: blur(40px);
+        }
+
         .hero-content {
+          position: relative;
+          z-index: 2;
           text-align: center;
-          max-width: 960px;
+          max-width: 980px;
           display: flex;
           flex-direction: column;
           align-items: center;
+        }
+
+        .hero-identity-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 26px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .hero-brand-eyebrow {
+          font-family: var(--font-mono);
+          font-size: 0.84rem;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          color: var(--color-copper);
+          text-transform: uppercase;
+          background: rgba(198, 114, 72, 0.12);
+          border: 1px solid rgba(198, 114, 72, 0.3);
+          padding: 5px 14px;
+          border-radius: var(--radius-full);
         }
 
         /* Pill Badge */
@@ -137,39 +182,40 @@ export default function Hero({ onExplore }) {
           display: inline-flex;
           align-items: center;
           gap: 9px;
-          padding: 6px 18px;
+          padding: 5px 16px;
           border-radius: var(--radius-full);
-          background: var(--color-surface);
+          background: rgba(24, 28, 38, 0.8);
           border: 1px solid var(--border-stone);
           box-shadow: var(--shadow-sm);
-          margin-bottom: 26px;
         }
 
         .badge-glow-dot {
           width: 7px;
           height: 7px;
           border-radius: 50%;
-          background: var(--color-copper);
+          background: var(--color-teal);
+          box-shadow: 0 0 8px var(--color-teal);
         }
 
         .badge-text {
           font-family: var(--font-mono);
-          font-size: 0.82rem;
+          font-size: 0.8rem;
           font-weight: 600;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.06em;
           text-transform: uppercase;
-          color: var(--color-forest);
+          color: #D1D5DB;
         }
 
         /* Hero Headline */
         .hero-headline {
-          font-size: clamp(2.4rem, 5.2vw, 4.2rem);
+          font-size: clamp(2.4rem, 5.2vw, 4.3rem);
           font-weight: 600;
           line-height: 1.14;
           letter-spacing: -0.025em;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           margin-bottom: 22px;
           text-wrap: balance;
+          text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         /* Supporting Copy */
@@ -177,8 +223,8 @@ export default function Hero({ onExplore }) {
           font-size: clamp(1.12rem, 2vw, 1.35rem);
           font-weight: 400;
           color: var(--color-text-secondary);
-          max-width: 660px;
-          margin-bottom: 38px;
+          max-width: 680px;
+          margin-bottom: 40px;
           line-height: 1.6;
         }
 
@@ -186,7 +232,7 @@ export default function Hero({ onExplore }) {
           display: flex;
           align-items: center;
           gap: 16px;
-          margin-bottom: 50px;
+          margin-bottom: 52px;
           flex-wrap: wrap;
           justify-content: center;
         }
@@ -195,11 +241,11 @@ export default function Hero({ onExplore }) {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 15px 24px;
+          padding: 15px 26px;
           border-radius: var(--radius-full);
-          background: var(--color-surface);
+          background: rgba(24, 28, 38, 0.85);
           border: 1px solid var(--border-stone);
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           font-family: var(--font-sans);
           font-size: 0.98rem;
           font-weight: 600;
@@ -209,9 +255,9 @@ export default function Hero({ onExplore }) {
         }
 
         .hero-secondary-btn:hover {
-          background: var(--color-surface-muted);
-          border-color: var(--color-copper);
-          color: var(--color-copper);
+          background: rgba(30, 36, 48, 0.95);
+          border-color: var(--color-teal);
+          color: var(--color-teal);
           transform: translateY(-1px);
         }
 
@@ -230,8 +276,8 @@ export default function Hero({ onExplore }) {
           align-items: center;
           gap: 14px;
           padding: 14px 18px;
-          background: var(--color-surface);
-          border: 1px solid var(--border-stone);
+          background: rgba(18, 21, 29, 0.85);
+          border: 1px solid var(--border-subtle);
           border-radius: var(--radius-md);
           box-shadow: var(--shadow-sm);
           text-align: left;
@@ -239,15 +285,15 @@ export default function Hero({ onExplore }) {
         }
 
         .telemetry-item:hover {
-          border-color: var(--color-copper-border);
+          border-color: var(--border-stone-hover);
         }
 
         .telemetry-icon {
           width: 38px;
           height: 38px;
           border-radius: 8px;
-          background: var(--color-surface-muted);
-          border: 1px solid var(--border-stone-light);
+          background: rgba(24, 28, 38, 0.9);
+          border: 1px solid var(--border-subtle);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -270,7 +316,7 @@ export default function Hero({ onExplore }) {
         .telemetry-val {
           font-size: 0.88rem;
           font-weight: 600;
-          color: var(--color-graphite);
+          color: var(--color-text-main);
           font-family: var(--font-mono);
         }
 
@@ -293,7 +339,7 @@ export default function Hero({ onExplore }) {
         }
 
         .hero-scroll-indicator:hover {
-          color: var(--color-copper);
+          color: var(--color-teal);
         }
 
         .scroll-arrow {
